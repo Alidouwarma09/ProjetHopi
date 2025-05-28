@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <body class="  layout-fixed layout-navbar-fixed   hold-transition sidebar-mini  layout-navbar-fixed sidebar-closed sidebar-collapse {% if request.user.dark_mode %}dark-mode{% endif %}">
+    <div class="wrapper">
+        {% include 'personnel_navbar.html' %}
+        <div class="content-wrapper">
+            <div class="container mt-5">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4><i class="fas fa-cogs"></i> Paramètres de l'application</h4>
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="id_is_afficher" class="form-label">
+                                            <i class="fas fa-eye"></i> Afficher l'info a l'acceuil
+                                        </label>
+                                        <div class="custom-switch">
+                                            <input type="checkbox" id="id_is_afficher" name="is_afficher" class="custom-switch-input"
+                                                   {% if parametre.is_afficher %}checked{% endif %}>
+                                            <label class="custom-switch-label" for="id_is_afficher"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="id_titre"><i class="fas fa-heading"></i> Titre info</label>
+                                        <input type="text" name="titre" id="id_titre" class="form-control" value="{{ parametre.titre }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id_info"><i class="fas fa-heading"></i> Informations</label>
+                                        <input type="text" name="info" id="id_titre" class="form-control" value="{{ parametre.info }}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="id_blocage_global" class="form-label text-danger">
+                                            <i class="fas fa-lock"></i> Bloquer l'application
+                                        </label>
+                                        <div class="custom-switch">
+                                            <input type="checkbox" id="id_blocage_global" name="blocage_global" class="custom-switch-input"
+                                                   {% if parametre.blocage_global %}checked{% endif %}>
+                                            <label class="custom-switch-label" for="id_blocage_global"></label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_image"><i class="fas fa-image"></i> Image de l'application</label>
+                                        {% if parametre.image %}
+                                            <img src="{% if parametre.image %}{{ parametre.image.url }}{% else %}{% static 'img.jpg' %}{% endif %} " alt="Image actuelle" class="img-thumbnail" style="max-width: 200px;">
+                                        {% endif %}
+                                        <input type="file" name="image" id="id_image" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-success btn-lg w-100">
+                                    <i class="fas fa-save"></i> Sauvegarder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </body>
+    <style>
+    body{
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+        .custom-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 25px;
+        }
+
+        .custom-switch-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .custom-switch-label {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            border-radius: 25px;
+            transition: background-color 0.3s ease;
+        }
+
+        .custom-switch-label::before {
+            content: "";
+            position: absolute;
+            height: 21px;
+            width: 21px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .custom-switch-input:checked + .custom-switch-label {
+            background-color: #28a745; /* Couleur pour ON */
+        }
+
+        .custom-switch-input:checked + .custom-switch-label::before {
+            transform: translateX(25px); /* Déplacement à droite */
+        }
+
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .badge-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .img-thumbnail {
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+    </style>
+{% endblock %}

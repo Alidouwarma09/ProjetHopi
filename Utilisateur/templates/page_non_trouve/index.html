@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Bloquée</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url("{% if parametre.image %}{{ parametre.image.url }}{% else %}{% static 'img.jpg' %}{% endif %} ");
+
+            color: #ffffff;
+            overflow: hidden;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+
+        }
+        .body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(192, 187, 187, 0.71), rgba(255, 255, 255, 0.48));
+            color: #c98682;
+            overflow: hidden;
+            width: 100%;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 30px 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        .btn {
+            text-decoration: none;
+            font-size: 1rem;
+            color: #ffffff;
+            background-color: #ff6a6a;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn:hover {
+            background-color: #ffffff;
+            color: #ff6a6a;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body>
+<div class="body">
+
+    <div class="container">
+        <div class="error-container">
+            <h1>404</h1>
+            <p>Oups ! La page que vous recherchez est introuvable.</p>
+            <p>Retournez à <a class="btn"  href="{% url 'Personnel:acceuil' %}">l'accueil</a> ou <a class="btn" href="javascript:history.back()">revenir en arrière</a>.</p>
+            <div  style="max-width: 300px;">Page non trouvée</div>
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>
