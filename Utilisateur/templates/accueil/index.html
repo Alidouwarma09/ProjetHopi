@@ -17,61 +17,68 @@
             <main class="p-6">
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-gray-500">Consulter les agendas</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">Agenda</h3>
-                                <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i> 12% depuis
-                                    hier
-                                </p>
-                            </div>
-                            <div class="bg-blue-100 p-3 rounded-lg">
-                                <i class="fas fa-procedures text-blue-600 text-xl"></i>
-                            </div>
+                    {% if request.user.role.designation == "Medecin" %}
+                        <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                            <a href="" class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Voir les Consultations</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">Consultations</h3>
+                                    <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i>
+                                        Gerer le Consultations
+                                    </p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded-lg">
+                                    <i class="fas fa-procedures text-blue-600 text-xl"></i>
+                                </div>
+                            </a>
                         </div>
-                    </div>
+
+                    {% endif %}
 
                     <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between">
+                        <a href="{% url 'Utilisateur:gestion_patients' %}" class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm text-gray-500">Médecins disponibles</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">18</h3>
+                                <p class="text-sm text-gray-500">Voir les patient</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">Patients</h3>
                                 <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i> 2 nouveaux
                                 </p>
                             </div>
                             <div class="bg-green-100 p-3 rounded-lg">
                                 <i class="fas fa-user-md text-green-600 text-xl"></i>
                             </div>
-                        </div>
+                        </a>
                     </div>
 
                     <div class="card-hover bg-white rounded-xl shadow-sm p-6">
                         <div class="flex items-center justify-between">
-                            <div>
+                            <a href="{% url 'Utilisateur:gestionRdvs' %}">
                                 <p class="text-sm text-gray-500">Rendez-vous</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">27</h3>
-                                <p class="text-xs text-red-500 mt-2"><i class="fas fa-arrow-down mr-1"></i> 3 annulés
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">Agenda</h3>
+                                <p class="text-xs text-blue-500 mt-2"><i class="fas fa-arrow-up mr-1"></i> Consulter la
+                                    liste
                                 </p>
-                            </div>
+                            </a>
                             <div class="bg-purple-100 p-3 rounded-lg">
                                 <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
                             </div>
                         </div>
                     </div>
+                    {% if request.user.role.designation == "Caisse" %}
 
-                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-gray-500">Lits occupés</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">84%</h3>
-                                <p class="text-xs text-gray-500 mt-2">12 lits disponibles</p>
-                            </div>
-                            <div class="bg-yellow-100 p-3 rounded-lg">
-                                <i class="fas fa-bed text-yellow-600 text-xl"></i>
+                        <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Genere des recus</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">Recus</h3>
+                                    <p class="text-xs text-gray-500 mt-2">12 lits disponibles</p>
+                                </div>
+                                <div class="bg-yellow-100 p-3 rounded-lg">
+                                    <i class="fas fa-bed text-yellow-600 text-xl"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    {% endif %}
+
                 </div>
 
                 <!-- Charts Row -->

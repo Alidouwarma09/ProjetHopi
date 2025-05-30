@@ -5,8 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>OGB</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.js' %}">
     <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
 </head>
@@ -18,7 +19,7 @@
                 {% csrf_token %}
                 <div class="row">
                     <label for="code">Entrez le code recu par email :</label>
-                    <input type="text" name="code" class="form-control"  placeholder="Entrer le code" required>
+                    <input type="text" name="code" class="form-control" placeholder="Entrer le code" required>
                 </div>
                 <div class="row" style="margin-top: 5px">
                     <button type="submit" class="btn col btn-primary">Valider</button>

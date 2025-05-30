@@ -71,8 +71,9 @@
     <div class="p-4 border-t">
         <div class="flex items-center space-x-3">
             <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-10 h-10 rounded-full" alt="Profile">
-            <div class="sidebar-text">
-                <a href="{% url 'Utilisateur:Deconnexion' %}" class="font-medium text-gray-800">Se deconnecter</a>
+            <div class="sidebar-text ">
+                <a href="{% url 'Utilisateur:Deconnexion' %}" class="font-medium text-gray-1000 text-red-900">Se
+                    deconnecter</a>
                 <p class="text-xs text-gray-500">{{ request.user.role.designation }}</p>
             </div>
         </div>
