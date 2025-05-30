@@ -1,3 +1,6 @@
+import string
+import random
+
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
 from datetime import date
@@ -94,15 +97,28 @@ class Patient(models.Model):
     prenom = models.CharField(max_length=100)
     profession = models.CharField(max_length=100)
     nationalite = models.CharField(max_length=100)
-    age = models.DecimalField(max_digits=10, decimal_places=2)
+    age = models.DecimalField(max_digits=10, decimal_places=0)
     sexe = models.CharField(max_length=10)
     lieu_habitation = models.TextField(blank=True)
     numero = models.CharField(max_length=20)
     statut_conjugal = models.CharField(max_length=40)
     groupe_sanguin = models.CharField(max_length=5)
+    code_patient = models.CharField(max_length=6, unique=True, editable=False, blank=True)
 
     def __str__(self):
         return f"{self.nom} {self.prenom}"
+
+    def save(self, *args, **kwargs):
+        if not self.code_patient:
+            self.code_patient = self.generate_unique_code()
+        super().save(*args, **kwargs)
+
+    def generate_unique_code(self):
+        characters = string.ascii_uppercase + string.digits
+        while True:
+            code = ''.join(random.choices(characters, k=6))
+            if not Patient.objects.filter(code_patient=code).exists():
+                return code
 
 
 class Antecedent(models.Model):
@@ -121,7 +137,7 @@ class Antecedent(models.Model):
 
 class RendezVous(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='rendezvous')
-    service = models.CharField(max_length=100)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='rendezvousSer')
     motif = models.CharField(blank=True, null=True, max_length=250)
     date = models.DateTimeField()
 

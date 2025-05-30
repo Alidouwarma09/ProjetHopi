@@ -1,485 +1,80 @@
-{% load static %}
-<nav class="main-header navbar navbar-expand {% if request.user.dark_mode %}navbar-dark bg-dark{% else %}navbar-light bg-light{% endif %}">
-    <ul class="navbar-nav">
-    </ul>
-
-    <div class="navbar-title mx-auto text-center animated-title" style="display: flex">
-        <h4 class="m-0">HOPI</h4>
-
+<div class="sidebar bg-white shadow-lg flex flex-col w-64">
+    <div class="p-4 flex items-center space-x-3 border-b">
+        <div class="bg-blue-600 text-white p-2 rounded-lg">
+            <i class="fas fa-hospital text-xl"></i>
+        </div>
+        <span class="logo-text text-xl font-bold text-gray-800">MediCare</span>
     </div>
 
-    <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-            <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-                <i class="fas fa-expand-arrows-alt"></i>
+    <div class="flex-1 overflow-y-auto py-4">
+        <div class="px-4 space-y-1">
+            <a href="{% url 'Utilisateur:acceuil' %}"
+               class="menu-item flex items-center space-x-3 px-3 py-3  rounded-lg {% if request.resolver_match.url_name == 'acceuil' %}bg-blue-50 text-blue-600 {% else %} text-gray-600 hover:bg-gray-50{% endif %}">
+                <i class="fas fa-tachometer-alt text-lg"></i>
+                <span class="sidebar-text font-medium">Tableau de bord</span>
             </a>
-        </li>
-        <li class="nav-item">
-            <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="" role="button">
-                        <i class="fas fa-user-circle" style="color: rgba(229,16,225,0.71)"></i> Mon Profil
-                    </a>
-                    {% if request.user.roles == 'ADMIN' %}
-                        <a class="dropdown-item" href="" role="button">
-                            <i class="fas fa-users-cog" style="color: blue"></i> Gerer les utilisateurs
-                        </a>
-                        <a class="dropdown-item" href="" role="button">
-                            <i class="fas fa-cogs" style="color: yellowgreen"></i>
-                            Parametre
-                        </a>
-                        {% if request.user.username == 'SuperUser' %}
-                            <a class="dropdown-item" href="" role="button">
-                                <i class="fas fa-cogs" style="color: #11045b"></i>
-                                Site control
-                            </a>
-                        {% endif %}
-                    {% endif %}
-
-                    <a class="dropdown-item btn btn-logout" style="background-color: red; color: white"
-                       href="{% url 'Utilisateur:Deconnexion' %}" role="button">
-                        <i class="fas fa-sign-out-alt"></i> Deconnexion
-                    </a>
-                </div>
-            </div>
-        </li>
-    </ul>
-</nav>
-
-<aside class="main-sidebar {% if request.user.dark_mode %}sidebar-dark{% else %}sidebar-light-secondary {% endif %} elevation-2">
-    <a href="" class="brand-link text-center" style="font-size: 40px; height: 70px">
-        <i class="fas fa-hospital-symbol text-primary"></i>
-    </a>
-
-    <div class="sidebar">
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image position-relative">
-                <i class="fas fa-user elevation-2 text-cyan" style="font-size: 40px"></i>
-                <span class="status-indicator"></span>
-            </div>
-            <div class="info">
-                <a href="#">
-                    <div style="font-weight: bold; color: #0f3156; display: grid; align-items: center; text-align: center">
-                        <span style="font-weight: bold; color: #0f3156;">
-                            {{ request.user.nom }} {{ request.user.prenom }}
-                       </span>
-                        <span style="font-weight: bold; color: #67696c; font-size: 12px">
-                            {% if request.user.roles|default:'' == "ADMIN" %}
-                                Administrateur
-                            {% elif request.user.roles|default:'' == "EDUCATIF" %}
-                                Service Educatif
-                            {% elif request.user.roles|default:'' == "MEDICAL" %}
-                                Service Medical
-                            {% elif request.user.roles|default:'' == "PEDAGOGIQUE" %}
-                                Service Pedagogique
-                            {% endif %}
-                         </span>
-                    </div>
+            <a href="{% url 'Utilisateur:gestion_patients' %}"
+               class="menu-item flex items-center space-x-3 px-3 py-3  {% if request.path == '/gestionPatient/' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} hover:bg-gray-50 rounded-lg">
+                <i class="fas fa-procedures text-lg"></i>
+                <span class="sidebar-text">Patients</span>
+            </a>
+            {% if request.user.role.designation == 'Medecin' or request.user.role.designation == 'Caisse' %}
+                <a href="{% url 'Utilisateur:gestionRdvs' %}"
+                   class="menu-item flex items-center space-x-3 px-3 py-3  {% if request.path == '/gestionRdvs/' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} hover:bg-gray-50 rounded-lg">
+                    <i class="fas fa-calendar-check text-lg"></i>
+                    <span class="sidebar-text">Rendez-vous</span>
                 </a>
-            </div>
+            {% endif %}
+            <a href="medecins.html"
+               class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <i class="fas fa-user-md text-lg"></i>
+                <span class="sidebar-text">Médecins</span>
+            </a>
+
+            <a href="pharmacie.html"
+               class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <i class="fas fa-pills text-lg"></i>
+                <span class="sidebar-text">Pharmacie</span>
+            </a>
+            <a href="#"
+               class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <i class="fas fa-flask text-lg"></i>
+                <span class="sidebar-text">Laboratoire</span>
+            </a>
+            <a href="facturation.html"
+               class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <i class="fas fa-file-invoice-dollar text-lg"></i>
+                <span class="sidebar-text">Facturation</span>
+            </a>
         </div>
 
-
-        <div class="form-inline">
-            <div class="input-group" data-widget="sidebar-search">
-                <input class="form-control form-control-sidebar" type="search" placeholder="Recherche"
-                       aria-label="Search">
-                <div class="input-group-append">
-                    <button class="btn btn-sidebar">
-                        <i class="fas fa-search fa-fw"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="px-4 mt-8">
+            <h3 class="sidebar-text text-xs uppercase font-semibold text-gray-400 px-3 mb-2">Administration</h3>
+            <a href="parametres.html"
+               class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <i class="fas fa-cog text-lg"></i>
+                <span class="sidebar-text">Paramètres</span>
+            </a>
+            <a href="utilisateurs.html"
+               class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <i class="fas fa-users text-lg"></i>
+                <span class="sidebar-text">Utilisateurs</span>
+            </a>
+            <a href="rapports.html"
+               class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <i class="fas fa-chart-line text-lg"></i>
+                <span class="sidebar-text">Rapports</span>
+            </a>
         </div>
-
-        <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                <li class="nav-item">
-                    <a href=""
-                       class="nav-link {% if request.resolver_match.url_name == 'acceuil' %}active{% endif %}">
-                        <i class="fas fa-home text-primary"></i> <!-- Icône couleur primaire -->
-                        <p>ACCUEIL</p>
-                    </a>
-                </li>
-
-                {% if request.user.roles in 'ADMIN,EDUCATIF,PEDAGOGIQUE' %}
-                    {% if request.user.roles in 'ADMIN,EDUCATIF' %}
-                        <li class="nav-header">ESPACE INFOS</li>
-                        <li class="nav-item">
-                            <a href=""
-                               class="nav-link {% if request.resolver_match.url_name == 'liste_pensionnaire' %}active{% endif %}">
-                                <i class="nav-icon fas fa-users text-info"></i> <!-- Icône couleur info -->
-                                <p>Liste pensionnaires</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href=""
-                               class="nav-link {% if request.resolver_match.url_name == 'enregistrer_pensionnaire' %}active{% endif %}">
-                                <i class="fas fa-user-plus nav-icon text-success"></i> <!-- Icône couleur success -->
-                                <p>Enregistrer</p>
-                            </a>
-                        </li>
-                    {% endif %}
-
-                    <hr style="border: 1px solid gray; margin: 10px 0;">
-
-                    <li class="nav-header">ESPACE SCOLAIRE
-                        <span class="right badge badge-danger">{{ annee_scolaire }}</span>
-                    </li>
-                    {% if request.user.roles in 'PEDAGOGIQUE,ADMIN' %}
-                        <li class="nav-item">
-                            <a href=""
-                               class="nav-link {% if request.resolver_match.url_name == 'espace_scolaire' %}active{% endif %}">
-                                <i class="fas fa-user-graduate nav-icon text-warning"></i>
-                                <!-- Icône couleur warning -->
-                                <p>Liste des élèves</p>
-                            </a>
-                        </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a href=""
-                           class="nav-link {% if request.resolver_match.url_name == 'afficher_emplois_du_temps' %}active{% endif %}">
-                            <i class="fas fa-calendar-alt nav-icon text-danger"></i>
-                            <p>Emplois du temps</p>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href=""
-                           class="nav-link {% if request.resolver_match.url_name == 'resultats_scolaire' %}active{% endif %}">
-                            <i class="fas fa-graduation-cap nav-icon text-info"></i> <!-- Icône couleur info -->
-                            <p>Résultats scolaire</p>
-                        </a>
-                    </li>
-                    <hr style="border: 1px solid gray; margin: 10px 0;">
-                {% endif %}
-
-                {% if request.user.roles in 'ADMIN,MEDICAL' %}
-                    <li class="nav-header">ESPACE MEDICAL</li>
-                    <li class="nav-item">
-                        <a href=""
-                           class="nav-link {% if request.resolver_match.url_name == 'suivi_trimestrielle' %}active{% endif %}">
-                            <i class="nav-icon fas fa-calendar-check text-success"></i> <!-- Icône couleur success -->
-                            <p>Suivi trimestriel</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href=""
-                           class="nav-link {% if request.resolver_match.url_name == 'consultation' %}active{% endif %}">
-                            <i class="nav-icon fas fa-stethoscope text-primary"></i> <!-- Icône couleur primaire -->
-                            <p>Consultation</p>
-                        </a>
-                    </li>
-                    <hr style="border: 1px solid gray; margin: 10px 0;">
-                {% endif %}
-            </ul>
-        </nav>
     </div>
-</aside>
 
-<style>
-    body, .navbar, .sidebar {
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .dropdown-menu {
-        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
-        background-color: #f1f1f1;
-        transition: box-shadow 0.8s ease;
-    }
-
-    #reloadButton {
-        margin-left: 45px;
-        background: linear-gradient(45deg, #007bff, #0056b3);
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 50px;
-        font-weight: bold;
-        font-size: 14px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease-in-out;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    #reloadButton:hover {
-        background: linear-gradient(45deg, #0056b3, #003d7a);
-        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
-        transform: scale(1.05);
-    }
-
-    #reloadButton i {
-        font-size: 18px;
-    }
-
-
-    #backButton {
-        background: linear-gradient(45deg, #007bff, #0056b3);
-        color: white;
-        border: none;
-        padding: 3px 5px;
-        border-radius: 50%;
-        font-weight: bold;
-        font-size: 14px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease-in-out;
-        align-items: center;
-        justify-content: center;
-        max-width: 30px;
-        max-height: 30px;
-    }
-
-    #backButton:hover {
-        background: linear-gradient(45deg, #0056b3, #003d7a);
-        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
-        transform: scale(1.05);
-    }
-
-    #backButton i {
-        font-size: 16px;
-    }
-
-
-    .animated-title h4 {
-        display: inline-block;
-        animation: pulse 2s infinite;
-        font-weight: bold;
-        color: #007bff;
-    }
-
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-            color: #007bff;
-            text-shadow: 0 0 5px rgba(0, 123, 255, 0.6), 0 0 10px rgba(0, 123, 255, 0.4);
-        }
-        50% {
-            transform: scale(1.1);
-            color: #ff6347;
-            text-shadow: 0 0 10px rgba(255, 99, 71, 0.6), 0 0 15px rgba(255, 99, 71, 0.4);
-        }
-    }
-
-    @media (max-width: 962px) {
-        #backButton {
-            padding: 3px 5px;
-            font-size: 12px;
-            gap: 8px;
-        }
-
-        #reloadButton {
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 7px;
-            gap: 5px;
-        }
-
-        .animated-title h4 {
-            font-size: 18px;
-        }
-
-        .navbar-title {
-            flex-direction: column;
-            text-align: center;
-        }
-    }
-
-    @media (max-width: 716px) {
-        #backButton {
-            font-size: 10px;
-            padding: 4px 8px;
-        }
-
-        .animated-title h4 {
-            font-size: 10px;
-        }
-    }
-
-    .sidebar-light-secondary {
-        background-color: rgb(244, 246, 249);
-    }
-
-    .sidebar-dark {
-        background-color: rgb(52, 58, 64);
-    }
-
-    .appearance-select-container {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .custom-select-wrapper {
-        position: relative;
-        width: 150px;
-    }
-
-    .custom-select {
-        appearance: none;
-        background-color: #f9f9f9;
-        border: 1px solid #ccc;
-        border-radius: 25px;
-        padding: 10px 15px;
-        font-size: 14px;
-        color: #333;
-        width: 100%;
-        transition: all 0.3s ease-in-out;
-        cursor: pointer;
-        position: relative;
-        z-index: 2;
-        font-family: Arial, sans-serif;
-    }
-
-    .custom-select::after {
-        content: "▼";
-        font-size: 10px;
-        position: absolute;
-        top: 50%;
-        right: 15px;
-        transform: translateY(-50%);
-        pointer-events: none;
-        color: #888;
-    }
-
-    .custom-select:hover {
-        background-color: #eee;
-        border-color: #007bff;
-        color: #007bff;
-    }
-
-    .custom-select.dark-mode {
-        background-color: #333;
-        color: #fff;
-        border: 1px solid #555;
-    }
-
-    .custom-select.dark-mode:hover {
-        background-color: #444;
-        border-color: #007bff;
-        color: #007bff;
-    }
-
-    .custom-select-wrapper select {
-        transition: all 0.3s ease-in-out;
-    }
-
-    .sidebar-light-secondary {
-        background-color: rgb(244, 246, 249);
-    }
-
-    .sidebar-dark {
-        background-color: rgb(52, 58, 64);
-    }
-
-    .sidebar .nav-link {
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .nav-link:hover {
-        background-color: #007bff;
-        color: #fff;
-    }
-
-    .image {
-        position: relative;
-    }
-
-    .status-indicator {
-        position: absolute;
-        bottom: 2px;
-        right: 2px;
-        width: 13px;
-        height: 13px;
-        border-radius: 50%;
-        background-color: #28a745; /* Vert pour indiquer connecté */
-        border: 2px solid white; /* Bordure blanche pour se démarquer */
-    }
-
-    .image img {
-        display: block;
-        width: 40px;
-        height: 40px;
-    }
-
-    .nav-link.active {
-        background-color: #0056b3;
-        color: #fff;
-        box-shadow: 0 0 10px rgba(0, 123, 255, 0.6);
-    }
-
-    .custom-select {
-        appearance: none;
-        background-color: #f9f9f9;
-        border: 1px solid #ccc;
-        border-radius: 25px;
-        padding: 10px 15px;
-        font-size: 14px;
-        color: #333;
-        width: 100%;
-        transition: all 0.3s ease-in-out;
-        cursor: pointer;
-        position: relative;
-        z-index: 2;
-    }
-
-    .custom-select.dark-mode {
-        background-color: #333;
-        color: #fff;
-        border: 1px solid #555;
-    }
-
-    .custom-select:hover {
-        background-color: #eee;
-        border-color: #007bff;
-        color: #007bff;
-    }
-
-    .sidebar-dark .nav-link {
-        color: #ddd;
-    }
-
-    .sidebar-dark .nav-link:hover {
-        background-color: #444;
-    }
-
-    .sidebar {
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar {
-        transition: background-color 0.3s ease;
-    }
-
-
-</style>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const backButton = document.getElementById('backButton');
-
-        if (window.history.length > 1) {
-            backButton.hidden = false;
-        }
-
-        backButton.addEventListener('click', () => {
-            window.history.back();
-        });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const reloadButton = document.getElementById('reloadButton');
-
-        reloadButton.addEventListener('click', () => {
-            location.reload();
-        });
-    });
-</script>
+    <div class="p-4 border-t">
+        <div class="flex items-center space-x-3">
+            <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-10 h-10 rounded-full" alt="Profile">
+            <div class="sidebar-text">
+                <a href="{% url 'Utilisateur:Deconnexion' %}" class="font-medium text-gray-800">Se deconnecter</a>
+                <p class="text-xs text-gray-500">{{ request.user.role.designation }}</p>
+            </div>
+        </div>
+    </div>
+</div>

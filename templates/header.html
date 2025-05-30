@@ -1,0 +1,32 @@
+<header class="bg-white shadow-sm">
+    <div class="flex items-center justify-between px-6 py-4">
+        <div class="flex items-center space-x-4">
+            <button id="sidebar-toggle" class="text-gray-500 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <h1 class="text-xl font-bold text-gray-800" id="page-title">Patients</h1>
+        </div>
+
+        <div class="flex items-center space-x-6">
+            <div class="relative">
+                <button class="text-gray-500 focus:outline-none">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                </button>
+            </div>
+            <div class="relative">
+                <button class="text-gray-500 focus:outline-none">
+                    <i class="fas fa-envelope text-xl"></i>
+                    <span class="notification-badge absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
+                </button>
+            </div>
+            <div class="relative">
+                <button class="flex items-center space-x-2 focus:outline-none">
+                    <span class="text-gray-700 font-medium hidden md:inline">{{ request.user.nom }}</span>
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-8 h-8 rounded-full"
+                         alt="Profile">
+                </button>
+            </div>
+        </div>
+    </div>
+</header>

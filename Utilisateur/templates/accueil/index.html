@@ -1,161 +1,235 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block content %}
-    <body class="  layout-fixed layout-navbar-fixed   hold-transition sidebar-mini  layout-navbar-fixed sidebar-closed sidebar-collapse {% if request.user.dark_mode %}dark-mode{% endif %}">
-    <div class="wrapper">
-
+    <body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
         {% include 'personnel_navbar.html' %}
 
-        <div class="content-wrapper">
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0 text-secondary">Bienvenue sur HOPI</h1>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top Navigation -->
+            {% include 'header.html' %}
+
+
+            <!-- Dashboard Content -->
+            <main class="p-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Consulter les agendas</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">Agenda</h3>
+                                <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i> 12% depuis
+                                    hier
+                                </p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-lg">
+                                <i class="fas fa-procedures text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Médecins disponibles</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">18</h3>
+                                <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i> 2 nouveaux
+                                </p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <i class="fas fa-user-md text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Rendez-vous</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">27</h3>
+                                <p class="text-xs text-red-500 mt-2"><i class="fas fa-arrow-down mr-1"></i> 3 annulés
+                                </p>
+                            </div>
+                            <div class="bg-purple-100 p-3 rounded-lg">
+                                <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Lits occupés</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">84%</h3>
+                                <p class="text-xs text-gray-500 mt-2">12 lits disponibles</p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-lg">
+                                <i class="fas fa-bed text-yellow-600 text-xl"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <section class="content">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-lg-4 col-6">
-                            <div class="small-box bg-success">
-                                <div class="inner">
-                                    <h3>Agenda<sup
-                                            style="font-size: 20px"></sup></h3>
-                                    <p>Consulter la liste des agenda</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="ion ion-stats-bars"></i>
-                                </div>
-                                <a href="" class="small-box-footer">Plus d'infos <i
-                                        class="fas fa-arrow-circle-right"></i></a>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-6">
-                            <div class="small-box bg-success">
-                                <div class="inner">
-                                    <h3>Consultation<sup
-                                            style="font-size: 20px"></sup></h3>
-                                    <p>Inscriptions actuelles</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="ion ion-stats-bars"></i>
-                                </div>
-                                <a href="" class="small-box-footer">Plus d'infos <i
-                                        class="fas fa-arrow-circle-right"></i></a>
-                            </div>
-                        </div>
 
-                        <div class="col-lg-4 col-6">
-                            <div class="small-box bg-warning">
-                                <div class="inner">
-                                    <h3>Voir le dossier d'un patient</h3>
-
-                                    <p>Consultations mensuelles</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="ion ion-person-add"></i>
-                                </div>
-                                <a href="" class="small-box-footer">Plus d'infos
-                                    <i class="fas fa-arrow-circle-right"></i></a>
-                            </div>
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Patients Chart -->
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-semibold text-gray-800">Activité des patients</h2>
+                            <select class="text-sm border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option>7 derniers jours</option>
+                                <option>30 derniers jours</option>
+                                <option>Cette année</option>
+                            </select>
                         </div>
-
+                        <canvas id="patientsChart" height="250"></canvas>
                     </div>
-                    <div class="row">
-                        <section class="col-lg-4 connectedSortable">
-                            <div class="card bg-gradient-success">
-                                <div class="card-header border-0">
 
-                                    <h3 class="card-title">
-                                        <i class="far fa-calendar-alt"></i>
-                                        Calendrier
-                                    </h3>
-                                    <div class="card-tools">
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-success btn-sm dropdown-toggle"
-                                                    data-toggle="dropdown" data-offset="-52">
-                                                <i class="fas fa-bars"></i>
-                                            </button>
-                                            <div class="dropdown-menu" role="menu">
-                                                <a href="#" class="dropdown-item">Add new event</a>
-                                                <a href="#" class="dropdown-item">Clear events</a>
-                                                <div class="dropdown-divider"></div>
-                                                <a href="#" class="dropdown-item">View calendar</a>
+                    <!-- Departments Chart -->
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Répartition par service</h2>
+                        <canvas id="departmentsChart" height="250"></canvas>
+                    </div>
+                </div>
+
+                <!-- Patients and Rooms Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Recent Patients -->
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-semibold text-gray-800">Patients récents</h2>
+                            <a href="#" class="text-sm text-blue-600 hover:underline">Voir tout</a>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Patient
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Médecin
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Service
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Statut
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="patient-status-admitted hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <img class="h-10 w-10 rounded-full"
+                                                     src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Pierre Lefèvre</div>
+                                                <div class="text-sm text-gray-500">45 ans</div>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-success btn-sm"
-                                                data-card-widget="collapse">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-success btn-sm" data-card-widget="remove">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-body pt-0">
-                                    <div id="calendar" style="width: 100%"></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4">
-                                        <div id="sparkline-1"></div>
-                                    </div>
-                                    <div class="col-4 text-center">
-                                        <div id="sparkline-2"></div>
-                                    </div>
-                                    <div class="col-4 text-center">
-                                        <div id="sparkline-3"></div>
-                                    </div>
-                                </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dr. Martin</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Cardiologie</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Hospitalisé</span>
+                                    </td>
+                                </tr>
+                                <tr class="patient-status-critical hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <img class="h-10 w-10 rounded-full"
+                                                     src="https://randomuser.me/api/portraits/women/65.jpg" alt="">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Marie Dubois</div>
+                                                <div class="text-sm text-gray-500">32 ans</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dr. Lambert</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Urgences</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Critique</span>
+                                    </td>
+                                </tr>
+                                <tr class="patient-status-discharged hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <img class="h-10 w-10 rounded-full"
+                                                     src="https://randomuser.me/api/portraits/men/75.jpg" alt="">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Jean Moreau</div>
+                                                <div class="text-sm text-gray-500">58 ans</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dr. Petit</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Chirurgie</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Sorti</span>
+                                    </td>
+                                </tr>
+                                <tr class="patient-status-admitted hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <img class="h-10 w-10 rounded-full"
+                                                     src="https://randomuser.me/api/portraits/women/33.jpg" alt="">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Sophie Laurent</div>
+                                                <div class="text-sm text-gray-500">29 ans</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dr. Martin</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">Pédiatrie</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Hospitalisé</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                            </div>
-                        </section>
-                        <div class="col-lg-8">
-                            <canvas id="consultationsChart"></canvas>
+                    <!-- Room Status -->
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-semibold text-gray-800">Statut des chambres</h2>
                         </div>
                     </div>
                 </div>
-            </section>
+            </main>
         </div>
-
-        <aside class="control-sidebar control-sidebar-dark">
-        </aside>
     </div>
     </body>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        // Récupérer le contexte du canvas
-        const ctx = document.getElementById('consultationsChart').getContext('2d');
-
-        // Récupérer les données du backend
-        const data = {{ data_classe_json|safe }};
-
-        // Initialiser le graphique avec Chart.js
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.labels, // Noms des pensionnaires
-                datasets: [{
-                    label: 'Consultations du mois actuel',
-                    data: data.values, // Nombre de consultations
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
 {% endblock %}
-
