@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        {% include 'personnel_navbar.html' %}
+
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top Navigation -->
+            {% include 'header.html' %}
+
+
+            <!-- Dashboard Content -->
+ <main class="p-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Gestion de la pharmacie</h2>
+                        <p class="text-gray-600">Inventaire et distribution des médicaments</p>
+                    </div>
+                    
+                    <div class="flex gap-3 w-full md:w-auto">
+                        <div x-data="{ open: false }">
+                            <button @click="open = true"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                <i class="fas fa-plus mr-2"></i>Ajouter médicament
+                            </button>
+
+                            <div x-show="open"
+                                 class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                 x-transition>
+                                <div class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+
+                                    <!-- Bouton de fermeture -->
+                                    <button @click="open = false"
+                                            class="absolute top-4 right-4 text-gray-500 hover:text-red-700 dark:hover:text-gray-300 text-xl">
+                                            <i class="fas fa-times fa-lg"></i>
+                                    
+                                    </button>
+
+                                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">🩺
+                                        Enregistrement du médicament</h2>
+
+                                    <form id="enregistrer-form" method="post"
+                                          action="{% url 'Utilisateur:ajouter_medicament' %}" class="space-y-6">
+                                        {% csrf_token %}
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <!-- Colonne gauche -->
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Designation</label>
+                                                    <input type="text" name="designation" required
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Code</label>
+                                                    <input type="text" name="code" required
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type du médicament</label>
+                                                <input list="codes-patients" id="code-patient" name="type_medicament"
+                                                       placeholder="Entrer le code patient"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+
+                                                <datalist id="codes-patients">
+                                                        <option value="dffd">Anti-douleur</option>
+                                                </datalist>
+                                            </div> 
+                                                
+                                            </div>
+
+                                            <!-- Colonne droite -->
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prix</label>
+                                                    <input type="text" name="prix"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantité</label>
+                                                    <input type="number" step="0.01" name="stock" required
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date
+                                                    d'expiration</label>
+                                                <input min="" type="date" name="date_expiration" required id="date-rdv"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+
+                                            </div>
+                                                
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Alertes -->
+                                        <div id="error-message" class="mt-4 text-sm"></div>
+
+                                        <!-- Loader -->
+                                        <div id="loader" class="text-center hidden mt-4">
+                                            <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                            <p class="text-gray-700 dark:text-gray-300 mt-2">Enregistrement en
+                                                cours...</p>
+                                        </div>
+
+                                        <!-- Boutons -->
+                                        <button id="enregistrer-btn" type="submit"
+                                                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                                            Enregistrer
+                                        </button>
+                                        <button id="enregistrer-autre-btn" type="button"
+                                                class="w-full mt-2 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition hidden">
+                                            Enregistrer un autre patient
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center whitespace-nowrap">
+                            <i class="fas fa-file-export mr-2"></i> Exporter
+                        </button>
+                        <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center whitespace-nowrap">
+                            <i class="fas fa-filter mr-2"></i> Filtres
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Médicaments</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{nombre_medicament}}</h3>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i class="fas fa-pills text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-green-600 text-sm font-medium"><i class="fas fa-arrow-up mr-1"></i> 12%</span>
+                            <span class="text-gray-500 text-sm ml-2">vs mois dernier</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">En rupture</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{nombre_rupture}}</h3>
+                            </div>
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-red-600 text-sm font-medium"><i class="fas fa-arrow-up mr-1"></i> 2%</span>
+                            <span class="text-gray-500 text-sm ml-2">vs mois dernier</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Faible stock</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{faible_stock}}</h3>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-green-600 text-sm font-medium"><i class="fas fa-arrow-down mr-1"></i> stock inferieur a 30</span>
+                            <span class="text-gray-500 text-sm ml-2"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Expiré</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{medicaments_expire}}</h3>
+                            </div>
+                            <div class="bg-orange-100 p-3 rounded-full">
+                                <i class="fas fa-calendar-times text-orange-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-red-600 text-sm font-medium"><i class="fas fa-arrow-up mr-1"></i> Produits périmés</span>
+                            <span class="text-gray-500 text-sm ml-2"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <div class="relative">
+                                <input id="searchInput" type="text" placeholder="Rechercher un médicament..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <select class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option>Tous les types</option>
+                                <option>Antibiotiques</option>
+                                <option>Antidouleurs</option>
+                                <option>Antihistaminiques</option>
+                                <option>Antiviraux</option>
+                            </select>
+                            <select class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option>Tous les statuts</option>
+                                <option>En stock</option>
+                                <option>Faible stock</option>
+                                <option>En rupture</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medications Table -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                    <div class="overflow-x-auto">
+                        <table id="patientsTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiration</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Medication 1 -->
+                                 {% for medicament in medicaments%}
+                                <tr class="hover:bg-gray-50 medication-in-stock">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-pills text-blue-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">{{medicament.designation}}</div>
+                                                <div class="text-sm text-gray-500"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{medicament.code}}</div>
+                                        <div class="text-xs text-gray-500 barcode"></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{medicament.type_medicament}}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{medicament.stock}}</div>
+                                        <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                            <div class="bg-green-600 h-1.5 rounded-full" style="width: 75%"></div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{medicament.prix}} XOF</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{medicament.date_expiration}}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="openEditMedicationModal()">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    </body>
+        <script>
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            let searchValue = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#patientsTable tr');
+
+            rows.forEach(function (row) {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+
+            const minDateTime = `${year}-${month}-${day}`;
+            document.getElementById('date-rdv').min = minDateTime;
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('#enregistrer-form');
+            const errorDiv = document.getElementById('error-message');
+            const loader = document.getElementById('loader');
+            const enregistrerBtn = document.getElementById('enregistrer-btn');
+            const enregistrerAutreBtn = document.getElementById('enregistrer-autre-btn');
+
+            const showLoader = () => {
+                loader.style.display = 'block';
+                enregistrerBtn.style.display = 'none';
+            };
+
+            const hideLoader = () => {
+                loader.style.display = 'none';
+            };
+
+            const showEnregistrerAutre = () => {
+                enregistrerAutreBtn.style.display = 'block';
+            };
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Empêche la soumission classique
+                showLoader();
+
+                const formData = new FormData(form);
+
+                const delay = new Promise(resolve => setTimeout(resolve, 2000));
+
+                Promise.all([
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                        }
+                    }).then(response => response.json()),
+                    delay
+                ])
+                    .then(([data]) => {
+                        hideLoader();
+                        if (data.error) {
+                            errorDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                            enregistrerBtn.style.display = 'block';
+                        } else if (data.success) {
+                            errorDiv.innerHTML = `
+    <div class="flex items-center gap-2 p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-100 border border-green-300 animate-fade-in" role="alert">
+        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11V7a1 1 0 10-2 0v4a1 1 0 001 1h1a1 1 0 100-2h-.586l1.293-1.293a1 1 0 10-1.414-1.414L9 8.586V7a1 1 0 10-2 0v1a1 1 0 001 1h.586l-1.293 1.293a1 1 0 101.414 1.414L11 10.414V11a1 1 0 002 0v-1a1 1 0 00-1-1h-.586l1.293-1.293a1 1 0 10-1.414-1.414L11 8.586z" clip-rule="evenodd"/>
+        </svg>
+        <span>${data.success}</span>
+    </div>`;
+
+                            form.reset();
+                            showEnregistrerAutre();
+                        }
+                    })
+                    .catch(error => {
+                        hideLoader();
+                        errorDiv.innerHTML = `<div class="alert alert-danger">Erreur. Veuillez vérifier tous les champs.</div>`;
+                        enregistrerBtn.style.display = 'block';
+                    });
+            });
+
+            enregistrerAutreBtn.addEventListener('click', function () {
+                window.location.reload(); // Recharge la page
+            });
+        });
+    </script>
+
+    <script>
+        const showLoader = () => {
+            loader.classList.remove('hidden');
+            enregistrerBtn.classList.add('hidden');
+        };
+
+        const hideLoader = () => {
+            loader.classList.add('hidden');
+        };
+
+        const showEnregistrerAutre = () => {
+            enregistrerAutreBtn.classList.remove('hidden');
+        };
+
+    </script>
+{% endblock %}

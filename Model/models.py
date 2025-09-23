@@ -103,6 +103,7 @@ class Patient(models.Model):
     numero = models.CharField(max_length=20)
     statut_conjugal = models.CharField(max_length=40)
     groupe_sanguin = models.CharField(max_length=5)
+    created_at = models.DateTimeField(auto_now_add=True)
     code_patient = models.CharField(max_length=6, unique=True, editable=False, blank=True)
 
     def __str__(self):
@@ -264,8 +265,12 @@ class BulletinExamen(models.Model):
 
 class Medicament(models.Model):
     designation = models.CharField(max_length=100)
+    date_expiration = models.DateField()
+    stock = models.CharField(max_length=100)
+    code = models.CharField(max_length=100)
     prix = models.IntegerField()
-    statut = models.CharField(max_length=50)
+    type_medicament = models.CharField(max_length=100)
+    
 
 
 class Prestation(models.Model):

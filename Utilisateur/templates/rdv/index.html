@@ -33,7 +33,7 @@
                                     <!-- Bouton de fermeture -->
                                     <button @click="open = false"
                                             class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
-                                        &times;
+                                        <i class="fas fa-times fa-lg"></i>
                                     </button>
 
                                     <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">🩺
@@ -58,7 +58,7 @@
                                                             - {{ patient.nom }}</option>
                                                     {% endfor %}
                                                 </datalist>
-                                            </div>
+                                            </div> 
                                             <div>
 
                                             </div>
@@ -74,24 +74,29 @@
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
                                                 <select name="service" required
-                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                     <option value="" disabled selected>Choisir un service</option>
                                                     <option value="Urgences">Urgences</option>
                                                     <option value="Pédiatrie">Pédiatrie</option>
-                                                    <option value="Gynécologie">Gynécologie</option>
-                                                    <option value="Chirurgie">Chirurgie</option>
+                                                    <option value="Gynécologie / Obstétrique">Gynécologie / Obstétrique</option>
                                                     <option value="Médecine générale">Médecine générale</option>
+                                                    <option value="Chirurgie">Chirurgie</option>
                                                     <option value="Cardiologie">Cardiologie</option>
-                                                    <option value="Ophtalmologie">Ophtalmologie</option>
-                                                    <option value="Dentisterie">Dentisterie</option>
                                                     <option value="Neurologie">Neurologie</option>
-                                                    <option value="Orthopédie">Orthopédie</option>
                                                     <option value="Dermatologie">Dermatologie</option>
-                                                    <option value="Radiologie">Radiologie</option>
+                                                    <option value="Ophtalmologie">Ophtalmologie</option>
+                                                    <option value="Orthopédie">Orthopédie</option>
+                                                    <option value="Radiologie / Imagerie">Radiologie / Imagerie</option>
                                                     <option value="Oncologie">Oncologie</option>
+                                                    <option value="Anesthésie / Réanimation">Anesthésie / Réanimation</option>
                                                     <option value="Psychiatrie">Psychiatrie</option>
                                                     <option value="ORL">ORL</option>
+                                                    <option value="Urologie">Urologie</option>
+                                                    <option value="Laboratoire">Laboratoire</option>
+                                                    <option value="Pharmacie">Pharmacie</option>
+                                                    <option value="Stomatologie / Odontologie">Stomatologie / Odontologie</option>
                                                 </select>
+
                                             </div>
 
                                             <div>

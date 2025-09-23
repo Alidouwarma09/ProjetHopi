@@ -1,146 +1,205 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <body class="  layout-fixed layout-navbar-fixed   hold-transition sidebar-mini  layout-navbar-fixed sidebar-closed sidebar-collapse {% if request.user.dark_mode %}dark-mode{% endif %}">
-    <div class="wrapper">
-        {% include 'personnel_navbar.html' %}
-        <div class="content-wrapper">
-            <div class="container mt-5">
-                <div class="card shadow-lg">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h4><i class="fas fa-cogs"></i> Paramètres de l'application</h4>
-                        <i class="fas fa-tools"></i>
+    <body class="bg-gray-100 font-sans">
+        <div class="flex h-screen overflow-hidden">
+             <div class="flex-1 overflow-auto">
+        <header class="bg-white shadow-sm">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <h1 class="text-xl font-bold text-gray-800">Paramètres du système</h1>
                     </div>
-                    <div class="card-body">
-                        <form method="POST" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="id_is_afficher" class="form-label">
-                                            <i class="fas fa-eye"></i> Afficher l'info a l'acceuil
-                                        </label>
-                                        <div class="custom-switch">
-                                            <input type="checkbox" id="id_is_afficher" name="is_afficher" class="custom-switch-input"
-                                                   {% if parametre.is_afficher %}checked{% endif %}>
-                                            <label class="custom-switch-label" for="id_is_afficher"></label>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="id_titre"><i class="fas fa-heading"></i> Titre info</label>
-                                        <input type="text" name="titre" id="id_titre" class="form-control" value="{{ parametre.titre }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="id_info"><i class="fas fa-heading"></i> Informations</label>
-                                        <input type="text" name="info" id="id_titre" class="form-control" value="{{ parametre.info }}">
-                                    </div>
-                                    <div class="form-group mb-3">
-                                        <label for="id_blocage_global" class="form-label text-danger">
-                                            <i class="fas fa-lock"></i> Bloquer l'application
-                                        </label>
-                                        <div class="custom-switch">
-                                            <input type="checkbox" id="id_blocage_global" name="blocage_global" class="custom-switch-input"
-                                                   {% if parametre.blocage_global %}checked{% endif %}>
-                                            <label class="custom-switch-label" for="id_blocage_global"></label>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="id_image"><i class="fas fa-image"></i> Image de l'application</label>
-                                        {% if parametre.image %}
-                                            <img src="{% if parametre.image %}{{ parametre.image.url }}{% else %}{% static 'img.jpg' %}{% endif %} " alt="Image actuelle" class="img-thumbnail" style="max-width: 200px;">
-                                        {% endif %}
-                                        <input type="file" name="image" id="id_image" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-4">
-                                <button type="submit" class="btn btn-success btn-lg w-100">
-                                    <i class="fas fa-save"></i> Sauvegarder
-                                </button>
-                            </div>
-                        </form>
+                    
+                    <div class="flex items-center space-x-6">
+                        <div class="relative">
+                            <button class="text-gray-500 focus:outline-none">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="animate-pulse absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button class="text-gray-500 focus:outline-none">
+                                <i class="fas fa-envelope text-xl"></i>
+                                <span class="animate-pulse absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-        </div>
-    </div>
+            </header>
+   <main class="p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Settings Navigation -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div class="p-4 border-b border-gray-200">
+                                <h2 class="text-lg font-semibold text-gray-800">Menu des paramètres</h2>
+                            </div>
+                            <div class="divide-y divide-gray-200">
+                                <a href="#" class="block p-4 hover:bg-gray-50 text-blue-600 font-medium border-l-4 border-blue-600">
+                                    <i class="fas fa-cog mr-2"></i> Général
+                                </a>
+                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
+                                    <i class="fas fa-user-shield mr-2"></i> Sécurité
+                                </a>
+                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
+                                    <i class="fas fa-bell mr-2"></i> Notifications
+                                </a>
+                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
+                                    <i class="fas fa-file-invoice mr-2"></i> Facturation
+                                </a>
+                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
+                                    <i class="fas fa-calendar-alt mr-2"></i> Rendez-vous
+                                </a>
+                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
+                                    <i class="fas fa-pills mr-2"></i> Pharmacie
+                                </a>
+                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
+                                    <i class="fas fa-database mr-2"></i> Sauvegarde
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Content -->
+                    <div class="lg:col-span-3 space-y-6">
+                        <!-- General Settings Card -->
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div class="p-4 border-b border-gray-200">
+                                <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-cog mr-2 text-blue-600"></i> Paramètres généraux
+                                </h2>
+                            </div>
+                            <div class="p-6">
+                                <form class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom de l'établissement</label>
+                                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="Pharmacie MediCare">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Adresse email</label>
+                                            <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="contact@medicare.com">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                                            <input type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="+33 1 23 45 67 89">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="123 Rue de la Santé, Paris">
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                        <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">Pharmacie et centre médical offrant des services de qualité depuis 2010.</textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Logo</label>
+                                        <div class="mt-1 flex items-center">
+                                            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
+                                                <img src="https://via.placeholder.com/48" alt="Logo" class="h-full w-full">
+                                            </span>
+                                            <button type="button" class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-lg shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                Changer
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex justify-end">
+                                        <button type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3">
+                                            Annuler
+                                        </button>
+                                        <button type="submit" class="bg-blue-600 py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            Enregistrer
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Business Hours Card -->
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div class="p-4 border-b border-gray-200">
+                                <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-clock mr-2 text-blue-600"></i> Heures d'ouverture
+                                </h2>
+                            </div>
+                            <div class="p-6">
+                                <form class="space-y-4">
+                                    <div class="space-y-4">
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-sm font-medium text-gray-700">Lundi</label>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
+                                                <span>à</span>
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-sm font-medium text-gray-700">Mardi</label>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
+                                                <span>à</span>
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-sm font-medium text-gray-700">Mercredi</label>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
+                                                <span>à</span>
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-sm font-medium text-gray-700">Jeudi</label>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
+                                                <span>à</span>
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-sm font-medium text-gray-700">Vendredi</label>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
+                                                <span>à</span>
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-sm font-medium text-gray-700">Samedi</label>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="09:00">
+                                                <span>à</span>
+                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="13:00">
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-sm font-medium text-gray-700">Dimanche</label>
+                                            <div class="flex items-center">
+                                                <span class="text-sm text-gray-500">Fermé</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex justify-end">
+                                        <button type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3">
+                                            Annuler
+                                        </button>
+                                        <button type="submit" class="bg-blue-600 py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            Enregistrer
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+     </main>
+      </div>
     </body>
-    <style>
-    body{
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
-        .custom-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 25px;
-        }
-
-        .custom-switch-input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .custom-switch-label {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            border-radius: 25px;
-            transition: background-color 0.3s ease;
-        }
-
-        .custom-switch-label::before {
-            content: "";
-            position: absolute;
-            height: 21px;
-            width: 21px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            border-radius: 50%;
-            transition: transform 0.3s ease;
-        }
-
-        .custom-switch-input:checked + .custom-switch-label {
-            background-color: #28a745; /* Couleur pour ON */
-        }
-
-        .custom-switch-input:checked + .custom-switch-label::before {
-            transform: translateX(25px); /* Déplacement à droite */
-        }
-
-        .badge-success {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .badge-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .badge-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .img-thumbnail {
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-
-    </style>
+    
 {% endblock %}

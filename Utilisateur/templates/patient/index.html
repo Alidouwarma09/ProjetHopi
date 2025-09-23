@@ -257,6 +257,9 @@
                                 <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        N°
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Patient
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -284,8 +287,11 @@
                                 </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
+                                     {% if patients %}
                                 {% for patient in patients %}
                                     <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ forloop.counter }}</td>
+
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
                                                 <div class="flex-shrink-0 h-10 w-10">
@@ -310,7 +316,13 @@
 
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.nationalite }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">+225{{ patient.numero }}</span>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                {% if patient.numero %}
+                                                +225{{ patient.numero }}
+                                                {% else%}
+                                                ❌
+                                                {% endif%}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <button class="text-blue-600 hover:text-blue-900 mr-3"><i
@@ -324,6 +336,10 @@
                                         </td>
                                     </tr>
                                 {% endfor %}
+                                 {% else %}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Aucun patient disponible</td>
+
+                                  {% endif %}
                                 </tbody>
                             </table>
                         </div>

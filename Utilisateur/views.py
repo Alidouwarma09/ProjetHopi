@@ -10,8 +10,9 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
+from datetime import timedelta, datetime, date
 
-from Model.models import Patient, RendezVous, Service
+from Model.models import Patient, RendezVous, Service, Medicament
 from Utilisateur.forms import ConnexionForm
 
 
@@ -37,16 +38,36 @@ def Deconnexion(request):
     logout(request)
     return redirect(reverse('Utilisateur:Connexion'))
 
-
-@login_required(login_url='Utilisateur:Connexion')
-def acceuil(request):
-    return render(request, 'accueil/index.html')
+def parametre(request):
+    return render(request, 'parametre/index.html')
 
 
 @login_required(login_url='Utilisateur:Connexion')
 def acceuil(request):
-    return render(request, 'accueil/index.html')
+    il_y_a_une_semaine = datetime.now()-timedelta(days=7)
+    stats_patient = Patient.objects.filter(created_at__gte=il_y_a_une_semaine).count()
+    patients = Patient.objects.order_by('-id')[:10]
+    for patient in patients:
+        print(patient.id)
 
+    return render(request, 'accueil/index.html', {'patients':patients, 'stats_patient':stats_patient})
+
+
+
+
+@login_required(login_url='Utilisateur:Connexion')
+def pharmacie(request):
+    today = date.today()
+    medicaments = Medicament.objects.all()
+    nombre_medicament = Medicament.objects.all().count()
+    nombre_rupture = Medicament.objects.filter(stock=0).count()
+    medicaments_expire = Medicament.objects.filter(date_expiration__lte=today).count()
+    faible_stock = Medicament.objects.filter(stock__lte=30).count()
+    return render(request, 'pharmacie/index.html', {'medicaments':medicaments, 
+                                                    'nombre_medicament':nombre_medicament, 
+                                                    'nombre_rupture':nombre_rupture, 
+                                                    'medicaments_expire':medicaments_expire,
+                                                    'faible_stock':faible_stock})
 
 @login_required(login_url='Utilisateur:Connexion')
 def gestion_patients(request):
@@ -114,6 +135,47 @@ def gestionRdvs(request):
     return render(request, 'rdv/index.html', context)
 
 
+
+@login_required(login_url='Utilisateur:Connexion')
+def ajouter_medicament(request):
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                designation = request.POST.get('designation', '').strip()
+                type_medicament = request.POST.get('type_medicament', '').strip()
+                prix = request.POST.get('prix', '').strip()
+                stock = request.POST.get('stock', '').strip()
+                date_expiration = request.POST.get('date_expiration', '').strip()
+                print(date_expiration)
+                code = request.POST.get('code', '').strip()
+
+                Medicament.objects.create(
+                    designation=designation,
+                    type_medicament=type_medicament,
+                    stock=stock,
+                    code=code,
+                    date_expiration=date_expiration,
+                    prix=prix,
+                )
+
+            return JsonResponse({'success': 'Medicament enregistré avec succès !'})
+
+        except ValueError as e:
+            print(f"Erreur de validation : {e}")
+            return JsonResponse(
+                {'error': 'Une erreur de validation est survenue. Veuillez vérifier les informations saisies.'},
+                status=400
+            )
+        except Exception as e:
+            print(f"Erreur : {e}")
+            return JsonResponse(
+                {'error': 'Une erreur est survenue lors de l\'enregistrement.'}, status=400
+            )
+
+    return JsonResponse({'error': 'Requête invalide.'}, status=400)
+
+
+
 @login_required(login_url='Utilisateur:Connexion')
 def ajouter_Rdvs(request):
     if request.method == "POST":
@@ -121,8 +183,12 @@ def ajouter_Rdvs(request):
             with transaction.atomic():
                 code_patient = request.POST.get('code_patient', '').strip()
                 patient = get_object_or_404(Patient, code_patient=code_patient)
+
                 service_id = request.POST.get('service', '').strip()
+
                 service = get_object_or_404(Service, designation=service_id)
+                print('service:',service)
+
                 RendezVous.objects.create(
                     motif=request.POST.get('motif', '').strip(),
                     service=service,

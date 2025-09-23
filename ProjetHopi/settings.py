@@ -84,11 +84,17 @@ DATABASES = {
         'PORT': 5432,
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
+            'options': '-c search_path=public',
             'connect_timeout': 10,
         },
     }
 }
-
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
