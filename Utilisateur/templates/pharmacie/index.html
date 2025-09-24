@@ -14,13 +14,13 @@
 
 
             <!-- Dashboard Content -->
- <main class="p-6">
+            <main class="p-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-800">Gestion de la pharmacie</h2>
                         <p class="text-gray-600">Inventaire et distribution des médicaments</p>
                     </div>
-                    
+
                     <div class="flex gap-3 w-full md:w-auto">
                         <div x-data="{ open: false }">
                             <button @click="open = true"
@@ -36,8 +36,8 @@
                                     <!-- Bouton de fermeture -->
                                     <button @click="open = false"
                                             class="absolute top-4 right-4 text-gray-500 hover:text-red-700 dark:hover:text-gray-300 text-xl">
-                                            <i class="fas fa-times fa-lg"></i>
-                                    
+                                        <i class="fas fa-times fa-lg"></i>
+
                                     </button>
 
                                     <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">🩺
@@ -61,23 +61,25 @@
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                                 <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type du médicament</label>
-                                                <input list="codes-patients" id="code-patient" name="type_medicament"
-                                                       placeholder="Entrer le code patient"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type
+                                                        du médicament</label>
+                                                    <input list="codes-patients" id="code-patient"
+                                                           name="type_medicament"
+                                                           placeholder="Entrer le code patient"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
 
-                                                <datalist id="codes-patients">
+                                                    <datalist id="codes-patients">
                                                         <option value="dffd">Anti-douleur</option>
-                                                </datalist>
-                                            </div> 
-                                                
+                                                    </datalist>
+                                                </div>
+
                                             </div>
 
                                             <!-- Colonne droite -->
                                             <div class="space-y-4">
                                                 <div>
                                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prix</label>
-                                                    <input type="text" name="prix"
+                                                    <input type="number" name="prix"
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                                 <div>
@@ -86,13 +88,14 @@
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                                 <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date
-                                                    d'expiration</label>
-                                                <input min="" type="date" name="date_expiration" required id="date-rdv"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date
+                                                        d'expiration</label>
+                                                    <input min="" type="date" name="date_expiration" required
+                                                           id="date-rdv"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
 
-                                            </div>
-                                                
+                                                </div>
+
 
                                             </div>
                                         </div>
@@ -120,12 +123,6 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center whitespace-nowrap">
-                            <i class="fas fa-file-export mr-2"></i> Exporter
-                        </button>
-                        <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center whitespace-nowrap">
-                            <i class="fas fa-filter mr-2"></i> Filtres
-                        </button>
                     </div>
                 </div>
 
@@ -135,39 +132,41 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Médicaments</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{nombre_medicament}}</h3>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ nombre_medicament }}</h3>
                             </div>
                             <div class="bg-blue-100 p-3 rounded-full">
                                 <i class="fas fa-pills text-blue-600 text-xl"></i>
                             </div>
                         </div>
                         <div class="mt-4">
-                            <span class="text-green-600 text-sm font-medium"><i class="fas fa-arrow-up mr-1"></i> 12%</span>
+                            <span class="text-green-600 text-sm font-medium"><i
+                                    class="fas fa-arrow-up mr-1"></i> 12%</span>
                             <span class="text-gray-500 text-sm ml-2">vs mois dernier</span>
                         </div>
                     </div>
-                    
+
                     <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">En rupture</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{nombre_rupture}}</h3>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ nombre_rupture }}</h3>
                             </div>
                             <div class="bg-red-100 p-3 rounded-full">
                                 <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
                             </div>
                         </div>
                         <div class="mt-4">
-                            <span class="text-red-600 text-sm font-medium"><i class="fas fa-arrow-up mr-1"></i> 2%</span>
+                            <span class="text-red-600 text-sm font-medium"><i
+                                    class="fas fa-arrow-up mr-1"></i> 2%</span>
                             <span class="text-gray-500 text-sm ml-2">vs mois dernier</span>
                         </div>
                     </div>
-                    
+
                     <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Faible stock</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{faible_stock}}</h3>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ faible_stock }}</h3>
                             </div>
                             <div class="bg-yellow-100 p-3 rounded-full">
                                 <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
@@ -178,12 +177,12 @@
                             <span class="text-gray-500 text-sm ml-2"></span>
                         </div>
                     </div>
-                    
+
                     <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Expiré</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{medicaments_expire}}</h3>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ medicaments_expire }}</h3>
                             </div>
                             <div class="bg-orange-100 p-3 rounded-full">
                                 <i class="fas fa-calendar-times text-orange-600 text-xl"></i>
@@ -201,24 +200,10 @@
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex-1">
                             <div class="relative">
-                                <input id="searchInput" type="text" placeholder="Rechercher un médicament..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input id="searchInput" type="text" placeholder="Rechercher un médicament..."
+                                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                             </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <select class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option>Tous les types</option>
-                                <option>Antibiotiques</option>
-                                <option>Antidouleurs</option>
-                                <option>Antihistaminiques</option>
-                                <option>Antiviraux</option>
-                            </select>
-                            <select class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option>Tous les statuts</option>
-                                <option>En stock</option>
-                                <option>Faible stock</option>
-                                <option>En rupture</option>
-                            </select>
                         </div>
                     </div>
                 </div>
@@ -228,19 +213,40 @@
                     <div class="overflow-x-auto">
                         <table id="patientsTable" class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiration</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Nom
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Code
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Type
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Stock
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Prix
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Expiration
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                <!-- Medication 1 -->
-                                 {% for medicament in medicaments%}
+                            <!-- Medication 1 -->
+                            {% for medicament in medicaments %}
                                 <tr class="hover:bg-gray-50 medication-in-stock">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
@@ -248,45 +254,118 @@
                                                 <i class="fas fa-pills text-blue-600"></i>
                                             </div>
                                             <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{medicament.designation}}</div>
+                                                <div class="text-sm font-medium text-gray-900">{{ medicament.designation }}</div>
                                                 <div class="text-sm text-gray-500"></div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{medicament.code}}</div>
+                                        <div class="text-sm text-gray-900">{{ medicament.code }}</div>
                                         <div class="text-xs text-gray-500 barcode"></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{medicament.type_medicament}}</span>
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{ medicament.type_medicament }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{medicament.stock}}</div>
+                                        <div class="text-sm text-gray-900">{{ medicament.stock }}</div>
                                         <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                                             <div class="bg-green-600 h-1.5 rounded-full" style="width: 75%"></div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{medicament.prix}} XOF</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{medicament.date_expiration}}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ medicament.prix }}
+                                        XOF
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ medicament.date_expiration }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="openEditMedicationModal()">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="text-red-600 hover:text-red-900">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+                                        <div x-data="{ open: false, stock: {{ medicament.stock }} }">
+                                            <!-- Bouton Edit -->
+                                            <button @click="open = true"
+                                                    class="text-blue-600 hover:text-blue-900 mr-3">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
+                                            <!-- Modal Alpine.js -->
+                                            <div x-show="open" x-transition
+                                                 class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm">
+                                                <div @click.away="open = false"
+                                                     class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl p-8 relative border border-gray-200 dark:border-gray-700">
+
+                                                    <!-- Titre -->
+                                                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                                        🩺 Modification du médicament
+                                                    </h2>
+
+                                                    <!-- Formulaire édition stock -->
+                                                    <form @submit.prevent="
+    fetch('{% url  'Utilisateur:modifier_medicament' %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ id: {{ medicament.id }}, stock: stock })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            alert(data.success);
+            open = false;
+            window.location.reload();
+        } else {
+            alert(data.error);
+        }
+    });
+">
+
+                                                        <div class="mb-4">
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Désignation</label>
+                                                            <input type="text" value="{{ medicament.designation }}"
+                                                                   readonly
+                                                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                                        </div>
+
+                                                        <div class="mb-4">
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Stock</label>
+                                                            <input value="{{ medicament.stock }}" type="number" min="0"
+                                                                   x-model="stock" required
+                                                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                                        </div>
+                                                        <div class="mb-4">
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prix</label>
+                                                            <input type="number" min="0"
+                                                                   value="{{ medicament.prix }}" required
+
+                                                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                                        </div>
+
+                                                        <div class="flex justify-end gap-2">
+                                                            <button type="submit"
+                                                                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                                                                Enregistrer
+                                                            </button>
+                                                            <button type="button" @click="open = false"
+                                                                    class="bg-gray-300 dark:bg-gray-600 px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-500">
+                                                                Annuler
+                                                            </button>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
-                                {% endfor %}
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </main>
         </div>
+
     </div>
     </body>
-        <script>
+    <script>
         document.getElementById('searchInput').addEventListener('keyup', function () {
             let searchValue = this.value.toLowerCase();
             let rows = document.querySelectorAll('#patientsTable tr');

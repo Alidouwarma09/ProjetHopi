@@ -270,7 +270,6 @@ class Medicament(models.Model):
     code = models.CharField(max_length=100)
     prix = models.IntegerField()
     type_medicament = models.CharField(max_length=100)
-    
 
 
 class Prestation(models.Model):

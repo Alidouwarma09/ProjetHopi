@@ -30,12 +30,30 @@
                 <i class="fas fa-user-md text-lg"></i>
                 <span class="sidebar-text">Médecins</span>
             </a>
+            {% if request.user.role.designation == 'PHARMACIEN' or request.user.role.designation == 'ADMIN' %}
+                <a href="{% url 'Utilisateur:pharmacie' %}"
+                   class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                    <i class="fas fa-pills text-lg"></i>
+                    <span class="sidebar-text">Pharmacie</span>
+                </a>
+            {% endif %}
+            {% if request.user.role.designation == 'MEDECIN' or request.user.role.designation == 'ADMIN' %}
+                <a href="{% url 'Utilisateur:hospitalisation' %}"
+                   class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                    <i class="fas fa-pills text-lg"></i>
+                    <span class="sidebar-text">Hospitalisation</span>
+                </a>
+            {% endif %}
 
-            <a  href="{% url 'Utilisateur:pharmacie' %}"
-               class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
-                <i class="fas fa-pills text-lg"></i>
-                <span class="sidebar-text">Pharmacie</span>
-            </a>
+            {% if request.user.role.designation == 'MEDECIN' or request.user.role.designation == 'ADMIN' %}
+                <a href="{% url 'Utilisateur:consultation' %}"
+                   class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                    <i class="fas fa-pills text-lg"></i>
+                    <span class="sidebar-text">Consultation</span>
+                </a>
+            {% endif %}
+
+
             <a href="#"
                class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
                 <i class="fas fa-flask text-lg"></i>

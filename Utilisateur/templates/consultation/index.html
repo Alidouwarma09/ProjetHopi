@@ -106,154 +106,169 @@
 
             <!-- Dashboard Content -->
             <main class="p-6">
-                <!-- Patients Page -->
-                <div id="patients-page" class="page-transition">
+                <!-- Consultations Page -->
+                <div id="consultations-page" class="page-transition">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Gestion des patients</h2>
+                        <h2 class="text-2xl font-bold text-gray-800">Gestion des Consultations</h2>
 
+                        <!-- Bouton nouvelle consultation -->
                         <div x-data="{ open: false }">
                             <button @click="open = true"
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
-                                <i class="fas fa-plus mr-2"></i> Nouveau patient
+                                <i class="fas fa-plus mr-2"></i> Nouvelle consultation
                             </button>
 
+                            <!-- Modal -->
                             <div x-show="open"
                                  class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
                                  x-transition>
-                                <div class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+                                <div @click.away="open = false"
+                                     class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-7 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
 
-                                    <!-- Bouton de fermeture -->
+                                    <!-- Bouton fermeture -->
                                     <button @click="open = false"
                                             class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
                                         &times;
                                     </button>
 
-                                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">🩺
-                                        Enregistrement du patient</h2>
+                                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                        🩺 Enregistrement d'une consultation
+                                    </h2>
 
+                                    <!-- Formulaire -->
                                     <form id="enregistrer-form" method="post"
-                                          action="{% url 'Utilisateur:ajouter_patient' %}" class="space-y-6">
+                                          action="{% url 'Utilisateur:ajouter_consultation' %}" class="space-y-6">
                                         {% csrf_token %}
 
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <!-- Colonne gauche -->
                                             <div class="space-y-4">
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
-                                                    <input type="text" name="nom" required
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Patient</label>
+                                                    <input list="codes-patients" id="code-patient" name="code_patient"
+                                                           placeholder="Entrer le code patient"
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+                                                    
+                                                    <datalist id="codes-patients">
+                                                        {% for patient in patients %}
+                                                            <option value="{{ patient.code_patient }}">{{ patient.code_patient }}
+                                                                - {{ patient.nom }}</option>
+                                                        {% endfor %}
+                                                    </datalist>
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prénom</label>
-                                                    <input type="text" name="prenom" required
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
+                                                    <select name="service" required
+                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                        <option value="">Choisir un service</option>
+                                                        {% for service in services %}
+                                                            <option value="{{ service.id }}">{{ service.designation }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Motif</label>
+                                                    <input type="text" name="motif"
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profession</label>
-                                                    <input type="text" name="profession"
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Diagnostic</label>
+                                                    <input type="text" name="diagnostic"
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nationalité</label>
-                                                    <input type="text" name="nationalite"
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Constat</label>
+                                                    <input type="text" name="constat_consultation"
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Âge</label>
-                                                    <input type="number" step="0.01" name="age" required
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Résultat
+                                                        examen</label>
+                                                    <input type="text" name="resultat_examen"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut</label>
+                                                    <input type="text" name="statue"
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                             </div>
 
                                             <!-- Colonne droite -->
                                             <div class="space-y-4">
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sexe</label>
-                                                    <select name="sexe" required
-                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                        <option value="">Choisir</option>
-                                                        <option value="Masculin">Masculin</option>
-                                                        <option value="Féminin">Féminin</option>
-                                                    </select>
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Poids
+                                                            (kg)</label>
+                                                        <input type="number" step="0.01" name="poids"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Taille
+                                                            (cm)</label>
+                                                        <input type="number" step="0.01" name="taille"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">IMC</label>
+                                                        <input type="number" step="0.01" name="IMC"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pouls</label>
+                                                        <input type="number" step="0.01" name="pouls"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lieu
-                                                        d'habitation</label>
-                                                    <input type="text" name="lieu_habitation"
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">TA</label>
+                                                    <input type="number" step="0.01" name="TA"
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Téléphone</label>
-                                                    <input type="text" name="numero"
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Examen
+                                                        demandé</label>
+                                                    <input type="text" name="examen_demande"
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut
-                                                        conjugal</label>
-                                                    <input type="text" name="statut_conjugal"
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Traitement</label>
+                                                    <input type="text" name="traitement"
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Groupe
-                                                        sanguin</label>
-                                                    <select name="groupe_sanguin" required
-                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                        <option value="">Choisir</option>
-                                                        <option value="A+">A+</option>
-                                                        <option value="A-">A-</option>
-                                                        <option value="B+">B+</option>
-                                                        <option value="B-">B-</option>
-                                                        <option value="AB+">AB+</option>
-                                                        <option value="AB-">AB-</option>
-                                                        <option value="O+">O+</option>
-                                                        <option value="O-">O-</option>
-                                                    </select>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Issue</label>
+                                                    <input type="text" name="issue_consultation"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
+
                                             </div>
                                         </div>
 
-                                        <!-- Alertes -->
                                         <div id="error-message" class="mt-4 text-sm"></div>
 
-                                        <!-- Loader -->
                                         <div id="loader" class="text-center hidden mt-4">
                                             <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
                                             <p class="text-gray-700 dark:text-gray-300 mt-2">Enregistrement en
                                                 cours...</p>
                                         </div>
 
-                                        <!-- Boutons -->
                                         <button id="enregistrer-btn" type="submit"
                                                 class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
                                             Enregistrer
-                                        </button>
-                                        <button id="enregistrer-autre-btn" type="button"
-                                                class="w-full mt-2 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition hidden">
-                                            Enregistrer un autre patient
                                         </button>
                                     </form>
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
 
-                    <!-- Patient Filters -->
-                    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
-                        <div class="grid grid-cols-1 md:grid-cols gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Recherche</label>
-                                <input id="searchInput" type="text" placeholder="Rechercher: Nom &, Code, Numero..."
-                                       class="w-full border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Patients Table -->
+                    <!-- Table des consultations -->
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
-                            <table id="patientsTable" class="min-w-full divide-y divide-gray-200">
+                            <table id="consultationsTable" class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -263,80 +278,40 @@
                                         Patient
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Code Patient
+                                        Service
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Âge
+                                        Motif
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Genre
+                                        Diagnostic
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Groupe sanguin
-                                    </th>
-
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Nationalité
+                                        Statut
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Telephone
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
+                                        Date
                                     </th>
                                 </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                {% if patients %}
-                                    {% for patient in patients %}
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ forloop.counter }}</td>
-
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 h-10 w-10">
-
-                                                        <i
-                                                                class="h-1 w-20 rounded-full fas fa-user-tie"></i>
-                                                    </div>
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium text-gray-900">{{ patient.nom }}</div>
-                                                        <div class="text-sm text-gray-500">{{ patient.prenom }}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">{{ patient.code_patient }}</span>
-
-
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.age }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.sexe }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.groupe_sanguin }}</td>
-
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.nationalite }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                {% if patient.numero %}
-                                                    +225{{ patient.numero }}
-                                                {% else %}
-                                                    ❌
-                                                {% endif %}
-                                            </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <button class="text-red-600 hover:text-red-900"><i
-                                                        class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Aucun patient
-                                        disponible
-                                    </td>
-
-                                {% endif %}
+                                {% for consult in consultations %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ forloop.counter }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ consult.patient.nom }} {{ consult.patient.prenom }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.service.designation }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.motif }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.diagnostic }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.statue }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.date|date:"d/m/Y H:i" }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Aucune
+                                            consultation disponible
+                                        </td>
+                                    </tr>
+                                {% endfor %}
                                 </tbody>
                             </table>
                         </div>
@@ -344,13 +319,14 @@
                 </div>
             </main>
 
+
         </div>
     </div>
     </body>
     <script>
         document.getElementById('searchInput').addEventListener('keyup', function () {
             let searchValue = this.value.toLowerCase();
-            let rows = document.querySelectorAll('#patientsTable tr');
+            let rows = document.querySelectorAll('#hospitalisationsTable tr');
 
             rows.forEach(function (row) {
                 let text = row.innerText.toLowerCase();
@@ -416,11 +392,6 @@
                             showEnregistrerAutre();
                         }
                     })
-                    .catch(error => {
-                        hideLoader();
-                        errorDiv.innerHTML = `<div class="alert alert-danger">Erreur. Veuillez vérifier tous les champs.</div>`;
-                        enregistrerBtn.style.display = 'block';
-                    });
             });
 
             enregistrerAutreBtn.addEventListener('click', function () {

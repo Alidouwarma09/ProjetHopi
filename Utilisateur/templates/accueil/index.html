@@ -40,7 +40,8 @@
                             <div>
                                 <p class="text-sm text-gray-500">Voir les patient</p>
                                 <h3 class="text-2xl font-bold text-gray-800 mt-1">Patients</h3>
-                                <p class="text-xs text-green-500 mt-2"> {% if stats_patient %} <i class="fas fa-arrow-up mr-1"></i> {{stats_patient}} nouveaux patient{% endif %}
+                                <p class="text-xs text-green-500 mt-2"> {% if stats_patient %}
+                                    <i class="fas fa-arrow-up mr-1"></i> {{ stats_patient }} nouveaux patient{% endif %}
                                 </p>
                             </div>
                             <div class="bg-green-100 p-3 rounded-lg">
@@ -48,22 +49,24 @@
                             </div>
                         </a>
                     </div>
-
-                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <a href="{% url 'Utilisateur:gestionRdvs' %}">
-                                <p class="text-sm text-gray-500">Rendez-vous</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">Agenda</h3>
-                                <p class="text-xs text-blue-500 mt-2"><i class="fas fa-arrow-up mr-1"></i> Consulter la
-                                    liste
-                                </p>
-                            </a>
-                            <div class="bg-purple-100 p-3 rounded-lg">
-                                <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
+                    {% if request.user.role.designation == "CAISSE" or request.user.role.designation == "ADMIN" or request.user.role.designation == "MEDECIN" %}
+                        <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                            <div class="flex items-center justify-between">
+                                <a href="{% url 'Utilisateur:gestionRdvs' %}">
+                                    <p class="text-sm text-gray-500">Rendez-vous</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">Agenda</h3>
+                                    <p class="text-xs text-blue-500 mt-2"><i class="fas fa-arrow-up mr-1"></i> Consulter
+                                        la
+                                        liste
+                                    </p>
+                                </a>
+                                <div class="bg-purple-100 p-3 rounded-lg">
+                                    <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    {% if request.user.role.designation == "Caisse" %}
+                    {% endif %}
+                    {% if request.user.role.designation == "CAISSE" %}
 
                         <div class="card-hover bg-white rounded-xl shadow-sm p-6">
                             <div class="flex items-center justify-between">
@@ -109,7 +112,8 @@
                     <div class="card-hover bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-lg font-semibold text-gray-800">Patients récents</h2>
-                            <a href="{% url 'Utilisateur:gestion_patients' %}" class="text-sm text-blue-600 hover:underline">Voir tout</a>
+                            <a href="{% url 'Utilisateur:gestion_patients' %}"
+                               class="text-sm text-blue-600 hover:underline">Voir tout</a>
                         </div>
 
                         <div class="overflow-x-auto">
@@ -131,38 +135,39 @@
                                 </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    {% if patients %}
+                                {% if patients %}
                                     {% for patient in patients %}
-                                    <tr class="patient-status-discharged hover:bg-gray-50">
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                <img class="h-10 w-10 rounded-full"
-                                                     src="https://randomuser.me/api/portraits/men/75.jpg" alt="">
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{patient.nom}}</div>
-                                                <div class="text-sm text-gray-500">{{patient.age}} ans</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{{patient.code_patient}}</span>
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{patient.sexe}}</div>
-                                    </td>
-                                    
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-green-800">{{patient.groupe_sanguin}}</span>
-                                    </td>
-                                </tr>
-                                    {% endfor%}
-                                    {% else %}
+                                        <tr class="patient-status-discharged hover:bg-gray-50">
+                                            <td class="px-4 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10">
+                                                        <img class="h-10 w-10 rounded-full"
+                                                             src="https://randomuser.me/api/portraits/men/75.jpg"
+                                                             alt="">
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">{{ patient.nom }}</div>
+                                                        <div class="text-sm text-gray-500">{{ patient.age }} ans</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{{ patient.code_patient }}</span>
+                                            </td>
+                                            <td class="px-4 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">{{ patient.sexe }}</div>
+                                            </td>
+
+                                            <td class="px-4 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-green-800">{{ patient.groupe_sanguin }}</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
                                     <td class="px-4 py-4 whitespace-nowrap text-center">
                                         <span class="px-2 text-center mx-auto inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-green-800">Aucun patient disponible</span>
                                     </td>
-                                    {% endif%}
+                                {% endif %}
                                 </tbody>
                             </table>
                         </div>
