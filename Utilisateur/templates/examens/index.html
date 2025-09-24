@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+
+        <style>
+            .sidebar {
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-collapsed {
+                width: 80px;
+            }
+
+            .sidebar-collapsed .sidebar-text {
+                display: none;
+            }
+
+            .sidebar-collapsed .logo-text {
+                display: none;
+            }
+
+            .sidebar-collapsed .menu-item {
+                justify-content: center;
+            }
+
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            }
+
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+
+            .notification-badge {
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+
+            .patient-status-admitted {
+                border-left: 4px solid #3B82F6;
+            }
+
+            .patient-status-discharged {
+                border-left: 4px solid #10B981;
+            }
+
+            .patient-status-critical {
+                border-left: 4px solid #EF4444;
+            }
+
+            .room-occupied {
+                background-color: #FEE2E2;
+            }
+
+            .room-available {
+                background-color: #DCFCE7;
+            }
+
+            /* Animation for page transitions */
+            .page-transition {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Active menu item style */
+            .menu-item.active {
+                background-color: #EFF6FF;
+                color: #3B82F6;
+                font-weight: 500;
+            }
+        </style>
+    <body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        {% include 'personnel_navbar.html' %}
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top Navigation -->
+            {% include 'header.html' %}
+
+            <!-- Dashboard Content -->
+            <main class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Gestion des examens médicaux</h2>
+
+                    <div x-data="{ open: false }">
+                        <button @click="open = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg">➕ Nouvel
+                            examen
+                        </button>
+
+                        <!-- Modal ajout examen -->
+                        <div x-show="open"
+                             class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                            <div class="bg-white p-6 rounded-lg w-full max-w-lg">
+                                <button @click="open = false" class="float-right text-gray-500">✖</button>
+                                <h3 class="text-lg font-bold mb-4">Nouvel Examen</h3>
+
+                                <form id="form-examen" method="post" action="{% url 'Utilisateur:ajouter_examen' %}">
+                                    {% csrf_token %}
+                                    <label>Patient</label>
+                                    <select name="code_patient" class="w-full border rounded p-2 mb-3">
+                                        {% for patient in patients %}
+                                            <option value="{{ patient.code_patient }}">{{ patient.nom }} {{ patient.prenom }}
+                                                ({{ patient.code_patient }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <label>Type d'examen</label>
+                                    <input type="text" name="type_examen" class="w-full border rounded p-2 mb-3">
+
+                                    <label>Résultat</label>
+                                    <textarea name="resultat" class="w-full border rounded p-2 mb-3"></textarea>
+
+                                    <label>Statut</label>
+                                    <select name="statut" class="w-full border rounded p-2 mb-3">
+                                        <option value="En attente">En attente</option>
+                                        <option value="En cours">En cours</option>
+                                        <option value="Terminé">Terminé</option>
+                                    </select>
+
+                                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
+                                        Enregistrer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="bg-white shadow rounded-lg p-4">
+                    <table class="min-w-full">
+                        <thead>
+                        <tr class="bg-gray-100 text-left">
+                            <th class="p-2">Patient</th>
+                            <th class="p-2">Type</th>
+                            <th class="p-2">Résultat</th>
+                            <th class="p-2">Statut</th>
+                            <th class="p-2">Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for examen in examens %}
+                            <tr class="border-b">
+                                <td class="p-2">{{ examen.patient.nom }} {{ examen.patient.prenom }}</td>
+                                <td class="p-2">{{ examen.type_examen }}</td>
+                                <td class="p-2">{{ examen.resultat|default:"-" }}</td>
+                                <td class="p-2">{{ examen.statut }}</td>
+                                <td class="p-2">{{ examen.date_examen|date:"d/m/Y H:i" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center p-4 text-gray-500">Aucun examen enregistré</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+
+
+        </div>
+    </div>
+    </body>
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            let searchValue = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#hospitalisationsTable tr');
+
+            rows.forEach(function (row) {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('#enregistrer-form');
+            const errorDiv = document.getElementById('error-message');
+            const loader = document.getElementById('loader');
+            const enregistrerBtn = document.getElementById('enregistrer-btn');
+            const enregistrerAutreBtn = document.getElementById('enregistrer-autre-btn');
+
+            const showLoader = () => {
+                loader.style.display = 'block';
+                enregistrerBtn.style.display = 'none';
+            };
+
+            const hideLoader = () => {
+                loader.style.display = 'none';
+            };
+
+            const showEnregistrerAutre = () => {
+                enregistrerAutreBtn.style.display = 'block';
+            };
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Empêche la soumission classique
+                showLoader();
+
+                const formData = new FormData(form);
+
+                const delay = new Promise(resolve => setTimeout(resolve, 2000));
+
+                Promise.all([
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                        }
+                    }).then(response => response.json()),
+                    delay
+                ])
+                    .then(([data]) => {
+                        hideLoader();
+                        if (data.error) {
+                            errorDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                            enregistrerBtn.style.display = 'block';
+                        } else if (data.success) {
+                            errorDiv.innerHTML = `
+    <div class="flex items-center gap-2 p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-100 border border-green-300 animate-fade-in" role="alert">
+        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11V7a1 1 0 10-2 0v4a1 1 0 001 1h1a1 1 0 100-2h-.586l1.293-1.293a1 1 0 10-1.414-1.414L9 8.586V7a1 1 0 10-2 0v1a1 1 0 001 1h.586l-1.293 1.293a1 1 0 101.414 1.414L11 10.414V11a1 1 0 002 0v-1a1 1 0 00-1-1h-.586l1.293-1.293a1 1 0 10-1.414-1.414L11 8.586z" clip-rule="evenodd"/>
+        </svg>
+        <span>${data.success}</span>
+    </div>`;
+
+                            form.reset();
+                            showEnregistrerAutre();
+                        }
+                    })
+            });
+
+            enregistrerAutreBtn.addEventListener('click', function () {
+                window.location.reload(); // Recharge la page
+            });
+        });
+    </script>
+
+    <script>
+        const showLoader = () => {
+            loader.classList.remove('hidden');
+            enregistrerBtn.classList.add('hidden');
+        };
+
+        const hideLoader = () => {
+            loader.classList.add('hidden');
+        };
+
+        const showEnregistrerAutre = () => {
+            enregistrerAutreBtn.classList.remove('hidden');
+        };
+
+    </script>
+
+{% endblock %}

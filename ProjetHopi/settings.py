@@ -118,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'fr-Fr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Abidjan'
 
 USE_I18N = True
 

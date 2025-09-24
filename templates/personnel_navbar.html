@@ -52,6 +52,13 @@
                     <span class="sidebar-text">Consultation</span>
                 </a>
             {% endif %}
+            {% if request.user.role.designation == 'MEDECIN' or request.user.role.designation == 'ADMIN' %}
+                <a href="{% url 'Utilisateur:examens' %}"
+                   class="menu-item flex items-center space-x-3 px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                    <i class="fas fa-pills text-lg"></i>
+                    <span class="sidebar-text">Examens</span>
+                </a>
+            {% endif %}
 
 
             <a href="#"

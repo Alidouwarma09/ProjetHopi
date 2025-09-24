@@ -177,7 +177,8 @@ class Consultation(models.Model):
 # -----------------------
 
 class Recu(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='recus')
+    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, related_name='recus', null=True,
+                                     blank=True)
     montant = models.DecimalField(max_digits=10, decimal_places=2)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     monnaie = models.DecimalField(max_digits=10, decimal_places=2)
@@ -231,32 +232,30 @@ class ResultatExam(models.Model):
 
 
 class Examen(models.Model):
-    designation = models.CharField(max_length=100)
-    prix = models.IntegerField()
-    date = models.DateField()
-    statut = models.CharField(max_length=50)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="examens")
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="examens", null=True, blank=True)
+    type_examen = models.CharField(max_length=200)  # Ex: "Biologie", "Radio", "Scanner"
+    resultat = models.TextField(blank=True, null=True)
+    date_examen = models.DateTimeField(default=timezone.now)
+    statut = models.CharField(max_length=50, choices=[
+        ('En attente', 'En attente'),
+        ('En cours', 'En cours'),
+        ('Terminé', 'Terminé')
+    ], default='En attente')
+
+    def __str__(self):
+        return f"Examen {self.type_examen} - {self.patient.nom} {self.patient.prenom}"
 
 
 # -----------------------
 # ORDONNANCE / ARRET / BULLETIN
 # -----------------------
 
-class Ordonnance(models.Model):
-    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, related_name='ordonnances')
-    contenu = models.CharField(blank=True, null=True, max_length=250)
-    nom_pre = models.CharField(blank=True, null=True, max_length=250)
-    date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Ordonnance pour {self.consultation}"
-
 
 class BulletinExamen(models.Model):
     consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, related_name='bulletins')
-    service = models.CharField(blank=True, null=True, max_length=250)
-    nom_pre = models.CharField(blank=True, null=True, max_length=250)
+    examen = models.ForeignKey(Examen, on_delete=models.CASCADE, related_name='examen')
     age = models.CharField(blank=True, null=True, max_length=20)
-    examen = models.CharField(blank=True, null=True, max_length=20)
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -272,6 +271,15 @@ class Medicament(models.Model):
     type_medicament = models.CharField(max_length=100)
 
 
+class Ordonnance(models.Model):
+    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, related_name='ordonnances')
+    contenu = models.CharField(blank=True, null=True, max_length=250)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Ordonnance pour {self.consultation}"
+
+
 class Prestation(models.Model):
     recu = models.ForeignKey(Recu, on_delete=models.CASCADE, related_name='bulletins')
     designation = models.CharField(max_length=100)
@@ -281,7 +289,7 @@ class Prestation(models.Model):
 class ArretTravail(models.Model):
     consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, related_name='arrets')
     nombre_jours = models.IntegerField()
-    date_debut = models.DateTimeField()
+    date_debut = models.DateField()
     nom_med = models.CharField(blank=True, null=True, max_length=250)
 
     def __str__(self):

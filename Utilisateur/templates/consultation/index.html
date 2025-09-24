@@ -112,6 +112,7 @@
                         <h2 class="text-2xl font-bold text-gray-800">Gestion des Consultations</h2>
 
                         <!-- Bouton nouvelle consultation -->
+                        <!-- Bouton nouvelle consultation -->
                         <div x-data="{ open: false }">
                             <button @click="open = true"
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
@@ -120,10 +121,10 @@
 
                             <!-- Modal -->
                             <div x-show="open"
-                                 class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                 class="fixed inset-0 flex items-center overflow-y-scroll justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
                                  x-transition>
                                 <div @click.away="open = false"
-                                     class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-7 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+                                     class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl p-7 overflow-y-auto max-h-[90vh] border border-gray-200 dark:border-gray-700">
 
                                     <!-- Bouton fermeture -->
                                     <button @click="open = false"
@@ -137,115 +138,142 @@
 
                                     <!-- Formulaire -->
                                     <form id="enregistrer-form" method="post"
-                                          action="{% url 'Utilisateur:ajouter_consultation' %}" class="space-y-6">
+                                          action="{% url 'Utilisateur:ajouter_consultation' %}"
+                                          class="space-y-6">
                                         {% csrf_token %}
 
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <!-- Colonne gauche -->
-                                            <div class="space-y-4">
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Patient</label>
-                                                    <input list="codes-patients" id="code-patient" name="code_patient"
-                                                           placeholder="Entrer le code patient"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
-                                                    
-                                                    <datalist id="codes-patients">
-                                                        {% for patient in patients %}
-                                                            <option value="{{ patient.code_patient }}">{{ patient.code_patient }}
-                                                                - {{ patient.nom }}</option>
-                                                        {% endfor %}
-                                                    </datalist>
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
-                                                    <select name="service" required
-                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                        <option value="">Choisir un service</option>
-                                                        {% for service in services %}
-                                                            <option value="{{ service.id }}">{{ service.designation }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Motif</label>
-                                                    <input type="text" name="motif"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Diagnostic</label>
-                                                    <input type="text" name="diagnostic"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Constat</label>
-                                                    <input type="text" name="constat_consultation"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Résultat
-                                                        examen</label>
-                                                    <input type="text" name="resultat_examen"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut</label>
-                                                    <input type="text" name="statue"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            <!-- Patient -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Patient</label>
+                                                <input list="codes-patients" id="code-patient" name="code_patient"
+                                                       placeholder="Entrer le code patient"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                <datalist id="codes-patients">
+                                                    {% for patient in patients %}
+                                                        <option value="{{ patient.code_patient }}">{{ patient.code_patient }}
+                                                            - {{ patient.nom }}</option>
+                                                    {% endfor %}
+                                                </datalist>
                                             </div>
 
-                                            <!-- Colonne droite -->
-                                            <div class="space-y-4">
-                                                <div class="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Poids
-                                                            (kg)</label>
-                                                        <input type="number" step="0.01" name="poids"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Taille
-                                                            (cm)</label>
-                                                        <input type="number" step="0.01" name="taille"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                    </div>
-                                                </div>
-                                                <div class="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">IMC</label>
-                                                        <input type="number" step="0.01" name="IMC"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pouls</label>
-                                                        <input type="number" step="0.01" name="pouls"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">TA</label>
-                                                    <input type="number" step="0.01" name="TA"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Examen
-                                                        demandé</label>
-                                                    <input type="text" name="examen_demande"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Traitement</label>
-                                                    <input type="text" name="traitement"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Issue</label>
-                                                    <input type="text" name="issue_consultation"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
+                                            <!-- Service -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
+                                                <select name="service" required
+                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    <option value="">Choisir un service</option>
+                                                    {% for service in services %}
+                                                        <option value="{{ service.id }}">{{ service.designation }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
 
+                                            <!-- Motif -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Motif</label>
+                                                <input type="text" name="motif"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Diagnostic -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Diagnostic</label>
+                                                <input type="text" name="diagnostic"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Constat -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Constat</label>
+                                                <input type="text" name="constat_consultation"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Résultat examen -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Résultat
+                                                    examen</label>
+                                                <input type="text" name="resultat_examen"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Statut -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut</label>
+                                                <input type="text" name="statue"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Poids -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Poids
+                                                    (kg)</label>
+                                                <input type="number" step="0.01" name="poids"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Taille -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Taille
+                                                    (cm)</label>
+                                                <input type="number" step="0.01" name="taille"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- IMC -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">IMC</label>
+                                                <input type="number" step="0.01" name="IMC"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Pouls -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pouls</label>
+                                                <input type="number" step="0.01" name="pouls"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- TA -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">TA</label>
+                                                <input type="number" step="0.01" name="TA"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Examen demandé -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Examen
+                                                    demandé</label>
+                                                <input type="text" name="examen_demande"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Traitement -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Traitement</label>
+                                                <input type="text" name="traitement"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Issue -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Issue</label>
+                                                <input type="text" name="issue_consultation"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                            </div>
+
+                                            <!-- Ordonnance -->
+                                            <div class="col-span-3">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ordonnance
+                                                    (si nécessaire)</label>
+                                                <textarea name="contenu_ordonnance" rows="3"
+                                                          class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2"
+                                                          placeholder="Contenu de l'ordonnance"></textarea>
                                             </div>
                                         </div>
+
 
                                         <div id="error-message" class="mt-4 text-sm"></div>
 
@@ -263,6 +291,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
                     <!-- Table des consultations -->
@@ -292,27 +321,90 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Date
                                     </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        ACTION
+                                    </th>
                                 </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                {% for consult in consultations %}
+                                {% for consult in consultations_details %}
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ forloop.counter }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ consult.patient.nom }} {{ consult.patient.prenom }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.service.designation }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ consult.patient }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.service }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.motif }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.diagnostic }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.statue }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.date|date:"d/m/Y H:i" }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <!-- Modal Détails consultation -->
+                                            <div x-data="{ openDetails: false, consultData: {} }">
+                                                <button @click="openDetails = true; consultData = JSON.parse(document.getElementById('consult-{{ consult.id }}').textContent)"
+                                                        class="bg-blue-600 text-white px-2 py-1 rounded">
+                                                    Détails / Reçu
+                                                </button>
+
+                                                <div x-show="openDetails"
+                                                     class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                                                    <div @click.away="openDetails = false"
+                                                         class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-lg p-6 overflow-y-auto max-h-[90vh]">
+                                                        <button @click="openDetails = false"
+                                                                class="absolute top-4 right-4">&times;
+                                                        </button>
+                                                        <h2 class="text-xl font-bold mb-4">Détails Consultation</h2>
+
+                                                        <p><strong>Patient :</strong> {{ consult.patient }}</p>
+                                                        <p><strong>Service :</strong> {{ consult.service }}</p>
+                                                        <p><strong>Motif :</strong> {{ consult.motif }}</p>
+                                                        <p><strong>Poids :</strong> {{ consult.poids }} kg</p>
+                                                        <p><strong>Taille :</strong> {{ consult.taille }} cm</p>
+                                                        <p><strong>IMC :</strong> {{ consult.IMC }}</p>
+                                                        <p><strong>Pouls :</strong> {{ consult.pouls }}</p>
+                                                        <p><strong>TA :</strong> {{ consult.TA }}</p>
+                                                        <p><strong>Diagnostic :</strong> {{ consult.diagnostic }}</p>
+                                                        <p><strong>Constat :</strong> {{ consult.constat_consultation }}
+                                                        </p>
+                                                        <p><strong>Examen demandé
+                                                            :</strong> {{ consult.examen_demande }}</p>
+                                                        <p><strong>Traitement :</strong> {{ consult.traitement }}</p>
+                                                        <p><strong>Issue :</strong> {{ consult.issue_consultation }}</p>
+                                                        <p><strong>Résultat examen
+                                                            :</strong> {{ consult.resultat_examen }}</p>
+                                                        <p><strong>Statut :</strong> {{ consult.statue }}</p>
+
+                                                        <!-- Ordonnances -->
+                                                        {% if consult.ordonnances %}
+                                                            <h4 class="font-bold mt-4">Ordonnances</h4>
+                                                            <ul>
+                                                                {% for ord in consult.ordonnances %}
+                                                                    <li>{{ ord.contenu }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+
+                                                        <a href="{% url 'Utilisateur:pdf_consultation' consult.id %}"
+                                                           target="_blank"
+                                                           class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                                                            Générer PDF
+                                                        </a>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        </td>
+
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Aucune
+                                        <td colspan="8" class="px-6 py-4 text-sm text-gray-500 text-center">Aucune
                                             consultation disponible
                                         </td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
+
                             </table>
                         </div>
                     </div>

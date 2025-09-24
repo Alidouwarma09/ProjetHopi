@@ -6,16 +6,20 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta, datetime, date
 
 from django.views.decorators.csrf import csrf_exempt
+from six import BytesIO
 
-from Model.models import Patient, RendezVous, Service, Medicament, Hospitalisation, Consultation
+from Model.models import Patient, RendezVous, Service, Medicament, Hospitalisation, Consultation, Examen, Ordonnance, \
+    ArretTravail, Recu, Prestation
 from Utilisateur.forms import ConnexionForm
+from xhtml2pdf import pisa
 
 
 # Create your views here.
@@ -154,11 +158,114 @@ def consultation(request):
     consultations = Consultation.objects.all().select_related('patient', 'service')
     patients = Patient.objects.all()
     services = Service.objects.all()
+
+    consultations_details = []
+    for consult in consultations:
+        ordonnances = consult.ordonnances.all()  # multiple ordonnances
+        arrets = consult.arrets.all()  # multiple arrêts
+        recu = consult.recus.first()  # related_name="recus"
+        prestations = recu.bulletins.all() if recu else []
+
+        consultations_details.append({
+            'id': consult.id,
+            'patient': f"{consult.patient.nom} {consult.patient.prenom}",
+            'service': consult.service.designation,
+            'motif': consult.motif,
+            'poids': consult.poids,
+            'taille': consult.taille,
+            'IMC': consult.IMC,
+            'pouls': consult.pouls,
+            'TA': consult.TA,
+            'diagnostic': consult.diagnostic,
+            'constat_consultation': consult.constat_consultation,
+            'examen_demande': consult.examen_demande,
+            'traitement': consult.traitement,
+            'issue_consultation': consult.issue_consultation,
+            'resultat_examen': consult.resultat_examen,
+            'statue': consult.statue,
+            'date': consult.date,
+            'ordonnances': ordonnances,
+            'arrets': arrets,
+            'recu': recu,
+            'prestations': prestations,
+        })
+
     return render(request, 'consultation/index.html', {
-        'consultations': consultations,
+        'consultations_details': consultations_details,
         'patients': patients,
         'services': services
     })
+
+
+def pdf_consultation(request, consultation_id):
+    consultation = get_object_or_404(Consultation.objects.select_related('patient', 'service'), id=consultation_id)
+
+    ordonnances = consultation.ordonnances.all()
+    arrets = consultation.arrets.all()
+    recu = consultation.recus.first()
+    prestations = recu.bulletins.all() if recu else []
+
+    # Rendre le template HTML en string
+    html_string = render(request, 'pdf_template.html', {
+        'consultation': consultation,
+        'ordonnances': ordonnances,
+        'arrets': arrets,
+        'recu': recu,
+        'prestations': prestations,
+    }).content.decode('utf-8')
+
+    # Générer le PDF
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html_string.encode("UTF-8")), result)
+    if pdf.err:
+        return HttpResponse("Erreur lors de la génération du PDF", status=500)
+
+    # Retourner le PDF comme réponse
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"consultation_{consultation.id}_{timestamp}.pdf"
+    print(filename)
+    response = HttpResponse(result.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="{filename}"'
+    return response
+
+
+@login_required(login_url='Utilisateur:Connexion')
+def examens(request):
+    examens = Examen.objects.select_related("patient").all()
+    patients = Patient.objects.all()
+    return render(request, "examens/index.html", {
+        "examens": examens,
+        "patients": patients
+    })
+
+
+@login_required(login_url='Utilisateur:Connexion')
+def ajouter_examen(request):
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                code_patient = request.POST.get("code_patient", "").strip()
+                patient = get_object_or_404(Patient, code_patient=code_patient)
+
+                type_examen = request.POST.get("type_examen", "").strip()
+                service_id = request.POST.get("service", "").strip()
+                service = get_object_or_404(Service, id=service_id) if service_id else None
+
+                examen = Examen.objects.create(
+                    patient=patient,
+                    service=service,
+                    type_examen=type_examen,
+                    resultat=request.POST.get("resultat", "").strip(),
+                    statut=request.POST.get("statut", "En attente")
+                )
+
+            return JsonResponse({"success": "Examen enregistré avec succès !"})
+
+        except Exception as e:
+            print("Erreur:", e)
+            return JsonResponse({"error": "Erreur lors de l'enregistrement."}, status=400)
+
+    return JsonResponse({"error": "Requête invalide."}, status=400)
 
 
 @login_required(login_url='Utilisateur:Connexion')
@@ -247,65 +354,76 @@ def ajouter_hospitalisation(request):
 
 @login_required(login_url='Utilisateur:Connexion')
 def ajouter_consultation(request):
+    patients = Patient.objects.all()
+    services = Service.objects.all()
+
     if request.method == "POST":
         try:
             with transaction.atomic():
-                # Récupération des données du formulaire
-                code_patient = request.POST.get('code_patient', '').strip()
-                patient = get_object_or_404(Patient, code_patient=code_patient)
+                patient = get_object_or_404(Patient, code_patient=request.POST.get('code_patient', '').strip())
+                service = get_object_or_404(Service, id=request.POST.get('service'))
 
-                service_id = request.POST.get('service', '').strip()
-                service = get_object_or_404(Service, id=service_id)
-
-                motif = request.POST.get('motif', '').strip()
-                poids = request.POST.get('poids', '0').strip()
-                taille = request.POST.get('taille', '0').strip()
-                IMC = request.POST.get('IMC', '0').strip()
-                pouls = request.POST.get('pouls', '0').strip()
-                TA = request.POST.get('TA', '0').strip()
-                diagnostic = request.POST.get('diagnostic', '').strip()
-                constat_consultation = request.POST.get('constat_consultation', '').strip()
-                examen_demande = request.POST.get('examen_demande', '').strip()
-                traitement = request.POST.get('traitement', '').strip()
-                issue_consultation = request.POST.get('issue_consultation', '').strip()
-                resultat_examen = request.POST.get('resultat_examen', '').strip()
-                statue = request.POST.get('statue', '').strip()
-
-                # Création de la consultation
-                Consultation.objects.create(
+                consultation = Consultation.objects.create(
                     patient=patient,
                     service=service,
-                    motif=motif,
-                    poids=poids,
-                    taille=taille,
-                    IMC=IMC,
-                    pouls=pouls,
-                    TA=TA,
-                    diagnostic=diagnostic,
-                    constat_consultation=constat_consultation,
-                    examen_demande=examen_demande,
-                    traitement=traitement,
-                    issue_consultation=issue_consultation,
-                    resultat_examen=resultat_examen,
-                    statue=statue
+                    motif=request.POST.get('motif', '').strip(),
+                    poids=float(request.POST.get('poids', 0) or 0),
+                    taille=float(request.POST.get('taille', 0) or 0),
+                    IMC=float(request.POST.get('IMC', 0) or 0),
+                    pouls=float(request.POST.get('pouls', 0) or 0),
+                    TA=float(request.POST.get('TA', 0) or 0),
+                    diagnostic=request.POST.get('diagnostic', '').strip(),
+                    constat_consultation=request.POST.get('constat_consultation', '').strip(),
+                    examen_demande=request.POST.get('examen_demande', '').strip(),
+                    traitement=request.POST.get('traitement', '').strip(),
+                    issue_consultation=request.POST.get('issue_consultation', '').strip(),
+                    resultat_examen=request.POST.get('resultat_examen', '').strip(),
+                    statue=request.POST.get('statue', '').strip()
                 )
 
-            return JsonResponse({'success': 'Consultation enregistrée avec succès !'})
+                # Ordonnance
+                contenu_ord = request.POST.get('contenu_ordonnance', '').strip()
+                if contenu_ord:
+                    Ordonnance.objects.create(consultation=consultation, contenu=contenu_ord)
 
-        except ValueError as e:
-            print(f"Erreur de validation : {e}")
-            return JsonResponse(
-                {'error': 'Une erreur de validation est survenue. Veuillez vérifier les informations saisies.'},
-                status=400
-            )
+                # Arret
+                nombre_jours = request.POST.get('nombre_jours', '').strip()
+                date_str = request.POST.get('date_debut', '').strip()
+                if nombre_jours and date_str:
+                    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+                    date_aware = timezone.make_aware(date_obj)
+                    ArretTravail.objects.create(
+                        consultation=consultation,
+                        nombre_jours=int(nombre_jours),
+                        date_debut=date_aware,
+                        nom_med=f"{request.user.nom} {request.user.prenom}"
+                    )
+
+                # Recu
+                designation_prestation = request.POST.get('designation_prestation', '').strip()
+                prix_prestation = request.POST.get('prix_prestation', '').strip()
+                if designation_prestation and prix_prestation:
+                    prix_val = float(prix_prestation)
+                    recu = Recu.objects.create(
+                        consultation=consultation,
+                        montant=prix_val,
+                        total=prix_val,
+                        monnaie=0,
+                        details=designation_prestation
+                    )
+                    Prestation.objects.create(
+                        recu=recu,
+                        designation=designation_prestation,
+                        prix=prix_val
+                    )
+
+                return JsonResponse({'success': 'Consultation enregistrée avec succès !'})
+
         except Exception as e:
-            print(f"Erreur : {e}")
-            return JsonResponse(
-                {'error': 'Une erreur est survenue lors de l\'enregistrement.'},
-                status=400
-            )
+            return JsonResponse({'error': str(e)})
 
-    return JsonResponse({'error': 'Requête invalide.'}, status=400)
+    # GET
+    return render(request, 'consultation/index.html', {'patients': patients, 'services': services})
 
 
 @login_required(login_url='Utilisateur:Connexion')
