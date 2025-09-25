@@ -235,6 +235,130 @@
                                 </div>
                             </div>
                         </div>
+                        <div x-data="{ open: false }">
+                            <button @click="open = true"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                <i class="fas fa-user-nurse mr-2"></i> Enregistrer une sortie
+                            </button>
+
+                            <div x-show="open"
+                                 class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                 x-transition>
+                                <div class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+
+                                    <!-- Bouton de fermeture -->
+                                    <button @click="open = false"
+                                            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                        &times;
+                                    </button>
+
+                                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">🩺
+                                        Enregistrement de la sortie</h2>
+
+                                    <form id="enregistrer-form" method="post"
+                                          action="{% url 'Utilisateur:ajouter_patient' %}" class="space-y-6">
+                                        {% csrf_token %}
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <!-- Colonne gauche -->
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
+                                                    <input type="text" name="nom" required
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prénom</label>
+                                                    <input type="text" name="prenom" required
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profession</label>
+                                                    <input type="text" name="profession"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nationalité</label>
+                                                    <input type="text" name="nationalite"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Âge</label>
+                                                    <input type="number" step="0.01" name="age" required
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                            </div>
+
+                                            <!-- Colonne droite -->
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sexe</label>
+                                                    <select name="sexe" required
+                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                        <option value="">Choisir</option>
+                                                        <option value="Masculin">Masculin</option>
+                                                        <option value="Féminin">Féminin</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lieu
+                                                        d'habitation</label>
+                                                    <input type="text" name="lieu_habitation"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Téléphone</label>
+                                                    <input type="text" name="numero"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut
+                                                        conjugal</label>
+                                                    <input type="text" name="statut_conjugal"
+                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Groupe
+                                                        sanguin</label>
+                                                    <select name="groupe_sanguin" required
+                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                        <option value="">Choisir</option>
+                                                        <option value="A+">A+</option>
+                                                        <option value="A-">A-</option>
+                                                        <option value="B+">B+</option>
+                                                        <option value="B-">B-</option>
+                                                        <option value="AB+">AB+</option>
+                                                        <option value="AB-">AB-</option>
+                                                        <option value="O+">O+</option>
+                                                        <option value="O-">O-</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Alertes -->
+                                        <div id="error-message" class="mt-4 text-sm"></div>
+
+                                        <!-- Loader -->
+                                        <div id="loader" class="text-center hidden mt-4">
+                                            <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                            <p class="text-gray-700 dark:text-gray-300 mt-2">Enregistrement en
+                                                cours...</p>
+                                        </div>
+
+                                        <!-- Boutons -->
+                                        <button id="enregistrer-btn" type="submit"
+                                                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                                            Enregistrer
+                                        </button>
+                                        <button id="enregistrer-autre-btn" type="button"
+                                                class="w-full mt-2 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition hidden">
+                                            Enregistrer un autre patient
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
 
 
                     </div>
