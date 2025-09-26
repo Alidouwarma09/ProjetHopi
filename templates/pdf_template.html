@@ -12,53 +12,61 @@
             padding: 0;
         }
 
-        header {
-            background-color: #003366; /* bleu foncé du Ministère */
-            color: #fff;
-            text-align: center;
-            padding: 15px 0;
+        .page {
+            margin: auto;
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 18px;
-            text-transform: uppercase;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
 
-        header p {
-            margin: 2px 0;
+        .header-text {
+            line-height: 1.2;
+        }
+
+        .header-text .ministere {
+            font-weight: bold;
+            font-size: 16px;
+            color: #003366;
+        }
+
+        .header-text .etablissement {
+            font-size: 14px;
+        }
+
+        .header-text .address {
             font-size: 12px;
         }
 
-        .consultation-number {
-            text-align: right;
+        .consultation-title {
+            text-align: center;
+            font-size: 18px;
             font-weight: bold;
-            font-size: 14px;
-            margin: 10px 25px;
-            color: #003366;
+            color: #0b5ed7;
+            margin-bottom: 15px;
         }
 
-        .section {
-            margin: 20px 25px;
+        .infos {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
 
-        .section h2 {
-            font-size: 14px;
-            border-bottom: 2px solid #003366;
-            padding-bottom: 3px;
-            margin-bottom: 10px;
-            color: #003366;
+        .infos .left, .infos .right {
+            width: 48%;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 8px;
+            margin-bottom: 20px;
         }
 
         th, td {
             border: 1px solid #666;
-            padding: 6px;
+            padding: 8px;
             text-align: left;
         }
 
@@ -70,111 +78,122 @@
             background-color: #f9f9f9;
         }
 
-        ul {
-            padding-left: 18px;
-        }
-
         .footer {
             text-align: center;
-            font-size: 10px;
+            font-size: 11px;
             color: #777;
-            margin-top: 25px;
             border-top: 1px solid #999;
             padding-top: 5px;
         }
     </style>
 </head>
 <body>
-<header>
-    <h1>Ministère de la Santé et de l’Hygiène Publique</h1>
-    <p>République de Côte d’Ivoire</p>
-    <p>Hôpital de la Première Dame</p>
-</header>
-
-<div class="consultation-number">
-    Consultation n° {{ consultation.id }}
-</div>
-
-<div class="section">
-    <h2>Informations générales</h2>
-    <p><strong>Patient :</strong> {{ consultation.patient.nom }} {{ consultation.patient.prenom }}</p>
-    <p><strong>Service :</strong> {{ consultation.service.designation }}</p>
-    <p><strong>Date :</strong> {{ consultation.date|date:"d/m/Y H:i" }}</p>
-    <p><strong>Motif :</strong> {{ consultation.motif }}</p>
-    <p><strong>Diagnostic :</strong> {{ consultation.diagnostic }}</p>
-    <p><strong>Constat :</strong> {{ consultation.constat_consultation }}</p>
-    <p><strong>Examen demandé :</strong> {{ consultation.examen_demande }}</p>
-    <p><strong>Traitement :</strong> {{ consultation.traitement }}</p>
-    <p><strong>Issue :</strong> {{ consultation.issue_consultation }}</p>
-    <p><strong>Résultat examen :</strong> {{ consultation.resultat_examen }}</p>
-    <p><strong>Statut :</strong> {{ consultation.statue }}</p>
-    <p><strong>Poids :</strong> {{ consultation.poids }} kg</p>
-    <p><strong>Taille :</strong> {{ consultation.taille }} cm</p>
-    <p><strong>IMC :</strong> {{ consultation.IMC }}</p>
-    <p><strong>Pouls :</strong> {{ consultation.pouls }}</p>
-    <p><strong>TA :</strong> {{ consultation.TA }}</p>
-</div>
-
-{% if ordonnances %}
-    <div class="section">
-        <h2>Ordonnances</h2>
-        <ul>
-            {% for ord in ordonnances %}
-                <li>{{ ord.contenu }}</li>
-            {% endfor %}
-        </ul>
+<div class="page">
+    <div class="header">
+        <div class="header-text">
+            <div class="ministere">République de Côte d'Ivoire — Ministère de la Santé</div>
+            <div class="etablissement">Hôpital / Centre Médical MEDICARE</div>
+            <div class="address">Adresse : Cocody Riviera 2 — Tél : +225 0102030405</div>
+        </div>
+        <div style="text-align:right;">
+            <div style="font-size:12px; color:#0b5ed7; font-weight:700;">CONSULTATION MÉDICALE</div>
+            <div style="font-size:11px; color:#334155;">N° : CONS-{{ consultation.id }}</div>
+            <div style="font-size:11px; color:#334155;">Date : {{ consultation.date|date:"d/m/Y H:i" }}</div>
+        </div>
     </div>
-{% endif %}
 
-{% if arrets %}
-    <div class="section">
-        <h2>Arrêts de travail</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Nombre de jours</th>
-                <th>Date début</th>
-                <th>Médecin</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for arret in arrets %}
+    <div class="consultation-title">FICHE DE CONSULTATION</div>
+
+    <div class="infos">
+        <div class="left">
+            <p><strong>Patient :</strong> {{ consultation.patient.nom }} {{ consultation.patient.prenom }}</p>
+            <p><strong>Code patient :</strong> {{ consultation.patient.code_patient }}</p>
+            <p><strong>Service :</strong> {{ consultation.service.designation }}</p>
+            <p><strong>Motif :</strong> {{ consultation.motif }}</p>
+            <p><strong>Diagnostic :</strong> {{ consultation.diagnostic }}</p>
+            <p><strong>Constat :</strong> {{ consultation.constat_consultation }}</p>
+
+            <!-- Antécédents ajoutés -->
+            <p><strong>Antécédents médicaux :</strong> {{ ant_med }}</p>
+            <p><strong>Antécédents chirurgicaux :</strong> {{ ant_chirur }}</p>
+            <p><strong>Autres antécédents :</strong> {{ ant_mal }}</p>
+        </div>
+        <div class="right">
+            <p><strong>Examen demandé :</strong> {{ consultation.examen_demande }}</p>
+            <p><strong>Traitement :</strong> {{ consultation.traitement }}</p>
+            <p><strong>Issue :</strong> {{ consultation.issue_consultation }}</p>
+            <p><strong>Résultat examen :</strong> {{ consultation.resultat_examen }}</p>
+            <p><strong>Statut :</strong> {{ consultation.statue }}</p>
+            <p><strong>Poids :</strong> {{ consultation.poids }} kg</p>
+            <p><strong>Taille :</strong> {{ consultation.taille }} cm</p>
+            <p><strong>IMC :</strong> {{ consultation.IMC }}</p>
+            <p><strong>Pouls :</strong> {{ consultation.pouls }}</p>
+            <p><strong>TA :</strong> {{ consultation.TA }}</p>
+        </div>
+    </div>
+
+
+    {% if ordonnances %}
+        <div>
+            <h3>Ordonnances</h3>
+            <ul>
+                {% for ord in ordonnances %}
+                    <li>{{ ord.contenu }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if arrets %}
+        <div>
+            <h3>Arrêts de travail</h3>
+            <table>
+                <thead>
                 <tr>
-                    <td>{{ arret.nombre_jours }}</td>
-                    <td>{{ arret.date_debut|date:"d/m/Y" }}</td>
-                    <td>{{ arret.nom_med }}</td>
+                    <th>Nombre de jours</th>
+                    <th>Date début</th>
+                    <th>Médecin</th>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-{% endif %}
+                </thead>
+                <tbody>
+                {% for arret in arrets %}
+                    <tr>
+                        <td>{{ arret.nombre_jours }}</td>
+                        <td>{{ arret.date_debut|date:"d/m/Y" }}</td>
+                        <td>{{ arret.nom_med }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 
-{% if recu %}
-    <div class="section">
-        <h2>Reçu / Prestations</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Désignation</th>
-                <th>Prix (FCFA)</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for p in prestations %}
+    {% if recu %}
+        <div>
+            <h3>Prestations / Reçu</h3>
+            <table>
+                <thead>
                 <tr>
-                    <td>{{ p.designation }}</td>
-                    <td>{{ p.prix }}</td>
+                    <th>Désignation</th>
+                    <th>Prix (FCFA)</th>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <p><strong>Total :</strong> {{ recu.total }} FCFA</p>
-    </div>
-{% endif %}
+                </thead>
+                <tbody>
+                {% for p in prestations %}
+                    <tr>
+                        <td>{{ p.designation }}</td>
+                        <td style="text-align:right">{{ p.prix }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <p><strong>Total :</strong> {{ recu.total }} FCFA</p>
+        </div>
+    {% endif %}
 
-<div class="footer">
-    Document généré automatiquement par le système de gestion médicale de l'Hôpital de la Première Dame.
+    <div class="footer">
+        Document généré automatiquement par le système de gestion médicale de l'Hôpital.
+    </div>
 </div>
 </body>
 </html>

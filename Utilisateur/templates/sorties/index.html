@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+
+        <style>
+            .sidebar {
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-collapsed {
+                width: 80px;
+            }
+
+            .sidebar-collapsed .sidebar-text {
+                display: none;
+            }
+
+            .sidebar-collapsed .logo-text {
+                display: none;
+            }
+
+            .sidebar-collapsed .menu-item {
+                justify-content: center;
+            }
+
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            }
+
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+
+            .notification-badge {
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+
+            .patient-status-admitted {
+                border-left: 4px solid #3B82F6;
+            }
+
+            .patient-status-discharged {
+                border-left: 4px solid #10B981;
+            }
+
+            .patient-status-critical {
+                border-left: 4px solid #EF4444;
+            }
+
+            .room-occupied {
+                background-color: #FEE2E2;
+            }
+
+            .room-available {
+                background-color: #DCFCE7;
+            }
+
+            /* Animation for page transitions */
+            .page-transition {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Active menu item style */
+            .menu-item.active {
+                background-color: #EFF6FF;
+                color: #3B82F6;
+                font-weight: 500;
+            }
+        </style>
+    <body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        {% include 'personnel_navbar.html' %}
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            {% include 'header.html' %}
+
+            <main class="p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Gestion des Sorties et Reçus</h2>
+
+                <!-- Barre recherche -->
+
+                <a href="{% url 'Utilisateur:hospitalisation' %}"
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Enregistrer une sortie
+                </a>
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+                    <input id="searchInput" type="text"
+                           placeholder="Rechercher: Nom, Code, Motif..."
+                           class="w-full border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
+                </div>
+
+                <!-- Table des sorties -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table id="sortiesTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-blue-300">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">N°</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Motif</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diagnostic
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Observation
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date
+                                    sortie
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="sortiesTable" class="bg-white divide-y divide-gray-200">
+                            {% for sortie in sorties %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ forloop.counter }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                        {{ sortie.hospitalisation.patient.nom }} {{ sortie.hospitalisation.patient.prenom }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ sortie.hospitalisation.motif }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ sortie.hospitalisation.diagnotic }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ sortie.observation }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ sortie.montant_total }} FCFA</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ sortie.date_sortie|date:"d/m/Y H:i" }}</td>
+                                    <td class="px-6 py-4">
+                                        <button onclick="genererRecu({{ sortie.id }})"
+                                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg">
+                                            Générer reçu
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8" class="px-6 py-4 text-sm text-gray-500 text-center">
+                                        Aucune sortie enregistrée
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Overlay Loader -->
+    <div id="overlayLoader"
+         class="hidden fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
+        <div class="w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-white text-lg mt-4">Génération du reçu de sortie...</p>
+    </div>
+
+    <script>
+        function genererRecu(sortieId) {
+            const overlay = document.getElementById("overlayLoader");
+            overlay.classList.remove("hidden");
+
+            fetch(`/recu_sortie/${sortieId}/`, {
+                method: 'GET',
+                headers: {'Accept': 'application/pdf'}
+            })
+                .then(resp => {
+                    if (!resp.ok) throw new Error('Erreur PDF');
+                    return resp.blob();
+                })
+                .then(blob => {
+                    // télécharge le PDF
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Recu_Sortie_${sortieId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(err => {
+                    alert("Erreur lors de la génération du reçu.");
+                    console.error(err);
+                })
+                .finally(() => {
+                    overlay.classList.add("hidden");
+                });
+        }
+    </script>
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            let searchValue = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#sortiesTable tr');
+
+            rows.forEach(function (row) {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        });
+    </script>
+
+
+    </body>
+
+
+
+{% endblock %}

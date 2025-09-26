@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import Connexion, acceuil, Deconnexion, ajouter_patient, gestion_patients, gestionRdvs, ajouter_Rdvs, \
     parametre, pharmacie, ajouter_medicament, modifier_medicament, hospitalisation, ajouter_hospitalisation, \
-    consultation, ajouter_consultation, examens, ajouter_examen, pdf_consultation
+    consultation, ajouter_consultation, examens, ajouter_examen, pdf_consultation, enregistrer_sortie, sorties, \
+    recu_sortie
 
 app_name = 'Utilisateur'
 urlpatterns = [
@@ -17,6 +18,9 @@ urlpatterns = [
     path('pharmacie/', pharmacie, name='pharmacie'),
     path('examens/', examens, name='examens'),
     path('hospitalisation/', hospitalisation, name='hospitalisation'),
+    path('sorties/', sorties, name='sorties'),
+    path('recu_sortie/<int:sortie_id>/', recu_sortie, name='recu_sortie'),
+    path('enregistrer_sortie/<int:hosp_id>/', enregistrer_sortie, name='enregistrer_sortie'),
     path('consultation/', consultation, name='consultation'),
     path('gestionPatient/', gestion_patients, name='gestion_patients'),
     path('parametre/', parametre, name='parametre'),

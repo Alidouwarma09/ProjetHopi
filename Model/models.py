@@ -192,7 +192,6 @@ class Recu(models.Model):
 # -----------------------
 # HOSPITALISATION
 # -----------------------
-
 class Hospitalisation(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='hospitalisations')
     motif = models.CharField(blank=True, null=True, max_length=250)
@@ -224,7 +223,7 @@ class Analyse(models.Model):
 
 
 class ResultatExam(models.Model):
-    analyse = models.OneToOneField(Analyse, on_delete=models.CASCADE, related_name='resultat')
+    analyse = models.OneToOneField(Analyse, on_delete=models.CASCADE, related_name='resultat_exam')
     resultat = models.TextField()
 
     def __str__(self):
@@ -239,7 +238,6 @@ class Examen(models.Model):
     date_examen = models.DateTimeField(default=timezone.now)
     statut = models.CharField(max_length=50, choices=[
         ('En attente', 'En attente'),
-        ('En cours', 'En cours'),
         ('Terminé', 'Terminé')
     ], default='En attente')
 
@@ -294,3 +292,14 @@ class ArretTravail(models.Model):
 
     def __str__(self):
         return f"Arrêt de travail ({self.nombre_jours} jours) pour {self.consultation}"
+
+
+class Sortie(models.Model):
+    hospitalisation = models.OneToOneField(Hospitalisation, on_delete=models.CASCADE, related_name="sortie")
+    date_sortie = models.DateTimeField(default=timezone.now)
+    observation = models.TextField(blank=True, null=True)  # Notes médicales ou raison de la sortie
+    montant_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # montant payé
+    recu = models.OneToOneField(Recu, on_delete=models.SET_NULL, null=True, blank=True, related_name="sortie")
+
+    def __str__(self):
+        return f"Sortie de {self.hospitalisation.patient.nom} {self.hospitalisation.patient.prenom} - {self.date_sortie}"

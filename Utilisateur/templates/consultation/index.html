@@ -112,27 +112,29 @@
                         <h2 class="text-2xl font-bold text-gray-800">Gestion des Consultations</h2>
 
                         <!-- Bouton nouvelle consultation -->
-                        <!-- Bouton nouvelle consultation -->
                         <div x-data="{ open: false }">
+                            <!-- Bouton d'ouverture du modal -->
                             <button @click="open = true"
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
                                 <i class="fas fa-plus mr-2"></i> Nouvelle consultation
                             </button>
 
-
                             <!-- Modal -->
                             <div x-show="open"
-                                 class="fixed inset-0 flex items-center overflow-y-scroll justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
-                                 x-transition>
+                                 x-transition
+                                 class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm overflow-y-auto">
+
+                                <!-- Conteneur du modal -->
                                 <div @click.away="open = false"
-                                     class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl p-7 overflow-y-auto max-h-[90vh] border border-gray-200 dark:border-gray-700">
+                                     class="relative bg-white dark:bg-gray-900 w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-h-[90vh] overflow-y-auto">
 
                                     <!-- Bouton fermeture -->
                                     <button @click="open = false"
-                                            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl font-bold">
                                         &times;
                                     </button>
 
+                                    <!-- Titre -->
                                     <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
                                         🩺 Enregistrement d'une consultation
                                     </h2>
@@ -140,12 +142,12 @@
                                     <!-- Formulaire -->
                                     <form id="enregistrer-form" method="post"
                                           action="{% url 'Utilisateur:ajouter_consultation' %}"
-                                          class="space-y-6">
+                                          class="space-y-4">
                                         {% csrf_token %}
 
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                             <!-- Patient -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Patient</label>
                                                 <input list="codes-patients" id="code-patient" name="code_patient"
                                                        placeholder="Entrer le code patient"
@@ -159,7 +161,7 @@
                                             </div>
 
                                             <!-- Service -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
                                                 <select name="service" required
                                                         class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
@@ -171,28 +173,55 @@
                                             </div>
 
                                             <!-- Motif -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Motif</label>
                                                 <input type="text" name="motif"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
                                             <!-- Diagnostic -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Diagnostic</label>
                                                 <input type="text" name="diagnostic"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
+                                            <!-- Antécédents médicaux -->
+                                            <div class="col-span-1">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Antécédents
+                                                    médicaux</label>
+                                                <textarea name="ant_med" rows="2"
+                                                          class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2"
+                                                          placeholder="Ex : Diabète, Hypertension..."></textarea>
+                                            </div>
+
+                                            <!-- Antécédents chirurgicaux -->
+                                            <div class="col-span-1">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Antécédents
+                                                    chirurgicaux</label>
+                                                <textarea name="ant_chirur" rows="2"
+                                                          class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2"
+                                                          placeholder="Ex : Appendicectomie, Chirurgie cardiaque..."></textarea>
+                                            </div>
+
+                                            <!-- Autres antécédents -->
+                                            <div class="col-span-1">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Autres
+                                                    antécédents</label>
+                                                <textarea name="ant_mal" rows="2"
+                                                          class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2"
+                                                          placeholder="Ex : Allergies, Asthme..."></textarea>
+                                            </div>
+
                                             <!-- Constat -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Constat</label>
                                                 <input type="text" name="constat_consultation"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
                                             <!-- Résultat examen -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Résultat
                                                     examen</label>
                                                 <input type="text" name="resultat_examen"
@@ -200,14 +229,14 @@
                                             </div>
 
                                             <!-- Statut -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut</label>
                                                 <input type="text" name="statue"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
                                             <!-- Poids -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Poids
                                                     (kg)</label>
                                                 <input type="number" step="0.01" name="poids"
@@ -215,7 +244,7 @@
                                             </div>
 
                                             <!-- Taille -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Taille
                                                     (cm)</label>
                                                 <input type="number" step="0.01" name="taille"
@@ -223,28 +252,28 @@
                                             </div>
 
                                             <!-- IMC -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">IMC</label>
                                                 <input type="number" step="0.01" name="IMC"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
                                             <!-- Pouls -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pouls</label>
                                                 <input type="number" step="0.01" name="pouls"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
                                             <!-- TA -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">TA</label>
                                                 <input type="number" step="0.01" name="TA"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
                                             <!-- Examen demandé -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Examen
                                                     demandé</label>
                                                 <input type="text" name="examen_demande"
@@ -252,21 +281,21 @@
                                             </div>
 
                                             <!-- Traitement -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Traitement</label>
                                                 <input type="text" name="traitement"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
                                             <!-- Issue -->
-                                            <div>
+                                            <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Issue</label>
                                                 <input type="text" name="issue_consultation"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
                                             <!-- Ordonnance -->
-                                            <div class="col-span-3">
+                                            <div class="col-span-4">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ordonnance
                                                     (si nécessaire)</label>
                                                 <textarea name="contenu_ordonnance" rows="3"
@@ -275,15 +304,16 @@
                                             </div>
                                         </div>
 
-
-                                        <div id="error-message" class="mt-4 text-sm"></div>
-
+                                        <!-- Messages et loader -->
+                                        <div id="error-message"
+                                             class="mt-4 text-sm text-red-600 dark:text-red-400"></div>
                                         <div id="loader" class="text-center hidden mt-4">
                                             <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
                                             <p class="text-gray-700 dark:text-gray-300 mt-2">Enregistrement en
                                                 cours...</p>
                                         </div>
 
+                                        <!-- Bouton Enregistrer -->
                                         <button id="enregistrer-btn" type="submit"
                                                 class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
                                             Enregistrer
@@ -292,6 +322,7 @@
                                 </div>
                             </div>
                         </div>
+
 
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
@@ -351,54 +382,104 @@
                                             <!-- Modal Détails consultation -->
                                             <div x-data="{ openDetails: false, consultData: {} }">
                                                 <button @click="openDetails = true; consultData = JSON.parse(document.getElementById('consult-{{ consult.id }}').textContent)"
-                                                        class="bg-blue-600 text-white px-2 py-1 rounded">
+                                                        class="bg-blue-600 text-white px-3 py-2 rounded-lg shadow hover:bg-blue-700 transition">
                                                     Détails / Reçu
                                                 </button>
 
-                                                <div x-show="openDetails"
-                                                     class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                                                <!-- Modal -->
+                                                <div x-show="openDetails" x-transition
+                                                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                                                     <div @click.away="openDetails = false"
-                                                         class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-lg p-6 overflow-y-auto max-h-[90vh]">
-                                                        <button @click="openDetails = false"
-                                                                class="absolute top-4 right-4">&times;
-                                                        </button>
-                                                        <h2 class="text-xl font-bold mb-4">Détails Consultation</h2>
+                                                         class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-6 overflow-y-auto max-h-[90vh] relative">
 
-                                                        <p><strong>Patient :</strong> {{ consult.patient }}</p>
-                                                        <p><strong>Service :</strong> {{ consult.service }}</p>
-                                                        <p><strong>Motif :</strong> {{ consult.motif }}</p>
-                                                        <p><strong>Poids :</strong> {{ consult.poids }} kg</p>
-                                                        <p><strong>Taille :</strong> {{ consult.taille }} cm</p>
-                                                        <p><strong>IMC :</strong> {{ consult.IMC }}</p>
-                                                        <p><strong>Pouls :</strong> {{ consult.pouls }}</p>
-                                                        <p><strong>TA :</strong> {{ consult.TA }}</p>
-                                                        <p><strong>Diagnostic :</strong> {{ consult.diagnostic }}</p>
-                                                        <p><strong>Constat :</strong> {{ consult.constat_consultation }}
-                                                        </p>
-                                                        <p><strong>Examen demandé
-                                                            :</strong> {{ consult.examen_demande }}</p>
-                                                        <p><strong>Traitement :</strong> {{ consult.traitement }}</p>
-                                                        <p><strong>Issue :</strong> {{ consult.issue_consultation }}</p>
-                                                        <p><strong>Résultat examen
-                                                            :</strong> {{ consult.resultat_examen }}</p>
-                                                        <p><strong>Statut :</strong> {{ consult.statue }}</p>
+                                                        <!-- Close button -->
+                                                        <button @click="openDetails = false"
+                                                                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl font-bold">
+                                                            <i class="fa-solid fa-circle-xmark"></i>
+                                                        </button>
+
+                                                        <!-- Title -->
+                                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                                            Détails de la Consultation
+                                                        </h2>
+
+                                                        <!-- Infos principales en grille -->
+                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div class="space-y-2">
+                                                                <p><span
+                                                                        class="font-semibold">Patient :</span> {{ consult.patient }}
+                                                                </p>
+                                                                <p><span
+                                                                        class="font-semibold">Service :</span> {{ consult.service }}
+                                                                </p>
+                                                                <p><span
+                                                                        class="font-semibold">Motif :</span> {{ consult.motif }}
+                                                                </p>
+                                                                <p><span
+                                                                        class="font-semibold">Poids :</span> {{ consult.poids }}
+                                                                    kg</p>
+                                                                <p><span
+                                                                        class="font-semibold">Taille :</span> {{ consult.taille }}
+                                                                    cm</p>
+                                                                <p><span
+                                                                        class="font-semibold">IMC :</span> {{ consult.IMC }}
+                                                                </p>
+                                                            </div>
+                                                            <div class="space-y-2">
+                                                                <p><span
+                                                                        class="font-semibold">Pouls :</span> {{ consult.pouls }}
+                                                                </p>
+                                                                <p><span
+                                                                        class="font-semibold">TA :</span> {{ consult.TA }}
+                                                                </p>
+                                                                <p><span
+                                                                        class="font-semibold">Diagnostic :</span> {{ consult.diagnostic }}
+                                                                </p>
+                                                                <p><span
+                                                                        class="font-semibold">Constat :</span> {{ consult.constat_consultation }}
+                                                                </p>
+                                                                <p><span
+                                                                        class="font-semibold">Examen demandé :</span> {{ consult.examen_demande }}
+                                                                </p>
+                                                                <p><span
+                                                                        class="font-semibold">Traitement :</span> {{ consult.traitement }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Issue, Résultat, Statut -->
+                                                        <div class="mt-4 space-y-2">
+                                                            <p><span
+                                                                    class="font-semibold">Issue :</span> {{ consult.issue_consultation }}
+                                                            </p>
+                                                            <p><span
+                                                                    class="font-semibold">Résultat examen :</span> {{ consult.resultat_examen }}
+                                                            </p>
+                                                            <p><span
+                                                                    class="font-semibold">Statut :</span> {{ consult.statue }}
+                                                            </p>
+                                                        </div>
 
                                                         <!-- Ordonnances -->
                                                         {% if consult.ordonnances %}
-                                                            <h4 class="font-bold mt-4">Ordonnances</h4>
-                                                            <ul>
-                                                                {% for ord in consult.ordonnances %}
-                                                                    <li>{{ ord.contenu }}</li>
-                                                                {% endfor %}
-                                                            </ul>
+                                                            <div class="mt-6">
+                                                                <h4 class="font-bold text-lg mb-2">Ordonnances</h4>
+                                                                <ul class="list-disc list-inside space-y-1">
+                                                                    {% for ord in consult.ordonnances %}
+                                                                        <li class="bg-gray-100 dark:bg-gray-800 p-2 rounded">{{ ord.contenu }}</li>
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            </div>
                                                         {% endif %}
 
-                                                        <a href="{% url 'Utilisateur:pdf_consultation' consult.id %}"
-                                                           target="_blank"
-                                                           class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                                                            Générer PDF
-                                                        </a>
-
+                                                        <!-- Bouton PDF -->
+                                                        <div class="mt-6 text-center">
+                                                            <a href="{% url 'Utilisateur:pdf_consultation' consult.id %}"
+                                                               target="_blank"
+                                                               class="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                                                                Générer PDF
+                                                            </a>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

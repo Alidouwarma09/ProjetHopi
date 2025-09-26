@@ -1,4 +1,7 @@
 import json
+import os
+import tempfile
+import uuid
 
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -6,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
+from django.db.models import Case, When, IntegerField, Value
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
@@ -15,9 +19,10 @@ from datetime import timedelta, datetime, date
 
 from django.views.decorators.csrf import csrf_exempt
 from six import BytesIO
+from weasyprint import HTML
 
 from Model.models import Patient, RendezVous, Service, Medicament, Hospitalisation, Consultation, Examen, Ordonnance, \
-    ArretTravail, Recu, Prestation
+    ArretTravail, Recu, Prestation, Sortie, Antecedent, Analyse
 from Utilisateur.forms import ConnexionForm
 from xhtml2pdf import pisa
 
@@ -145,8 +150,17 @@ def gestionRdvs(request):
 
 @login_required(login_url='Utilisateur:Connexion')
 def hospitalisation(request):
-    hospitalisations = Hospitalisation.objects.all().select_related('patient')
+    # Annoter chaque hospitalisation : 0 si pas de sortie, 1 si sortie
+    hospitalisations = Hospitalisation.objects.select_related('patient').prefetch_related('sortie').annotate(
+        has_sortie=Case(
+            When(sortie__isnull=True, then=Value(0)),  # pas de sortie
+            default=Value(1),  # sortie existante
+            output_field=IntegerField()
+        )
+    ).order_by('has_sortie', 'id')  # Affiche d'abord les 0 (sans sortie), puis les 1 (avec sortie)
+
     patients = Patient.objects.all()
+
     return render(request, 'hospitalisation/index.html', {
         'hospitalisations': hospitalisations,
         'patients': patients
@@ -154,8 +168,16 @@ def hospitalisation(request):
 
 
 @login_required(login_url='Utilisateur:Connexion')
+def sorties(request):
+    sorties = Sortie.objects.select_related("hospitalisation__patient").all()
+    return render(request, 'sorties/index.html', {
+        'sorties': sorties
+    })
+
+
+@login_required(login_url='Utilisateur:Connexion')
 def consultation(request):
-    consultations = Consultation.objects.all().select_related('patient', 'service')
+    consultations = Consultation.objects.all().select_related('patient', 'service').order_by('-id')
     patients = Patient.objects.all()
     services = Service.objects.all()
 
@@ -198,35 +220,96 @@ def consultation(request):
 
 
 def pdf_consultation(request, consultation_id):
-    consultation = get_object_or_404(Consultation.objects.select_related('patient', 'service'), id=consultation_id)
-
+    consultation = get_object_or_404(
+        Consultation.objects.select_related('patient', 'service'),
+        id=consultation_id
+    )
     ordonnances = consultation.ordonnances.all()
     arrets = consultation.arrets.all()
     recu = consultation.recus.first()
     prestations = recu.bulletins.all() if recu else []
 
-    # Rendre le template HTML en string
-    html_string = render(request, 'pdf_template.html', {
+    # Récupérer les antécédents du patient
+    antecedents = consultation.patient.antecedents.first()  # si plusieurs, prends le premier
+    ant_med = antecedents.ant_med if antecedents else ""
+    ant_chirur = antecedents.ant_chirur if antecedents else ""
+    ant_mal = antecedents.ant_mal if antecedents else ""
+
+    context = {
         'consultation': consultation,
         'ordonnances': ordonnances,
         'arrets': arrets,
         'recu': recu,
         'prestations': prestations,
-    }).content.decode('utf-8')
+        'ant_med': ant_med,
+        'ant_chirur': ant_chirur,
+        'ant_mal': ant_mal,
+    }
 
-    # Générer le PDF
-    result = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html_string.encode("UTF-8")), result)
-    if pdf.err:
-        return HttpResponse("Erreur lors de la génération du PDF", status=500)
+    html_string = render_to_string("pdf_template.html", context)
 
-    # Retourner le PDF comme réponse
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"consultation_{consultation.id}_{timestamp}.pdf"
-    print(filename)
-    response = HttpResponse(result.getvalue(), content_type='application/pdf')
-    response['Content-Disposition'] = f'filename="{filename}"'
+    # Générer le PDF avec WeasyPrint
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    try:
+        HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(temp_file.name)
+        temp_file.seek(0)
+        pdf = temp_file.read()
+    finally:
+        temp_file.close()
+        os.unlink(temp_file.name)
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="Consultation_{uuid.uuid4().hex}.pdf"'
     return response
+
+
+def recu_sortie(request, sortie_id):
+    sortie = get_object_or_404(Sortie.objects.select_related('hospitalisation__patient'), id=sortie_id)
+    context = {"sortie": sortie, "hospitalisation": sortie.hospitalisation, "patient": sortie.hospitalisation.patient}
+
+    html_string = render_to_string("recu_sortie.html", context)
+
+    # Générer PDF avec WeasyPrint
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    try:
+        HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(temp_file.name)
+        temp_file.seek(0)
+        pdf = temp_file.read()
+    finally:
+        temp_file.close()
+        os.unlink(temp_file.name)  # suppression du fichier
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename = f"Recu_{sortie.id}_{uuid.uuid4().hex}.pdf"'
+    return response
+
+
+@login_required(login_url='Utilisateur:Connexion')
+def enregistrer_sortie(request, hosp_id):
+    hospitalisation = get_object_or_404(Hospitalisation, id=hosp_id)
+
+    if request.method == "POST":
+        montant_total = request.POST.get("montant_total", 0)
+        observation = request.POST.get("observation", "")
+
+        with transaction.atomic():
+            # Création du reçu
+            recu = Recu.objects.create(
+                montant=montant_total,
+                total=montant_total,
+                monnaie=0,
+                details=f"Sortie après hospitalisation - {hospitalisation.patient.nom}"
+            )
+
+            # Création de la sortie
+            sortie = Sortie.objects.create(
+                hospitalisation=hospitalisation,
+                montant_total=montant_total,
+                observation=observation,
+                recu=recu
+            )
+
+        return redirect("Utilisateur:hospitalisation")
 
 
 @login_required(login_url='Utilisateur:Connexion')
@@ -251,15 +334,28 @@ def ajouter_examen(request):
                 service_id = request.POST.get("service", "").strip()
                 service = get_object_or_404(Service, id=service_id) if service_id else None
 
+                statut = request.POST.get("statut", "En attente")
+
                 examen = Examen.objects.create(
                     patient=patient,
                     service=service,
                     type_examen=type_examen,
-                    resultat=request.POST.get("resultat", "").strip(),
-                    statut=request.POST.get("statut", "En attente")
+                    statut=statut
                 )
 
-            return JsonResponse({"success": "Examen enregistré avec succès !"})
+                # Ajouter les analyses
+                analyses = request.POST.getlist('analyses')
+                # analyses est un dictionnaire sous forme de {type_analyse, resultat, statut}
+                # En POST depuis le formulaire, ça vient sous la forme analyses[0][type_analyse], etc.
+                for i in range(len(request.POST.getlist('analyses[0][type_analyse]'))):
+                    Analyse.objects.create(
+                        examen=examen,
+                        type_analyse=request.POST.get(f'analyses[{i}][type_analyse]'),
+                        resultat=request.POST.get(f'analyses[{i}][resultat]'),
+                        statut=request.POST.get(f'analyses[{i}][statut]')
+                    )
+
+            return JsonResponse({"success": "Examen et analyses enregistrés avec succès !"})
 
         except Exception as e:
             print("Erreur:", e)
@@ -362,6 +458,16 @@ def ajouter_consultation(request):
             with transaction.atomic():
                 patient = get_object_or_404(Patient, code_patient=request.POST.get('code_patient', '').strip())
                 service = get_object_or_404(Service, id=request.POST.get('service'))
+                ant_med = request.POST.get('ant_med', '').strip()
+                ant_mal = request.POST.get('ant_mal', '').strip()
+                ant_chirur = request.POST.get('ant_chirur', '').strip()
+                if ant_med or ant_mal or ant_chirur:
+                    Antecedent.objects.create(
+                        patient=patient,
+                        ant_med=ant_med,
+                        ant_mal=ant_mal,
+                        ant_chirur=ant_chirur
+                    )
 
                 consultation = Consultation.objects.create(
                     patient=patient,
