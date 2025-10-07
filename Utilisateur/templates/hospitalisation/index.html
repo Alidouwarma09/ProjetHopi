@@ -110,123 +110,137 @@
                 <div id="patients-page" class="page-transition">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-gray-800">Gestion des Hospitalisation</h2>
+                        {% if request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" %}
+                            <div x-data="{ open: false }">
+                                <button @click="open = true"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-plus mr-2"></i> Nouvelle hospitalisation
+                                </button>
 
-                        <div x-data="{ open: false }">
-                            <button @click="open = true"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
-                                <i class="fas fa-plus mr-2"></i> Nouvelle hospitalisation
-                            </button>
+                                <div x-show="open"
+                                     class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                     x-transition>
+                                    <div @click.away="open = false"
+                                         class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
 
-                            <div x-show="open"
-                                 class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
-                                 x-transition>
-                                <div @click.away="open = false"
-                                     class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
-
-                                    <!-- Bouton de fermeture -->
-                                    <button @click="open = false"
-                                            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
-                                        &times;
-                                    </button>
-
-                                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
-                                        🩺 Enregistrement d'une hospitalisation
-                                    </h2>
-
-                                    <form id="enregistrer-form" method="post"
-                                          action="{% url 'Utilisateur:ajouter_hospitalisation' %}" class="space-y-6">
-                                        {% csrf_token %}
-
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <!-- Colonne gauche -->
-                                            <div class="space-y-4">
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Patient</label>
-                                                    <input list="codes-patients" id="code-patient" name="code_patient"
-                                                           placeholder="Entrer le code patient"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
-
-                                                    <datalist id="codes-patients">
-                                                        {% for patient in patients %}
-                                                            <option value="{{ patient.code_patient }}">{{ patient.code_patient }}
-                                                                - {{ patient.nom }}</option>
-                                                        {% endfor %}
-                                                    </datalist>
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Motif</label>
-                                                    <input type="text" name="motif"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Diagnostic</label>
-                                                    <input type="text" name="diagnostic"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Décision</label>
-                                                    <input type="text" name="decision"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Infos
-                                                        supplémentaires</label>
-                                                    <input type="text" name="info_supp"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-
-                                            </div>
-
-                                            <!-- Colonne droite -->
-                                            <div class="space-y-4">
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Traitement</label>
-                                                    <input type="text" name="traitement"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Examen</label>
-                                                    <input type="text" name="examen"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Détails</label>
-                                                    <input type="text" name="details"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut</label>
-                                                    <input type="text" name="statut"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
-                                                    <input type="text" name="type"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div id="error-message" class="mt-4 text-sm"></div>
-
-                                        <div id="loader" class="text-center hidden mt-4">
-                                            <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                                            <p class="text-gray-700 dark:text-gray-300 mt-2">Enregistrement en
-                                                cours...</p>
-                                        </div>
-
-                                        <button id="enregistrer-btn" type="submit"
-                                                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
-                                            Enregistrer
+                                        <!-- Bouton de fermeture -->
+                                        <button @click="open = false"
+                                                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                            &times;
                                         </button>
-                                    </form>
+
+                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                            🩺 Enregistrement d'une hospitalisation
+                                        </h2>
+
+                                        <form id="enregistrer-form" method="post"
+                                              action="{% url 'Utilisateur:ajouter_hospitalisation' %}"
+                                              class="space-y-6">
+                                            {% csrf_token %}
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <!-- Colonne gauche -->
+                                                <div class="space-y-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Patient</label>
+                                                        <input list="codes-patients" id="code-patient"
+                                                               name="code_patient"
+                                                               placeholder="Entrer le code patient"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+
+                                                        <datalist id="codes-patients">
+                                                            {% for patient in patients %}
+                                                                <option value="{{ patient.code_patient }}">{{ patient.code_patient }}
+                                                                    - {{ patient.nom }}</option>
+                                                            {% endfor %}
+                                                        </datalist>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Motif</label>
+                                                        <input type="text" name="motif"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Diagnostic</label>
+                                                        <input type="text" name="diagnostic"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Décision</label>
+                                                        <input type="text" name="decision"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Infos
+                                                            supplémentaires</label>
+                                                        <input type="text" name="info_supp"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+
+                                                </div>
+
+                                                <!-- Colonne droite -->
+                                                <div class="space-y-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Traitement</label>
+                                                        <input type="text" name="traitement"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Examen</label>
+                                                        <input type="text" name="examen"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Détails</label>
+                                                        <input type="text" name="details"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut</label>
+                                                        <input type="text" name="statut"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                                                        <input type="text" name="type"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="error-message" class="mt-4 text-sm"></div>
+
+                                            <div id="loader" class="text-center hidden mt-4">
+                                                <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                                <p class="text-gray-700 dark:text-gray-300 mt-2">Enregistrement en
+                                                    cours...</p>
+                                            </div>
+
+                                            <button id="enregistrer-btn" type="submit"
+                                                    class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                                                Enregistrer
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
+
                             </div>
-
-                        </div>
-
+                        {% endif %}
 
                     </div>
+                    <div class="flex gap-5 mb-4">
+                        <button onclick="filterHospitalisations('tout')"
+                                class="bg-blue-600 text-white px-3 py-1 rounded-lg">Toutes les hospitalisations
+                        </button>
+                        <button onclick="filterHospitalisations('en_cours')"
+                                class="bg-yellow-500 text-white px-3 py-1 rounded-lg">Hospitalisations en cours...
+                        </button>
+                        <button onclick="filterHospitalisations('sortie')"
+                                class="bg-green-600 text-white px-3 py-1 rounded-lg">Hospitalisations terminées
+                        </button>
+                    </div>
+
 
                     <!-- Patient Filters -->
                     <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
@@ -273,7 +287,8 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                 {% for hosp in hospitalisations %}
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class="hover:bg-gray-50"
+                                        data-type="{% if hosp.sortie %}sortie{% else %}en_cours{% endif %}">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ forloop.counter }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hosp.patient.nom }} {{ hosp.patient.prenom }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ hosp.motif }}</td>
@@ -286,14 +301,14 @@
                                                 <!-- Si sortie déjà enregistrée -->
                                                 <a href="{% url 'Utilisateur:sorties' %}"
                                                    class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-lg">
-                                                    Voir sortie
+                                                    Voir sortie<i class="fa-solid fa-chevron-right"></i>
                                                 </a>
                                             {% else %}
                                                 <!-- Sinon afficher le bouton Sortie -->
                                                 <div x-data="{ open: false }">
                                                     <button @click="open = true"
                                                             class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg">
-                                                        Sortie
+                                                        Sortie<i class="fa-solid fa-person-hiking"></i>
                                                     </button>
 
                                                     <!-- Modal -->
@@ -364,6 +379,24 @@
         </div>
     </div>
     </body>
+    <script>
+        function filterHospitalisations(type) {
+            const rows = document.querySelectorAll('#hospitalisationsTable tbody tr');
+
+            rows.forEach(row => {
+                const rowType = row.getAttribute('data-type');
+
+                if (type === 'tout') {
+                    row.style.display = '';
+                } else if (type === rowType) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
     <script>
         document.getElementById('searchInput').addEventListener('keyup', function () {
             let searchValue = this.value.toLowerCase();

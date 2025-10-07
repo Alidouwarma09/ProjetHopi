@@ -160,18 +160,6 @@
                                                 </datalist>
                                             </div>
 
-                                            <!-- Service -->
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
-                                                <select name="service" required
-                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                    <option value="">Choisir un service</option>
-                                                    {% for service in services %}
-                                                        <option value="{{ service.id }}">{{ service.designation }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-
                                             <!-- Motif -->
                                             <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Motif</label>
@@ -248,13 +236,6 @@
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Taille
                                                     (cm)</label>
                                                 <input type="number" step="0.01" name="taille"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <!-- IMC -->
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">IMC</label>
-                                                <input type="number" step="0.01" name="IMC"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
@@ -486,6 +467,206 @@
 
 
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <div x-data="{ openModifier: false }">
+                                                <button
+                                                        @click="openModifier = true"
+                                                        class="text-green-600 hover:text-green-900 mr-3"
+                                                >
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </button>
+
+                                                <!-- Modal de modification -->
+                                                <div
+                                                        x-show="openModifier"
+                                                        x-transition
+                                                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                >
+                                                    <div
+                                                            @click.away="openModifier = false"
+                                                            class="bg-white dark:bg-gray-900 w-full max-w-5xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative"
+                                                    >
+                                                        <!-- Fermer -->
+                                                        <button
+                                                                @click="openModifier = false"
+                                                                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl font-bold"
+                                                        >
+                                                            <i class="fa-solid fa-circle-xmark"></i>
+                                                        </button>
+
+                                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                                            ✏️ Modifier la consultation de {{ consult.patient }}
+                                                        </h2>
+
+                                                        <form method="post"
+                                                              action="{% url 'Utilisateur:modifier_consultation' consult.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="grid grid-cols-5 gap-4">
+                                                                <!-- Patient (readonly) -->
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Patient</label>
+                                                                    <input type="text" name="patient"
+                                                                           value="{{ consult.patient }}"
+                                                                           class="w-full border rounded-lg px-2 py-1 bg-gray-100 dark:bg-gray-800 dark:text-white"
+                                                                           readonly>
+                                                                </div>
+
+                                                                <!-- Motif -->
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Motif</label>
+                                                                    <input type="text" name="motif"
+                                                                           value="{{ consult.motif }}"
+                                                                           class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">
+                                                                </div>
+
+                                                                <!-- Diagnostic -->
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Diagnostic</label>
+                                                                    <input type="text" name="diagnostic"
+                                                                           value="{{ consult.diagnostic }}"
+                                                                           class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">
+                                                                </div>
+
+                                                                <!-- Poids -->
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Poids
+                                                                        (kg)</label>
+                                                                    <input type="number" step="0.1" name="poids"
+                                                                           value="{{ consult.poids|floatformat:'2' }}"
+                                                                           class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">
+                                                                </div>
+
+                                                                <!-- Taille -->
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Taille
+                                                                        (cm)</label>
+                                                                    <input type="number" step="0.1" name="taille"
+                                                                           value="{{ consult.taille|floatformat:'2' }}"
+                                                                           class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">
+                                                                </div>
+
+                                                                <!-- Pouls -->
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pouls</label>
+                                                                    <input type="number" name="pouls"
+                                                                           value="{{ consult.pouls|floatformat:'0' }}"
+                                                                           class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">
+                                                                </div>
+
+                                                                <!-- TA -->
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">TA</label>
+                                                                    <input type="number" name="TA"
+                                                                           value="{{ consult.TA|floatformat:'0' }}"
+                                                                           class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">
+                                                                </div>
+
+                                                                <!-- Statut -->
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut</label>
+                                                                    <input type="text" name="statue"
+                                                                           value="{{ consult.statue }}"
+                                                                           class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">
+                                                                </div>
+
+                                                                <!-- Issue consultation -->
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Issue</label>
+                                                                    <input type="text" name="issue_consultation"
+                                                                           value="{{ consult.issue_consultation }}"
+                                                                           class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">
+                                                                </div>
+
+                                                                <!-- Constat -->
+                                                                <div class="col-span-5">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Constat</label>
+                                                                    <textarea name="constat_consultation" rows="2"
+                                                                              class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">{{ consult.constat_consultation }}</textarea>
+                                                                </div>
+
+                                                                <!-- Examen demandé -->
+                                                                <div class="col-span-5">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Examen
+                                                                        demandé</label>
+                                                                    <textarea name="examen_demande" rows="2"
+                                                                              class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">{{ consult.examen_demande }}</textarea>
+                                                                </div>
+
+                                                                <!-- Traitement -->
+                                                                <div class="col-span-5">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Traitement</label>
+                                                                    <textarea name="traitement" rows="3"
+                                                                              class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">{{ consult.traitement }}</textarea>
+                                                                </div>
+
+                                                                <!-- Résultat examen -->
+                                                                <div class="col-span-5">
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Résultat
+                                                                        examen</label>
+                                                                    <textarea name="resultat_examen" rows="2"
+                                                                              class="w-full border rounded-lg px-2 py-1 dark:bg-gray-800 dark:text-white">{{ consult.resultat_examen }}</textarea>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Bouton -->
+                                                            <button type="submit"
+                                                                    class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                                                💾 Mettre à jour
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div x-data="{ open: false, message: '' }">
+                                                <!-- Bouton Supprimer -->
+                                                <button @click="open = true"
+                                                        class="text-red-600 hover:text-red-900">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+
+                                                <!-- Modal Suppression -->
+                                                <div x-show="open"
+                                                     class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                                     x-transition>
+                                                    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-8 relative border border-gray-200 dark:border-gray-700 text-center">
+
+                                                        <button @click="open = false"
+                                                                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                                            &times;
+                                                        </button>
+
+                                                        <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
+                                                        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                                                            Supprimer cette consultation ?</h2>
+                                                        <p class="text-gray-600 dark:text-gray-300 mb-6">Cette
+                                                            action
+                                                            est irréversible.</p>
+
+                                                        <!-- Message succès/erreur -->
+                                                        <div x-text="message" class="mb-4 text-sm"></div>
+
+                                                        <!-- Formulaire de suppression -->
+                                                        <form @submit.prevent="submitDelete"
+                                                              action="{% url 'Utilisateur:supprimer_consultation' consult.id %}"
+                                                              method="post">
+                                                            {% csrf_token %}
+                                                            <div class="flex justify-center space-x-4">
+                                                                <button type="button" @click="open = false"
+                                                                        class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg">
+                                                                    Annuler
+                                                                </button>
+                                                                <button type="submit"
+                                                                        class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+                                                                    Supprimer
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </td>
+
 
                                     </tr>
                                 {% empty %}
@@ -507,6 +688,33 @@
         </div>
     </div>
     </body>
+    <script>
+
+        function submitDelete(event) {
+            const form = event.target;
+
+            fetch(form.action, {
+                method: 'POST', // Django POST avec CSRF
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Accept': 'application/json'
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        console.log("succes");
+                    }
+                })
+                .catch(err => {
+
+                    console.error(err);
+                });
+        }
+    </script>
+
     <script>
         document.getElementById('searchInput').addEventListener('keyup', function () {
             let searchValue = this.value.toLowerCase();
@@ -546,7 +754,7 @@
 
                 const formData = new FormData(form);
 
-                const delay = new Promise(resolve => setTimeout(resolve, 2000));
+                const delay = new Promise(resolve => setTimeout(resolve, 1500));
 
                 Promise.all([
                     fetch(form.action, {
@@ -573,6 +781,7 @@
     </div>`;
 
                             form.reset();
+                            location.reload();
                             showEnregistrerAutre();
                         }
                     })

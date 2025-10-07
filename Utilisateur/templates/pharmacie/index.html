@@ -115,10 +115,7 @@
                                                 class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
                                             Enregistrer
                                         </button>
-                                        <button id="enregistrer-autre-btn" type="button"
-                                                class="w-full mt-2 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition hidden">
-                                            Enregistrer un autre patient
-                                        </button>
+
                                     </form>
                                 </div>
                             </div>
@@ -395,7 +392,6 @@
             const errorDiv = document.getElementById('error-message');
             const loader = document.getElementById('loader');
             const enregistrerBtn = document.getElementById('enregistrer-btn');
-            const enregistrerAutreBtn = document.getElementById('enregistrer-autre-btn');
 
             const showLoader = () => {
                 loader.style.display = 'block';
@@ -404,10 +400,6 @@
 
             const hideLoader = () => {
                 loader.style.display = 'none';
-            };
-
-            const showEnregistrerAutre = () => {
-                enregistrerAutreBtn.style.display = 'block';
             };
 
             form.addEventListener('submit', function (event) {
@@ -443,7 +435,9 @@
     </div>`;
 
                             form.reset();
-                            showEnregistrerAutre();
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
                         }
                     })
                     .catch(error => {
@@ -451,10 +445,6 @@
                         errorDiv.innerHTML = `<div class="alert alert-danger">Erreur. Veuillez vérifier tous les champs.</div>`;
                         enregistrerBtn.style.display = 'block';
                     });
-            });
-
-            enregistrerAutreBtn.addEventListener('click', function () {
-                window.location.reload(); // Recharge la page
             });
         });
     </script>
@@ -467,10 +457,6 @@
 
         const hideLoader = () => {
             loader.classList.add('hidden');
-        };
-
-        const showEnregistrerAutre = () => {
-            enregistrerAutreBtn.classList.remove('hidden');
         };
 
     </script>

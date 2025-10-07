@@ -4,97 +4,95 @@
 
     <!DOCTYPE html>
     <html lang="fr">
-    <head>
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
 
-        <style>
-            .sidebar {
-                transition: all 0.3s ease;
-            }
+        .sidebar-collapsed {
+            width: 80px;
+        }
 
-            .sidebar-collapsed {
-                width: 80px;
-            }
+        .sidebar-collapsed .sidebar-text {
+            display: none;
+        }
 
-            .sidebar-collapsed .sidebar-text {
-                display: none;
-            }
+        .sidebar-collapsed .logo-text {
+            display: none;
+        }
 
-            .sidebar-collapsed .logo-text {
-                display: none;
-            }
+        .sidebar-collapsed .menu-item {
+            justify-content: center;
+        }
 
-            .sidebar-collapsed .menu-item {
-                justify-content: center;
-            }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
 
-            .card-hover:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
 
-            .card-hover {
-                transition: all 0.3s ease;
-            }
+        .notification-badge {
+            animation: pulse 2s infinite;
+        }
 
-            .notification-badge {
-                animation: pulse 2s infinite;
+        @keyframes pulse {
+            0% {
+                opacity: 1;
             }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
 
-            @keyframes pulse {
-                0% {
-                    opacity: 1;
-                }
-                50% {
-                    opacity: 0.5;
-                }
-                100% {
-                    opacity: 1;
-                }
-            }
+        .patient-status-admitted {
+            border-left: 4px solid #3B82F6;
+        }
 
-            .patient-status-admitted {
-                border-left: 4px solid #3B82F6;
-            }
+        .patient-status-discharged {
+            border-left: 4px solid #10B981;
+        }
 
-            .patient-status-discharged {
-                border-left: 4px solid #10B981;
-            }
+        .patient-status-critical {
+            border-left: 4px solid #EF4444;
+        }
 
-            .patient-status-critical {
-                border-left: 4px solid #EF4444;
-            }
+        .room-occupied {
+            background-color: #FEE2E2;
+        }
 
-            .room-occupied {
-                background-color: #FEE2E2;
-            }
+        .room-available {
+            background-color: #DCFCE7;
+        }
 
-            .room-available {
-                background-color: #DCFCE7;
-            }
+        /* Animation for page transitions */
+        .page-transition {
+            animation: fadeIn 0.3s ease-in-out;
+        }
 
-            /* Animation for page transitions */
-            .page-transition {
-                animation: fadeIn 0.3s ease-in-out;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
             }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            /* Active menu item style */
-            .menu-item.active {
-                background-color: #EFF6FF;
-                color: #3B82F6;
-                font-weight: 500;
-            }
-        </style>
+        /* Active menu item style */
+        .menu-item.active {
+            background-color: #EFF6FF;
+            color: #3B82F6;
+            font-weight: 500;
+        }
+    </style>
     <body class="bg-gray-100 font-sans">
     <div class="flex h-screen overflow-hidden">
         {% include 'personnel_navbar.html' %}
@@ -108,6 +106,7 @@
             <main class="p-6">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gray-800">Gestion des examens médicaux</h2>
+
 
                     <div x-data="{ open: false }">
                         <button @click="open = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg">➕ Nouvel
@@ -161,16 +160,24 @@
                         </div>
                     </div>
                 </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Recherche</label>
+                            <input id="searchInput" type="text" placeholder="Rechercher: Nom &, Code, Numero..."
+                                   class="w-full border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Table -->
                 <div class="bg-white shadow rounded-lg p-4">
-                    <table class="min-w-full">
+                    <table id="examensTable" class="min-w-full">
                         <thead>
                         <tr class="bg-gray-100 text-left">
                             <th class="p-2">Patient</th>
                             <th class="p-2">Type</th>
                             <th class="p-2">Résultat</th>
-                            <th class="p-2">Statut</th>
                             <th class="p-2">Date</th>
                         </tr>
                         </thead>
@@ -180,7 +187,6 @@
                                 <td class="p-2">{{ examen.patient.nom }} {{ examen.patient.prenom }}</td>
                                 <td class="p-2">{{ examen.type_examen }}</td>
                                 <td class="p-2">{{ examen.resultat|default:"-" }}</td>
-                                <td class="p-2">{{ examen.statut }}</td>
                                 <td class="p-2">{{ examen.date_examen|date:"d/m/Y H:i" }}</td>
                             </tr>
                         {% empty %}
@@ -200,7 +206,7 @@
     <script>
         document.getElementById('searchInput').addEventListener('keyup', function () {
             let searchValue = this.value.toLowerCase();
-            let rows = document.querySelectorAll('#hospitalisationsTable tr');
+            let rows = document.querySelectorAll('#examensTable tr');
 
             rows.forEach(function (row) {
                 let text = row.innerText.toLowerCase();
@@ -239,8 +245,18 @@
                             errorDiv.innerHTML = `<div class="text-red-600">${data.error}</div>`;
                             enregistrerBtn.classList.remove('hidden');
                         } else if (data.success) {
-                            errorDiv.innerHTML = `<div class="text-green-600">${data.success}</div>`;
+                            errorDiv.innerHTML = `
+    <div class="flex items-center gap-2 p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-100 border border-green-300 animate-fade-in" role="alert">
+        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11V7a1 1 0 10-2 0v4a1 1 0 001 1h1a1 1 0 100-2h-.586l1.293-1.293a1 1 0 10-1.414-1.414L9 8.586V7a1 1 0 10-2 0v1a1 1 0 001 1h.586l-1.293 1.293a1 1 0 101.414 1.414L11 10.414V11a1 1 0 002 0v-1a1 1 0 00-1-1h-.586l1.293-1.293a1 1 0 10-1.414-1.414L11 8.586z" clip-rule="evenodd"/>
+        </svg>
+        <span>${data.success}</span>
+    </div>`;
+
                             form.reset();
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
                         }
                     })
                     .catch(err => {
@@ -250,7 +266,7 @@
                     });
             });
 
-           
+
         });
 
     </script>

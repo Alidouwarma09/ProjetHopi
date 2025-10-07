@@ -3,7 +3,7 @@ import random
 
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
-from datetime import date
+from datetime import date, timedelta
 
 from django.db.models import UniqueConstraint
 
@@ -87,9 +87,17 @@ class Utilisateur(AbstractBaseUser):
         return f"{self.nom} {self.prenom}"
 
     def est_en_ligne(self):
-        if (timezone.now() - self.last_activity).seconds > 60:
-            return False
-        return True
+        """
+        Retourne un dictionnaire avec l'état en ligne et la dernière connexion.
+        """
+        now = timezone.now()
+        delta = now - self.last_activity
+        en_ligne = delta <= timedelta(minutes=2)  # seuil pour considérer l'utilisateur en ligne
+
+        return {
+            'en_ligne': en_ligne,
+            'derniere_connexion': self.last_activity,  # datetime
+        }
 
 
 class Patient(models.Model):

@@ -2,6 +2,7 @@ import json
 import os
 import tempfile
 import uuid
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -9,7 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
-from django.db.models import Case, When, IntegerField, Value
+from django.db.models import Case, When, IntegerField, Value, FloatField
+from django.db.models.functions import Cast
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
@@ -22,9 +24,9 @@ from six import BytesIO
 from weasyprint import HTML
 
 from Model.models import Patient, RendezVous, Service, Medicament, Hospitalisation, Consultation, Examen, Ordonnance, \
-    ArretTravail, Recu, Prestation, Sortie, Antecedent, Analyse
+    ArretTravail, Recu, Prestation, Sortie, Antecedent, Analyse, Utilisateur, Role
 from Utilisateur.forms import ConnexionForm
-from xhtml2pdf import pisa
+from django.db import models
 
 
 # Create your views here.
@@ -57,12 +59,127 @@ def parametre(request):
 @login_required(login_url='Utilisateur:Connexion')
 def acceuil(request):
     il_y_a_une_semaine = datetime.now() - timedelta(days=7)
-    stats_patient = Patient.objects.filter(created_at__gte=il_y_a_une_semaine).count()
-    patients = Patient.objects.order_by('-id')[:10]
-    for patient in patients:
-        print(patient.id)
 
-    return render(request, 'accueil/index.html', {'patients': patients, 'stats_patient': stats_patient})
+    # Patients récents
+    patients = Patient.objects.order_by('-id')[:10]
+
+    # Nouveaux patients créés cette semaine
+    stats_patient = Patient.objects.filter(created_at__gte=il_y_a_une_semaine).count()
+
+    # Hospitalisations récentes
+    hospitalisations_recentes = Hospitalisation.objects.select_related('patient').order_by('-id')[:10]
+
+    # Médicaments récents
+    medicaments_recents = Medicament.objects.order_by('-id')[:8]
+
+    # Médicaments avec le stock le plus faible (conversion du champ stock en float)
+    medicaments_stock_bas = (
+        Medicament.objects
+            .annotate(stock_num=Cast('stock', FloatField()))
+            .order_by('stock_num')[:5]
+    )
+
+    # Statistiques utilisateurs par service
+    stats_services = (
+        Utilisateur.objects.values('role__designation')
+            .annotate(nombre=models.Count('id'))
+    )
+
+    return render(request, 'accueil/index.html', {
+        'patients': patients,
+        'stats_patient': stats_patient,
+        'hospitalisations_recentes': hospitalisations_recentes,
+        'medicaments_recents': medicaments_recents,
+        'medicaments_stock_bas': medicaments_stock_bas,
+        'stats_services': list(stats_services),
+    })
+
+
+@login_required
+def modifier_consultation(request, id):
+    consultation = get_object_or_404(Consultation, id=id)
+
+    if request.method == "POST":
+        def parse_decimal(value):
+            """Convertit une valeur texte en Decimal ou None si vide/incorrect."""
+            if value and value.strip():
+                try:
+                    return Decimal(value.strip())
+                except InvalidOperation:
+                    return None
+            return None
+
+        # 🔹 Champs texte
+        consultation.motif = request.POST.get("motif") or consultation.motif
+        consultation.diagnostic = request.POST.get("diagnostic") or consultation.diagnostic
+        consultation.statue = request.POST.get("statue") or consultation.statue
+        consultation.issue_consultation = request.POST.get("issue_consultation") or consultation.issue_consultation
+        consultation.constat_consultation = request.POST.get(
+            "constat_consultation") or consultation.constat_consultation
+        consultation.examen_demande = request.POST.get("examen_demande") or consultation.examen_demande
+        consultation.traitement = request.POST.get("traitement") or consultation.traitement
+        consultation.resultat_examen = request.POST.get("resultat_examen") or consultation.resultat_examen
+
+        # 🔹 Champs numériques
+        poids = parse_decimal(request.POST.get("poids"))
+        taille = parse_decimal(request.POST.get("taille"))
+        pouls = parse_decimal(request.POST.get("pouls"))
+        TA = parse_decimal(request.POST.get("TA"))
+
+        if poids is not None:
+            consultation.poids = poids
+        if taille is not None:
+            consultation.taille = taille
+        if pouls is not None:
+            consultation.pouls = pouls
+        if TA is not None:
+            consultation.TA = TA
+
+        # 🔹 Calcul automatique de l’IMC si poids et taille disponibles
+        if consultation.poids is not None and consultation.taille is not None and consultation.taille > 0:
+            consultation.IMC = round(consultation.poids / (consultation.taille * consultation.taille), 2)
+        else:
+            # Si IMC existait déjà, on garde sa valeur pour éviter le NULL
+            consultation.IMC = consultation.IMC or Decimal('0.0')
+
+        consultation.save()
+        messages.success(request, "✅ Consultation mise à jour avec succès.")
+        return redirect('Utilisateur:consultation')
+
+    return redirect('Utilisateur:consultation')
+
+
+@login_required
+def supprimer_consultation(request, id):
+    consultations = get_object_or_404(Consultation, id=id)
+    consultations.delete()
+    messages.success(request, "Consultation supprimée avec succès.")
+    return redirect('Utilisateur:consultation')
+
+
+@login_required(login_url='Utilisateur:Connexion')
+def gestion_utilisateur(request):
+    services = Service.objects.all()
+    roles = Role.objects.all()
+    utilisateurs = Utilisateur.objects.select_related('role__service').all()
+
+    utilisateurs_aadmin = utilisateurs.filter(role__designation="ADMIN").count()
+    utilisateurs_medecin = utilisateurs.filter(role__designation="MEDECIN").count()
+    utilisateurs_total = utilisateurs.count()
+
+    # Calcul des utilisateurs actifs aujourd'hui
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    utilisateurs_actifs_auj = utilisateurs.filter(last_activity__gte=today_start).count()
+
+    return render(request, 'utilisateurs/index.html', {
+        'services': services,
+        'roles': roles,
+        'utilisateurs_total': utilisateurs_total,
+        'utilisateurs_aadmin': utilisateurs_aadmin,
+        'utilisateurs_medecin': utilisateurs_medecin,
+        'utilisateurs_actifs_auj': utilisateurs_actifs_auj,
+        'utilisateurs': utilisateurs
+    })
 
 
 @login_required(login_url='Utilisateur:Connexion')
@@ -84,6 +201,54 @@ def pharmacie(request):
 def gestion_patients(request):
     patients = Patient.objects.all()
     return render(request, 'patient/index.html', {'patients': patients})
+
+
+@csrf_exempt
+def modifier_Rdvs(request, id):
+    if request.method == "POST":
+        rdv = get_object_or_404(RendezVous, id=id)
+        rdv.motif = request.POST.get('motif')
+        service_id = request.POST.get('service')  # maintenant ce sera un ID
+        if service_id:
+            rdv.service_id = int(service_id)
+        rdv.date = request.POST.get('date')
+        rdv.save()
+        return JsonResponse({"success": "Rendez-vous mis à jour"})
+    return JsonResponse({"error": "Méthode non autorisée"})
+
+
+@csrf_exempt
+def supprimer_Rdvs(request, id):
+    if request.method == "POST":
+        rdv = get_object_or_404(RendezVous, id=id)
+        rdv.delete()
+        return JsonResponse({"success": "Rendez-vous supprimé"})
+    return JsonResponse({"error": "Méthode non autorisée"})
+
+
+@csrf_exempt
+def modifier_patient(request):
+    if request.method == "POST":
+        id = request.POST.get("patient_id")
+        patient = get_object_or_404(Patient, id=id)
+        patient.nom = request.POST.get("nom")
+        patient.prenom = request.POST.get("prenom")
+        patient.age = request.POST.get("age")
+        patient.numero = request.POST.get("numero")
+        patient.nationalite = request.POST.get("nationalite")
+        patient.groupe_sanguin = request.POST.get("groupe_sanguin")
+        patient.save()
+        return JsonResponse({"success": "Patient mis à jour avec succès"})
+    return JsonResponse({"error": "Méthode invalide"})
+
+
+@csrf_exempt  # nécessaire si on utilise fetch POST avec CSRF manuel
+def supprimer_patient(request, id):
+    if request.method == "POST":  # on accepte POST maintenant
+        patient = get_object_or_404(Patient, id=id)
+        patient.delete()
+        return JsonResponse({"success": "Patient supprimé avec succès"})
+    return JsonResponse({"error": "Méthode non autorisée"})
 
 
 @login_required(login_url='Utilisateur:Connexion')
@@ -122,9 +287,61 @@ def ajouter_patient(request):
 
 
 @login_required(login_url='Utilisateur:Connexion')
+def ajouter_utilisateur(request):
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                nom = request.POST.get('nom', '').strip()
+                prenom = request.POST.get('prenom', '').strip()
+                username = request.POST.get('username', '').strip()
+                password = request.POST.get('password', '').strip()
+                role_designation = request.POST.get('role', '').strip()
+                service_id = request.POST.get('services', '').strip()
+
+                # Vérification des champs requis
+                if not (nom and prenom and username and password and role_designation and service_id):
+                    return JsonResponse({'error': 'Veuillez remplir tous les champs requis.'}, status=400)
+
+                # Vérifier si le nom d’utilisateur existe déjà
+                if Utilisateur.objects.filter(username=username).exists():
+                    return JsonResponse({'error': 'Ce nom d’utilisateur existe déjà.'}, status=400)
+
+                # Récupérer le service sélectionné
+                service = Service.objects.get(id=service_id)
+
+                # Vérifier si le rôle existe déjà pour ce service, sinon le créer
+                role, created = Role.objects.get_or_create(
+                    designation=role_designation,
+                    service=service
+                )
+
+                # Créer l'utilisateur
+                utilisateur = Utilisateur.objects.create(
+                    nom=nom,
+                    prenom=prenom,
+                    username=username,
+                    role=role,
+                    last_activity=timezone.now(),
+                )
+                utilisateur.set_password(password)
+                utilisateur.save()
+
+            return JsonResponse({'success': 'Utilisateur ajouté avec succès !'})
+
+        except Service.DoesNotExist:
+            return JsonResponse({'error': 'Service invalide.'}, status=400)
+        except Exception as e:
+            print("Erreur:", e)
+            return JsonResponse({'error': 'Erreur lors de l’ajout de l’utilisateur.'}, status=400)
+
+    return JsonResponse({'error': 'Requête invalide.'}, status=400)
+
+
+@login_required(login_url='Utilisateur:Connexion')
 def gestionRdvs(request):
     user_connect = request.user
     user_role = user_connect.role.designation
+    services = Service.objects.all()
     patients = Patient.objects.all()
     if user_role == "CAISSE":
         rendez_vous = RendezVous.objects.all()
@@ -142,6 +359,7 @@ def gestionRdvs(request):
     context = {
         'rendez_vous': rendez_vous,
         'patients': patients,
+        'services': services,
         'patients_json': json.dumps(patients_data, cls=DjangoJSONEncoder)
     }
 
@@ -334,28 +552,14 @@ def ajouter_examen(request):
                 service_id = request.POST.get("service", "").strip()
                 service = get_object_or_404(Service, id=service_id) if service_id else None
 
-                statut = request.POST.get("statut", "En attente")
-
                 examen = Examen.objects.create(
                     patient=patient,
                     service=service,
                     type_examen=type_examen,
-                    statut=statut
+                    resultat=request.POST.get("resultat", "").strip()
                 )
 
-                # Ajouter les analyses
-                analyses = request.POST.getlist('analyses')
-                # analyses est un dictionnaire sous forme de {type_analyse, resultat, statut}
-                # En POST depuis le formulaire, ça vient sous la forme analyses[0][type_analyse], etc.
-                for i in range(len(request.POST.getlist('analyses[0][type_analyse]'))):
-                    Analyse.objects.create(
-                        examen=examen,
-                        type_analyse=request.POST.get(f'analyses[{i}][type_analyse]'),
-                        resultat=request.POST.get(f'analyses[{i}][resultat]'),
-                        statut=request.POST.get(f'analyses[{i}][statut]')
-                    )
-
-            return JsonResponse({"success": "Examen et analyses enregistrés avec succès !"})
+            return JsonResponse({"success": "Examen enregistrés avec succès !"})
 
         except Exception as e:
             print("Erreur:", e)
@@ -451,13 +655,11 @@ def ajouter_hospitalisation(request):
 @login_required(login_url='Utilisateur:Connexion')
 def ajouter_consultation(request):
     patients = Patient.objects.all()
-    services = Service.objects.all()
 
     if request.method == "POST":
         try:
             with transaction.atomic():
                 patient = get_object_or_404(Patient, code_patient=request.POST.get('code_patient', '').strip())
-                service = get_object_or_404(Service, id=request.POST.get('service'))
                 ant_med = request.POST.get('ant_med', '').strip()
                 ant_mal = request.POST.get('ant_mal', '').strip()
                 ant_chirur = request.POST.get('ant_chirur', '').strip()
@@ -469,15 +671,31 @@ def ajouter_consultation(request):
                         ant_chirur=ant_chirur
                     )
 
+                def parse_decimal(value):
+                    if value and value.strip():
+                        try:
+                            return Decimal(value.strip())
+                        except InvalidOperation:
+                            return Decimal('0.0')
+                    return Decimal('0.0')
+
+                poids = parse_decimal(request.POST.get('poids'))
+                taille = parse_decimal(request.POST.get('taille'))
+                pouls = parse_decimal(request.POST.get('pouls'))
+                TA = parse_decimal(request.POST.get('TA'))
+                IMC = Decimal('0.0')
+                if poids > 0 and taille > 0:
+                    IMC = round(poids / (taille * taille), 2)
+
                 consultation = Consultation.objects.create(
                     patient=patient,
-                    service=service,
+                    service=request.user.role.service,
                     motif=request.POST.get('motif', '').strip(),
-                    poids=float(request.POST.get('poids', 0) or 0),
-                    taille=float(request.POST.get('taille', 0) or 0),
-                    IMC=float(request.POST.get('IMC', 0) or 0),
-                    pouls=float(request.POST.get('pouls', 0) or 0),
-                    TA=float(request.POST.get('TA', 0) or 0),
+                    poids=poids,
+                    taille=taille,
+                    IMC=IMC,
+                    pouls=pouls,
+                    TA=TA,
                     diagnostic=request.POST.get('diagnostic', '').strip(),
                     constat_consultation=request.POST.get('constat_consultation', '').strip(),
                     examen_demande=request.POST.get('examen_demande', '').strip(),
@@ -529,7 +747,7 @@ def ajouter_consultation(request):
             return JsonResponse({'error': str(e)})
 
     # GET
-    return render(request, 'consultation/index.html', {'patients': patients, 'services': services})
+    return render(request, 'consultation/index.html', {'patients': patients})
 
 
 @login_required(login_url='Utilisateur:Connexion')

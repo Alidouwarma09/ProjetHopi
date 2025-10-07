@@ -110,131 +110,136 @@
                 <div id="patients-page" class="page-transition">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-gray-800">Gestion des patients</h2>
+                        {% if request.user.role.designation == "CAISSE" or request.user.role.designation == "ADMIN" %}
 
-                        <div x-data="{ open: false }">
-                            <button @click="open = true"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
-                                <i class="fas fa-plus mr-2"></i> Nouveau patient
-                            </button>
+                            <div x-data="{ open: false }">
+                                <button @click="open = true"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-plus mr-2"></i> Nouveau patient
+                                </button>
 
-                            <div x-show="open"
-                                 class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
-                                 x-transition>
-                                <div class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+                                <div x-show="open"
+                                     class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                     x-transition>
+                                    <div class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
 
-                                    <!-- Bouton de fermeture -->
-                                    <button @click="open = false"
-                                            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
-                                        &times;
-                                    </button>
+                                        <!-- Bouton de fermeture -->
+                                        <button @click="open = false"
+                                                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                            &times;
+                                        </button>
 
-                                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">🩺
-                                        Enregistrement du patient</h2>
+                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">🩺
+                                            Enregistrement du patient</h2>
 
-                                    <form id="enregistrer-form" method="post"
-                                          action="{% url 'Utilisateur:ajouter_patient' %}" class="space-y-6">
-                                        {% csrf_token %}
+                                        <form id="enregistrer-form" method="post"
+                                              action="{% url 'Utilisateur:ajouter_patient' %}" class="space-y-6">
+                                            {% csrf_token %}
 
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <!-- Colonne gauche -->
-                                            <div class="space-y-4">
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
-                                                    <input type="text" name="nom" required
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <!-- Colonne gauche -->
+                                                <div class="space-y-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
+                                                        <input type="text" name="nom" required
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prénom</label>
+                                                        <input type="text" name="prenom" required
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profession</label>
+                                                        <input type="text" name="profession"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nationalité</label>
+                                                        <input type="text" name="nationalite"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Âge</label>
+                                                        <input type="number" step="0.01" name="age" required
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prénom</label>
-                                                    <input type="text" name="prenom" required
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profession</label>
-                                                    <input type="text" name="profession"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nationalité</label>
-                                                    <input type="text" name="nationalite"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Âge</label>
-                                                    <input type="number" step="0.01" name="age" required
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+
+                                                <!-- Colonne droite -->
+                                                <div class="space-y-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sexe</label>
+                                                        <select name="sexe" required
+                                                                class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                            <option value="">Choisir</option>
+                                                            <option value="Masculin">Masculin</option>
+                                                            <option value="Féminin">Féminin</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lieu
+                                                            d'habitation</label>
+                                                        <input type="text" name="lieu_habitation"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Téléphone</label>
+                                                        <input type="text" name="numero"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut
+                                                            conjugal</label>
+                                                        <input type="text" name="statut_conjugal"
+                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Groupe
+                                                            sanguin</label>
+                                                        <select name="groupe_sanguin" required
+                                                                class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                            <option value="">Choisir</option>
+                                                            <option value="A+">A+</option>
+                                                            <option value="A-">A-</option>
+                                                            <option value="B+">B+</option>
+                                                            <option value="B-">B-</option>
+                                                            <option value="AB+">AB+</option>
+                                                            <option value="AB-">AB-</option>
+                                                            <option value="O+">O+</option>
+                                                            <option value="O-">O-</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Colonne droite -->
-                                            <div class="space-y-4">
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sexe</label>
-                                                    <select name="sexe" required
-                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                        <option value="">Choisir</option>
-                                                        <option value="Masculin">Masculin</option>
-                                                        <option value="Féminin">Féminin</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lieu
-                                                        d'habitation</label>
-                                                    <input type="text" name="lieu_habitation"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Téléphone</label>
-                                                    <input type="text" name="numero"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Statut
-                                                        conjugal</label>
-                                                    <input type="text" name="statut_conjugal"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Groupe
-                                                        sanguin</label>
-                                                    <select name="groupe_sanguin" required
-                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                        <option value="">Choisir</option>
-                                                        <option value="A+">A+</option>
-                                                        <option value="A-">A-</option>
-                                                        <option value="B+">B+</option>
-                                                        <option value="B-">B-</option>
-                                                        <option value="AB+">AB+</option>
-                                                        <option value="AB-">AB-</option>
-                                                        <option value="O+">O+</option>
-                                                        <option value="O-">O-</option>
-                                                    </select>
-                                                </div>
+                                            <!-- Alertes -->
+                                            <div id="error-message" class="mt-4 text-sm"></div>
+
+                                            <!-- Loader -->
+                                            <div id="loader" class="text-center hidden mt-4">
+                                                <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                                <p class="text-gray-700 dark:text-gray-300 mt-2">Enregistrement en
+                                                    cours...</p>
                                             </div>
-                                        </div>
 
-                                        <!-- Alertes -->
-                                        <div id="error-message" class="mt-4 text-sm"></div>
-
-                                        <!-- Loader -->
-                                        <div id="loader" class="text-center hidden mt-4">
-                                            <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                                            <p class="text-gray-700 dark:text-gray-300 mt-2">Enregistrement en
-                                                cours...</p>
-                                        </div>
-
-                                        <!-- Boutons -->
-                                        <button id="enregistrer-btn" type="submit"
-                                                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
-                                            Enregistrer
-                                        </button>
-                                        <button id="enregistrer-autre-btn" type="button"
-                                                class="w-full mt-2 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition hidden">
-                                            Enregistrer un autre patient
-                                        </button>
-                                    </form>
+                                            <!-- Boutons -->
+                                            <button id="enregistrer-btn" type="submit"
+                                                    class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                                                Enregistrer
+                                            </button>
+                                            <button id="enregistrer-autre-btn" type="button"
+                                                    class="w-full mt-2 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition hidden">
+                                                Enregistrer un autre patient
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+
+
+                        {% endif %}
+
 
                     </div>
 
@@ -323,11 +328,202 @@
                                                 {% endif %}
                                             </span>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <button class="text-red-600 hover:text-red-900"><i
-                                                        class="fas fa-trash-alt"></i>
-                                                </button>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
+                                                {% if request.user.role.designation == "CAISSE" %}
+                                                    <!-- 🟦 MODAL MODIFICATION -->
+                                                    <div x-data="{ open: false }">
+                                                        <!-- Bouton Modifier -->
+                                                        <button
+                                                                @click="open = true"
+                                                                class="text-blue-600 hover:text-blue-900"
+                                                        >
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+
+
+                                                        <!-- Modal Modification -->
+                                                        <div x-show="open"
+                                                             class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                                             x-transition>
+                                                            <div class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+
+                                                                <!-- Bouton de fermeture -->
+                                                                <button @click="open = false"
+                                                                        class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                                                    &times;
+                                                                </button>
+
+                                                                <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                                                    ✏️ Modifier le patient
+                                                                </h2>
+
+                                                                <form id="modifier-form" method="post"
+                                                                      action="{% url 'Utilisateur:modifier_patient' %}"
+                                                                      class="space-y-6">
+                                                                    {% csrf_token %}
+                                                                    <input type="hidden" name="patient_id"
+                                                                           id="edit_patient_id"
+                                                                           value="{{ patient.id }}">
+
+                                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                                        <div class="space-y-4">
+                                                                            <div>
+                                                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
+                                                                                <input value="{{ patient.nom }}"
+                                                                                       type="text"
+                                                                                       name="nom" id="edit_nom"
+                                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2">
+                                                                            </div>
+                                                                            <div>
+                                                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prénom</label>
+                                                                                <input value="{{ patient.prenom }}"
+                                                                                       type="text" name="prenom"
+                                                                                       id="edit_prenom"
+                                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2">
+                                                                            </div>
+                                                                            <div>
+                                                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profession</label>
+                                                                                <input value="{{ patient.profession }}"
+                                                                                       type="text" name="profession"
+                                                                                       id="edit_profession"
+                                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2">
+                                                                            </div>
+                                                                            <div>
+                                                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nationalité</label>
+                                                                                <input value="{{ patient.nationalite }}"
+                                                                                       type="text" name="nationalite"
+                                                                                       id="edit_nationalite"
+                                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2">
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="space-y-4">
+                                                                            <div>
+                                                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Téléphone</label>
+                                                                                <input value="{{ patient.numero }}"
+                                                                                       type="text" name="numero"
+                                                                                       id="edit_numero"
+                                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2">
+                                                                            </div>
+                                                                            <div>
+                                                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Âge</label>
+                                                                                <input value="{{ patient.age }}"
+                                                                                       type="number" name="age"
+                                                                                       id="edit_age"
+                                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2">
+                                                                            </div>
+                                                                            <div>
+                                                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Groupe
+                                                                                    sanguin</label>
+                                                                                <select name="groupe_sanguin"
+                                                                                        id="edit_groupe_sanguin"
+                                                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2">
+                                                                                    <option value="">Choisir</option>
+                                                                                    <option value="A+"
+                                                                                            {% if patient.groupe_sanguin == 'A+' %}selected{% endif %}>
+                                                                                        A+
+                                                                                    </option>
+                                                                                    <option value="A-"
+                                                                                            {% if patient.groupe_sanguin == 'A-' %}selected{% endif %}>
+                                                                                        A-
+                                                                                    </option>
+                                                                                    <option value="B+"
+                                                                                            {% if patient.groupe_sanguin == 'B+' %}selected{% endif %}>
+                                                                                        B+
+                                                                                    </option>
+                                                                                    <option value="B-"
+                                                                                            {% if patient.groupe_sanguin == 'B-' %}selected{% endif %}>
+                                                                                        B-
+                                                                                    </option>
+                                                                                    <option value="AB+"
+                                                                                            {% if patient.groupe_sanguin == 'AB+' %}selected{% endif %}>
+                                                                                        AB+
+                                                                                    </option>
+                                                                                    <option value="AB-"
+                                                                                            {% if patient.groupe_sanguin == 'AB-' %}selected{% endif %}>
+                                                                                        AB-
+                                                                                    </option>
+                                                                                    <option value="O+"
+                                                                                            {% if patient.groupe_sanguin == 'O+' %}selected{% endif %}>
+                                                                                        O+
+                                                                                    </option>
+                                                                                    <option value="O-"
+                                                                                            {% if patient.groupe_sanguin == 'O-' %}selected{% endif %}>
+                                                                                        O-
+                                                                                    </option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div id="edit-message" class="mt-4 text-sm"></div>
+
+                                                                    <button type="submit"
+                                                                            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                                                        Mettre à jour
+                                                                    </button>
+                                                                </form>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- 🟥 MODAL SUPPRESSION -->
+                                                    <div x-data="{ open: false, patientId: {{ patient.id }}, message: '' }">
+                                                        <!-- Bouton Supprimer -->
+                                                        <button @click="open = true"
+                                                                class="text-red-600 hover:text-red-900">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+
+                                                        <!-- Modal Suppression -->
+                                                        <div x-show="open"
+                                                             class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                                             x-transition>
+                                                            <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-8 relative border border-gray-200 dark:border-gray-700 text-center">
+
+                                                                <button @click="open = false"
+                                                                        class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                                                    &times;
+                                                                </button>
+
+                                                                <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
+                                                                <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                                                                    Supprimer ce patient ?</h2>
+                                                                <p class="text-gray-600 dark:text-gray-300 mb-6">Cette
+                                                                    action est irréversible.</p>
+
+
+                                                                <!-- Formulaire de suppression -->
+                                                                <form @submit.prevent="submitDelete"
+                                                                      action="{% url 'Utilisateur:supprimer_patient' patient.id %}"
+                                                                      method="post">
+                                                                    {% csrf_token %}
+                                                                    <div class="flex justify-center space-x-4">
+                                                                        <button type="button" @click="open = false"
+                                                                                class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg">
+                                                                            Annuler
+                                                                        </button>
+                                                                        <button type="submit"
+                                                                                class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+                                                                            Supprimer
+                                                                        </button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <button disabled
+                                                            class="text-red-600 hover:text-red-900">
+                                                        <i class="fa-solid fa-table-cells-column-lock"></i>Acces réfusé
+                                                    </button>
+                                                {% endif %}
+
+
                                             </td>
+
+
                                         </tr>
                                     {% endfor %}
                                 {% else %}
@@ -346,10 +542,68 @@
         </div>
     </div>
     </body>
+
+    <script>
+        function submitDelete(event) {
+            const form = event.target;
+
+            fetch(form.action, {
+                method: 'POST', // On utilise POST pour que Django le reconnaisse
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Accept': 'application/json',
+                },
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+
+                        console.log("succes")
+                        location.reload();
+                    } else {
+                        console.log("erreur")
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+        }
+    </script>
+
+
+    <script>
+
+        // Soumission du formulaire de modification
+        document.getElementById('modifier-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const msg = document.getElementById('edit-message');
+                    if (data.success) {
+                        msg.innerHTML = `<div class='bg-green-100 text-green-800 p-3 rounded-lg'>${data.success}</div>`;
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        msg.innerHTML = `<div class='bg-red-100 text-red-800 p-3 rounded-lg'>${data.error}</div>`;
+                    }
+                });
+        });
+
+    </script>
+
+
     <script>
         document.getElementById('searchInput').addEventListener('keyup', function () {
             let searchValue = this.value.toLowerCase();
-            let rows = document.querySelectorAll('#patientsTable tr');
+            let rows = document.querySelectorAll('#patientsTable tbody tr');
 
             rows.forEach(function (row) {
                 let text = row.innerText.toLowerCase();

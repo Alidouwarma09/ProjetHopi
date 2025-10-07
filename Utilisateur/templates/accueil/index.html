@@ -73,7 +73,7 @@
                                 <a href="{% url 'Utilisateur:sorties' %}">
                                     <p class="text-sm text-gray-500">Genere des recus</p>
                                     <h3 class="text-2xl font-bold text-gray-800 mt-1">Recus</h3>
-                                    <p class="text-xs text-gray-500 mt-2">12 lits disponibles</p>
+                                    <p class="text-xs text-gray-500 mt-2">Génération des récus</p>
                                 </a>
                                 <div class="bg-yellow-100 p-3 rounded-lg">
                                     <i class="fas fa-bed text-yellow-600 text-xl"></i>
@@ -88,7 +88,7 @@
                                 <a href="{% url 'Utilisateur:examens' %}">
                                     <p class="text-sm text-gray-500">Gerer les examens</p>
                                     <h3 class="text-2xl font-bold text-gray-800 mt-1">EXAMENS</h3>
-                                    <p class="text-xs text-gray-500 mt-2">12 lits disponibles</p>
+                                    <p class="text-xs text-gray-500 mt-2">Les examens disponibles</p>
                                 </a>
                                 <div class="bg-yellow-100 p-3 rounded-lg">
                                     <i class="fas fa-bed text-yellow-600 text-xl"></i>
@@ -101,24 +101,76 @@
                 <!-- Charts Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                     <!-- Patients Chart -->
-                    <div class="card-hover bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800">Activité des patients</h2>
-                            <select class="text-sm border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                                <option>7 derniers jours</option>
-                                <option>30 derniers jours</option>
-                                <option>Cette année</option>
-                            </select>
-                        </div>
-                        <canvas id="patientsChart" height="250"></canvas>
-                    </div>
+                    <!-- Hospitalisations récentes -->
+                    {% if request.user.role.designation == "CAISSE" or request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" %}
+                        <div class="card-hover bg-white rounded-xl shadow-sm p-6 lg:col-span-2 mt-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-lg font-semibold text-gray-800">Hospitalisations récentes</h2>
+                            </div>
 
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Patient
+                                        </th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Diagnotic
+                                        </th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Motif
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for hosp in hospitalisations_recentes %}
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-4 py-3">{{ hosp.patient.nom }} {{ hosp.patient.prenom }}</td>
+                                            <td class="px-4 py-3">{{ hosp.diagnotic }}</td>
+                                            <td class="px-4 py-3">{{ hosp.motif }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-center py-4 text-gray-500">
+                                                Aucune hospitalisation récente
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    {% endif %}
                     <!-- Departments Chart -->
-                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Répartition par service</h2>
-                        <canvas id="departmentsChart" height="250"></canvas>
-                    </div>
+
                 </div>
+                {% if request.user.role.designation == "PHARMACIEN" or request.user.role.designation == "ADMIN" %}
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-semibold text-gray-800">Médicaments récents</h2>
+                            <a href="{% url 'Utilisateur:pharmacie' %}"
+                               class="text-sm text-blue-600 hover:underline">Voir tout</a>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {% for med in medicaments_recents %}
+                                <div class="border rounded-lg p-3 hover:shadow-md transition">
+                                    <h3 class="font-semibold text-gray-900">{{ med.designation }}</h3>
+                                    <p class="text-sm text-gray-600">Code : {{ med.code }}</p>
+                                    <p class="text-sm text-gray-600">Prix : {{ med.prix }} FCFA</p>
+                                    <p class="text-sm {% if med.stock|floatformat:0|add:0 < 5 %}text-red-500{% else %}text-green-600{% endif %}">
+                                        Stock : {{ med.stock }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">Expire
+                                        le {{ med.date_expiration|date:"d/m/Y" }}</p>
+                                </div>
+                            {% empty %}
+                                <p class="text-gray-500 text-sm">Aucun médicament enregistré récemment.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
 
                 <!-- Patients and Rooms Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -188,14 +240,72 @@
                     </div>
 
                     <!-- Room Status -->
-                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800">Statut des chambres</h2>
+                    {% if request.user.role.designation == "PHARMACIEN" or request.user.role.designation == "ADMIN" %}
+                        <div class="card-hover bg-white rounded-xl shadow-sm p-6 mt-6">
+                            <h2 class="text-lg font-semibold text-gray-800 mb-4">Top 5 - Stocks de médicaments les plus
+                                faibles</h2>
+                            <canvas id="stockChart" height="250"></canvas>
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
             </main>
         </div>
     </div>
     </body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            const labels = [
+                {% for med in medicaments_stock_bas %}
+                    "{{ med.designation|escapejs }}",
+                {% endfor %}
+            ];
+            const data = [
+                {% for med in medicaments_stock_bas %}
+                    {{ med.stock }},
+                {% endfor %}
+            ];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Stock disponible',
+                        data: data,
+                        borderWidth: 1,
+                        backgroundColor: [
+                            '#f87171', '#fb923c', '#facc15', '#4ade80', '#60a5fa'
+                        ],
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#4b5563'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#4b5563'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: "Médicaments à stock faible",
+                            color: "#111827",
+                            font: {size: 16, weight: 'bold'}
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 {% endblock %}
