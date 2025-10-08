@@ -697,16 +697,13 @@
                 method: 'POST', // Django POST avec CSRF
                 headers: {
                     'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 }
             })
                 .then(res => res.json())
                 .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        console.log("succes");
-                    }
+                    location.reload();
                 })
                 .catch(err => {
 

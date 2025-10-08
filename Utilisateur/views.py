@@ -7,6 +7,7 @@ from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.views import LoginView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
@@ -149,19 +150,142 @@ def modifier_consultation(request, id):
     return redirect('Utilisateur:consultation')
 
 
+@login_required(login_url='Utilisateur:Connexion')
+def modifier_profil(request):
+    user = request.user
+
+    if request.method == "POST":
+        nom = request.POST.get("nom", "").strip()
+        prenom = request.POST.get("prenom", "").strip()
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "").strip()
+
+        if not (nom and prenom and username):
+            messages.error(request, "Nom, prénom et email sont obligatoires.")
+            return redirect('Utilisateur:parametre')
+
+        # Vérifier l'unicité de l'email si modifié
+        if username != user.username and Utilisateur.objects.filter(username=username).exists():
+            messages.error(request, "Cet email est déjà utilisé.")
+            return redirect('Utilisateur:parametre')
+
+        user.nom = nom
+        user.prenom = prenom
+        user.username = username
+
+        if password:
+            user.set_password(password)
+
+        user.save()
+        messages.success(request, "Profil mis à jour avec succès !")
+        return redirect('Utilisateur:parametre')
+
+    return render(request, 'parametre/index.html', {"user": user})
+
+
+@login_required(login_url='Utilisateur:Connexion')
+def modifier_utilisateur(request, id):
+    """
+    Modifie un utilisateur existant.
+    L'URL doit fournir l'id : path('modifier_utilisateur/<int:id>/', ...)
+    """
+    user = get_object_or_404(Utilisateur, id=id)
+
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Méthode non autorisée."}, status=405)
+
+    # Récupération champs
+    nom = request.POST.get("nom", "").strip()
+    prenom = request.POST.get("prenom", "").strip()
+    username = request.POST.get("username", "").strip()
+    password = request.POST.get("password", "").strip()  # facultatif : si vide => on ne change pas
+    role_designation = request.POST.get("role", "").strip()
+    service_id = request.POST.get("services", "").strip()  # ton <select name="services"> renvoie l'id du service
+
+    # validation minimale
+    if not (nom and prenom and username):
+        return JsonResponse({"success": False, "message": "Nom, prénom et mail sont requis."}, status=400)
+
+    # vérifier unicité username (sauf si c'est le même utilisateur)
+    if Utilisateur.objects.exclude(id=user.id).filter(username=username).exists():
+        return JsonResponse({"success": False, "message": "Ce mail/nom d'utilisateur est déjà utilisé."}, status=400)
+
+    # appliquer mises à jour
+    user.nom = nom
+    user.prenom = prenom
+    user.username = username
+
+    if password:
+        user.set_password(password)  # utilisation de set_password pour hasher correctement
+
+    # Traitement service + rôle
+    if service_id:
+        try:
+            service = Service.objects.get(id=int(service_id))
+        except (Service.DoesNotExist, ValueError):
+            return JsonResponse({"success": False, "message": "Service invalide."}, status=400)
+
+        # On essaye de récupérer un rôle existant pour (designation, service)
+        role_obj = None
+        if role_designation:
+            role_obj = Role.objects.filter(designation__iexact=role_designation, service=service).first()
+
+        # Si pas trouvé -> on crée (optionnel, selon ta logique métier)
+        if not role_obj and role_designation:
+            role_obj = Role.objects.create(designation=role_designation, service=service)
+
+        if role_obj:
+            user.role = role_obj
+
+    elif role_designation:
+        # cas où rôle fourni mais pas de service choisi : on recherche un rôle portant cette designation
+        role_obj = Role.objects.filter(designation__iexact=role_designation).first()
+        if role_obj:
+            user.role = role_obj
+        else:
+            # si tu veux empêcher la création sans service, renvoie une erreur :
+            return JsonResponse({"success": False, "message": "Choisir le service associé au rôle."}, status=400)
+
+    user.save()
+
+    # répondre différemment si requête AJAX (fetch)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({"success": True, "message": "Utilisateur modifié avec succès."})
+
+    messages.success(request, "Utilisateur modifié avec succès.")
+    return redirect('Utilisateur:gestion_utilisateur')
+
+
 @login_required
 def supprimer_consultation(request, id):
     consultations = get_object_or_404(Consultation, id=id)
     consultations.delete()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True})
     messages.success(request, "Consultation supprimée avec succès.")
     return redirect('Utilisateur:consultation')
+
+
+@login_required(login_url='Utilisateur:Connexion')
+def supprimer_user(request, id):
+    user = get_object_or_404(Utilisateur, id=id)
+    user.delete()
+
+    # Si la requête vient d'un fetch (asynchrone)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True})
+
+    # Sinon, redirection classique (navigation normale)
+    messages.success(request, "Utilisateur supprimé avec succès.")
+    return redirect('Utilisateur:gestion_utilisateur')
 
 
 @login_required(login_url='Utilisateur:Connexion')
 def gestion_utilisateur(request):
     services = Service.objects.all()
     roles = Role.objects.all()
-    utilisateurs = Utilisateur.objects.select_related('role__service').all()
+    utilisateur = Utilisateur.objects.select_related('role__service').all()
+    utilisateurs = utilisateur.exclude(id=request.user.id).exclude(username="SuperUser")
 
     utilisateurs_aadmin = utilisateurs.filter(role__designation="ADMIN").count()
     utilisateurs_medecin = utilisateurs.filter(role__designation="MEDECIN").count()
@@ -180,6 +304,22 @@ def gestion_utilisateur(request):
         'utilisateurs_actifs_auj': utilisateurs_actifs_auj,
         'utilisateurs': utilisateurs
     })
+
+
+def export_utilisateurs_pdf(request):
+    utilisateurs = Utilisateur.objects.all()  # ou appliquer tes filtres
+
+    html_string = render_to_string('export_utilisateurs.html', {
+        'utilisateurs': utilisateurs,
+        'date_export': datetime.now(),
+    })
+
+    html = HTML(string=html_string)
+    pdf = html.write_pdf()
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Liste_utilisateurs.pdf"'
+    return response
 
 
 @login_required(login_url='Utilisateur:Connexion')

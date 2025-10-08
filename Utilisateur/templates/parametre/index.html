@@ -1,205 +1,158 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <body class="bg-gray-100 font-sans">
-        <div class="flex h-screen overflow-hidden">
-             <div class="flex-1 overflow-auto">
-        <header class="bg-white shadow-sm">
-                <div class="flex items-center justify-between px-6 py-4">
-                    <div class="flex items-center space-x-4">
-                        <h1 class="text-xl font-bold text-gray-800">Paramètres du système</h1>
+    <body class="bg-gray-50 font-sans">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">Gestion du compte</h1>
                     </div>
-                    
-                    <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-4">
                         <div class="relative">
-                            <button class="text-gray-500 focus:outline-none">
+                            <button class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200">
                                 <i class="fas fa-bell text-xl"></i>
-                                <span class="animate-pulse absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
                             </button>
                         </div>
                         <div class="relative">
-                            <button class="text-gray-500 focus:outline-none">
+                            <button class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200">
                                 <i class="fas fa-envelope text-xl"></i>
-                                <span class="animate-pulse absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
+                                <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
                             </button>
+                        </div>
+                        <div class="flex items-center space-x-2 ml-4">
+                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span class="text-blue-600 font-semibold">{{ request.user.prenom|first|upper }}{{ request.user.nom|first|upper }}</span>
+                            </div>
+                            <div class="hidden md:block">
+                                <p class="text-sm font-medium text-gray-900">{{ request.user.prenom }} {{ request.user.nom }}</p>
+                                <p class="text-xs text-gray-500">{{ request.user.role.designation }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </header>
-   <main class="p-6">
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <!-- Settings Navigation -->
-                    <div class="lg:col-span-1">
-                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                            <div class="p-4 border-b border-gray-200">
-                                <h2 class="text-lg font-semibold text-gray-800">Menu des paramètres</h2>
-                            </div>
-                            <div class="divide-y divide-gray-200">
-                                <a href="#" class="block p-4 hover:bg-gray-50 text-blue-600 font-medium border-l-4 border-blue-600">
-                                    <i class="fas fa-cog mr-2"></i> Général
-                                </a>
-                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
-                                    <i class="fas fa-user-shield mr-2"></i> Sécurité
-                                </a>
-                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
-                                    <i class="fas fa-bell mr-2"></i> Notifications
-                                </a>
-                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
-                                    <i class="fas fa-file-invoice mr-2"></i> Facturation
-                                </a>
-                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
-                                    <i class="fas fa-calendar-alt mr-2"></i> Rendez-vous
-                                </a>
-                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
-                                    <i class="fas fa-pills mr-2"></i> Pharmacie
-                                </a>
-                                <a href="#" class="block p-4 hover:bg-gray-50 text-gray-600">
-                                    <i class="fas fa-database mr-2"></i> Sauvegarde
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Settings Content -->
-                    <div class="lg:col-span-3 space-y-6">
-                        <!-- General Settings Card -->
-                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                            <div class="p-4 border-b border-gray-200">
-                                <h2 class="text-lg font-semibold text-gray-800 flex items-center">
-                                    <i class="fas fa-cog mr-2 text-blue-600"></i> Paramètres généraux
-                                </h2>
-                            </div>
-                            <div class="p-6">
-                                <form class="space-y-6">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom de l'établissement</label>
-                                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="Pharmacie MediCare">
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow">
+            <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Sidebar Navigation -->
+
+                        <!-- Profile Content -->
+                        <div class="lg:col-span-10">
+                            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                                <div class="p-6 border-b border-gray-200">
+                                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                        <i class="fas fa-user-circle mr-3 text-blue-600"></i>
+                                        Informations du profil
+                                    </h2>
+                                    <p class="mt-1 text-sm text-gray-500">
+                                        Gérez vos informations personnelles et comment les autres utilisateurs vous
+                                        voient sur la plateforme.
+                                    </p>
+                                </div>
+
+                                <div class="p-6">
+                                    <form method="POST" action="{% url 'Utilisateur:modifier_profil' %}"
+                                          class="space-y-6">
+                                        {% csrf_token %}
+                                        <!-- Avatar Section -->
+                                        <div class="flex items-center space-x-6">
+                                            <div class="h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
+                                                {{ request.user.prenom|first|upper }}{{ request.user.nom|first|upper }}
+                                            </div>
+                                            <div>
+                                                <h3 class="text-lg font-medium text-gray-900">
+                                                    {{ request.user.prenom }} - {{ request.user.nom }}</h3>
+
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Personal Information -->
+                                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                            <div>
+                                                <label for="nom" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                                                <input type="text" id="nom" name="nom"
+                                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                       value="{{ request.user.nom }}">
+                                            </div>
+                                            <div>
+                                                <label for="prenom"
+                                                       class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                                                <input type="text" id="prenom" name="prenom"
+                                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                       value="{{ request.user.prenom }}">
+                                            </div>
+                                            <div>
+                                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Adresse
+                                                    email</label>
+                                                <input type="email" id="email" name="username"
+                                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                       value="{{ request.user.username }}">
+                                            </div>
+                                            <div>
+                                                <label for="role"
+                                                       class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+                                                <input type="text" id="role" name="role" disabled
+                                                       class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                       value="{{ request.user.role.designation }}">
+                                            </div>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Adresse email</label>
-                                            <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="contact@medicare.com">
+                                            <label for="new-password"
+                                                   class="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de
+                                                passe</label>
+                                            <input type="password" id="new-password" name="password"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                   placeholder="••••••••">
                                         </div>
+
+                                        <!-- Professional Information -->
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-                                            <input type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="+33 1 23 45 67 89">
+                                            <h3 class="text-lg font-medium text-gray-900 mb-4">Informations
+                                                professionnelles</h3>
+                                            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+
+                                                <div>
+                                                    <label for="service"
+                                                           class="block text-sm font-medium text-gray-700 mb-1">Service</label>
+                                                    <input type="text" id="service" name="service" disabled
+                                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                           value="{{ request.user.role.service.designation }}">
+                                                </div>
+                                            </div>
+
                                         </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="123 Rue de la Santé, Paris">
-                                        </div>
-                                    </div>
-                                    
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                        <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">Pharmacie et centre médical offrant des services de qualité depuis 2010.</textarea>
-                                    </div>
-                                    
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Logo</label>
-                                        <div class="mt-1 flex items-center">
-                                            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
-                                                <img src="https://via.placeholder.com/48" alt="Logo" class="h-full w-full">
-                                            </span>
-                                            <button type="button" class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-lg shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                Changer
+
+
+                                        <!-- Password Section -->
+
+                                        <!-- Actions -->
+                                        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                                            <button type="button"
+                                                    class="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                                Annuler
+                                            </button>
+                                            <button type="submit"
+                                                    class="px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                                Enregistrer les modifications
                                             </button>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="flex justify-end">
-                                        <button type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3">
-                                            Annuler
-                                        </button>
-                                        <button type="submit" class="bg-blue-600 py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                            Enregistrer
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        
-                        <!-- Business Hours Card -->
-                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                            <div class="p-4 border-b border-gray-200">
-                                <h2 class="text-lg font-semibold text-gray-800 flex items-center">
-                                    <i class="fas fa-clock mr-2 text-blue-600"></i> Heures d'ouverture
-                                </h2>
-                            </div>
-                            <div class="p-6">
-                                <form class="space-y-4">
-                                    <div class="space-y-4">
-                                        <div class="flex items-center justify-between">
-                                            <label class="text-sm font-medium text-gray-700">Lundi</label>
-                                            <div class="flex items-center space-x-2">
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
-                                                <span>à</span>
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <label class="text-sm font-medium text-gray-700">Mardi</label>
-                                            <div class="flex items-center space-x-2">
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
-                                                <span>à</span>
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <label class="text-sm font-medium text-gray-700">Mercredi</label>
-                                            <div class="flex items-center space-x-2">
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
-                                                <span>à</span>
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <label class="text-sm font-medium text-gray-700">Jeudi</label>
-                                            <div class="flex items-center space-x-2">
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
-                                                <span>à</span>
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <label class="text-sm font-medium text-gray-700">Vendredi</label>
-                                            <div class="flex items-center space-x-2">
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="08:00">
-                                                <span>à</span>
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="19:00">
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <label class="text-sm font-medium text-gray-700">Samedi</label>
-                                            <div class="flex items-center space-x-2">
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="09:00">
-                                                <span>à</span>
-                                                <input type="time" class="border border-gray-300 rounded-lg px-3 py-1" value="13:00">
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <label class="text-sm font-medium text-gray-700">Dimanche</label>
-                                            <div class="flex items-center">
-                                                <span class="text-sm text-gray-500">Fermé</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex justify-end">
-                                        <button type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3">
-                                            Annuler
-                                        </button>
-                                        <button type="submit" class="bg-blue-600 py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                            Enregistrer
-                                        </button>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-     </main>
-      </div>
+            </div>
+        </main>
+    </div>
     </body>
-    
 {% endblock %}

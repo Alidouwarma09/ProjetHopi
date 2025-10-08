@@ -148,10 +148,8 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
-                            <i class="fas fa-filter mr-2"></i> Filtres
-                        </button>
-                        <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
+                        <button onclick="genererLiteUsers()"
+                                class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
                             <i class="fas fa-download mr-2"></i> Exporter
                         </button>
                     </div>
@@ -217,14 +215,12 @@
                             <span class="text-sm text-gray-500">Trier par:</span>
                             <select id="roleFilter" class="border ...">
                                 <option value="">Tous les rôles</option>
-                                {% for role in roles %}
-                                    <option value="{{ role.designation }}">{{ role.designation }}</option>
-                                {% endfor %}
-                            </select>
-                            <select id="statutFilter" class="border ...">
-                                <option value="">Tous</option>
-                                <option value="Actif">Actif</option>
-                                <option value="Hors ligne">Hors ligne</option>
+
+                                <option value="CAISSE">Caissier(ière) (Secrétaire)</option>
+                                <option value="PHARMACIEN">Pharmacien</option>
+                                <option value="MEDECIN">Médecin</option>
+                                <option value="TECHNICIEN">Technicien de laboratoire/imagerie médicale</option>
+                                <option value="ADMIN">Administrateur</option>
                             </select>
                         </div>
                     </div>
@@ -299,10 +295,175 @@
 
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button class="text-blue-600 hover:text-blue-900 mr-3"><i
-                                                class="fas fa-edit"></i></button>
-                                        <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i>
-                                        </button>
+
+
+                                        <div x-data="{ open: false, message: '' }">
+                                            <!-- Bouton Supprimer -->
+                                            <button @click="open = true"
+                                                    class="text-red-600 hover:text-red-900">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+
+                                            <!-- Modal Suppression -->
+                                            <div x-show="open"
+                                                 class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                                 x-transition>
+                                                <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-8 relative border border-gray-200 dark:border-gray-700 text-center">
+
+                                                    <button @click="open = false"
+                                                            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                                        &times;
+                                                    </button>
+
+                                                    <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
+                                                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                                                        Supprimer cette consultation ?</h2>
+                                                    <p class="text-gray-600 dark:text-gray-300 mb-6">Cette
+                                                        action
+                                                        est irréversible.</p>
+
+                                                    <!-- Message succès/erreur -->
+                                                    <div x-text="message" class="mb-4 text-sm"></div>
+
+                                                    <!-- Formulaire de suppression -->
+                                                    <form @submit.prevent="submitDelete"
+                                                          action="{% url 'Utilisateur:supprimer_user' user.id %}"
+                                                          method="post">
+                                                        {% csrf_token %}
+                                                        <div class="flex justify-center space-x-4">
+                                                            <button type="button" @click="open = false"
+                                                                    class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg">
+                                                                Annuler
+                                                            </button>
+                                                            <button type="submit"
+                                                                    class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+                                                                Supprimer
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div x-data="{ open: false, message: '' }">
+                                            <!-- Bouton Supprimer -->
+                                            <button @click="open = true"
+                                                    class="text-green-600 hover:text-green-900">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
+                                            <!-- Modal Suppression -->
+                                            <div x-show="open"
+                                                 class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                                 x-transition>
+                                                <div class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+
+                                                    <!-- Bouton de fermeture -->
+                                                    <button @click="open = false"
+                                                            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                                        &times;
+                                                    </button>
+
+                                                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                                        Modification de l'utilisateur</h2>
+
+                                                    <form id="modifier-utilisateur-form" method="post"
+                                                          action="{% url 'Utilisateur:modifier_utilisateur' user.id %}"
+                                                          class="space-y-6">
+                                                        {% csrf_token %}
+
+                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                            <!-- Colonne gauche -->
+                                                            <div class="space-y-4">
+                                                                <div>
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
+                                                                    <input value="{{ user.nom }}" type="text" name="nom"
+                                                                           required
+                                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2"
+                                                                           placeholder="Entrer le nom">
+                                                                </div>
+
+                                                                <div>
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prénom</label>
+                                                                    <input value="{{ user.prenom }}" type="text"
+                                                                           name="prenom" required
+                                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2"
+                                                                           placeholder="Entrer le prenom">
+                                                                </div>
+
+                                                                <div>
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mail</label>
+                                                                    <input value="{{ user.username }}" type="email"
+                                                                           name="username" required
+                                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2"
+                                                                           placeholder="Entrer le mail">
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Colonne droite -->
+                                                            <div class="space-y-4">
+                                                                <div>
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mot
+                                                                        de passe</label>
+                                                                    <input type="password"
+                                                                           name="password"
+                                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2"
+                                                                           placeholder="*******">
+                                                                </div>
+
+                                                                <div>
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
+                                                                    <select name="services"
+                                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-3 py-2">
+                                                                        <option value="">Choisir un service</option>
+                                                                        {% for service in services %}
+                                                                            <option value="{{ service.id }}">{{ service.designation }}</option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
+
+                                                                <div>
+                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Rôle</label>
+                                                                    <select name="role" id="roleSelect"
+                                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2">
+                                                                        <option value="">Choisir un rôle</option>
+                                                                        <option value="CAISSE">Caissier(ière)
+                                                                            (Secrétaire)
+                                                                        </option>
+                                                                        <option value="MEDECIN">Médecin</option>
+                                                                        <option value="TECHNICIEN">Technicien de
+                                                                            laboratoire/imagerie
+                                                                            médicale
+                                                                        </option>
+                                                                        <option value="PHARMACIEN">Pharmacien</option>
+                                                                        <option value="ADMIN">Administrateur</option>
+                                                                    </select>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Messages -->
+                                                        <div id="error-message" class="mt-4 text-sm"></div>
+
+                                                        <!-- Loader -->
+                                                        <div id="loader" class="text-center hidden mt-4">
+                                                            <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                                            <p class="text-gray-700 dark:text-gray-300 mt-2">
+                                                                Enregistrement...</p>
+                                                        </div>
+
+                                                        <!-- Boutons -->
+                                                        <button id="enregistrer-btn" type="submit"
+                                                                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                                                            Enregistrer
+                                                        </button>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+
                                     </td>
                                 </tr>
                             {% empty %}
@@ -318,9 +479,91 @@
                 </div>
             </main>
         </div>
-
+        <div id="overlayLoader"
+             class="hidden fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
+            <div class="w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-white text-lg mt-4">Génération de la liste des utilisateurs...</p>
+        </div>
     </div>
     </body>
+    <script>
+        const form = document.querySelector('#modifier-utilisateur-form');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const fd = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': fd.get('csrfmiddlewaretoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: fd
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    // afficher message + reload ou update UI
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message || 'Erreur');
+                }
+            });
+        });
+
+    </script>
+    <script>
+        function submitDelete(event) {
+            event.preventDefault(); // <— important pour bloquer le submit normal
+            const form = event.target;
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest', // important pour indiquer Ajax
+                    'Accept': 'application/json'
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    location.reload();
+                })
+                .catch(err => console.error(err));
+        }
+    </script>
+
+    <script>
+        function genererLiteUsers() {
+            const overlay = document.getElementById("overlayLoader");
+            overlay.classList.remove("hidden");
+
+            fetch(`/export_utilisateurs_pdf/`, {
+                method: 'GET',
+                headers: {'Accept': 'application/pdf'}
+            })
+                .then(resp => {
+                    if (!resp.ok) throw new Error('Erreur PDF');
+                    return resp.blob();
+                })
+                .then(blob => {
+                    // télécharge le PDF
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Liste_utilisateurs.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(err => {
+                    alert("Erreur lors de la génération de la liste.");
+                    console.error(err);
+                })
+                .finally(() => {
+                    overlay.classList.add("hidden");
+                });
+        }
+    </script>
     <script>
         document.getElementById('searchInput').addEventListener('keyup', function () {
             let searchValue = this.value.toLowerCase();
@@ -338,30 +581,26 @@
 
     <script>
         function filterTable() {
-            let searchValue = document.getElementById('searchInput').value.toLowerCase();
-            let roleValue = document.getElementById('roleFilter').value.toLowerCase();
-            let statutValue = document.getElementById('statutFilter').value.toLowerCase();
+            let searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
+            let roleValue = document.getElementById('roleFilter').value.toLowerCase().trim();
+
             let rows = document.querySelectorAll('#utilisateursTable tbody tr');
 
             rows.forEach(function (row) {
-                let text = row.innerText.toLowerCase();
-                let roleText = row.cells[1].innerText.toLowerCase();
-                let statutText = row.cells[4].innerText.toLowerCase();
+                let rowText = row.innerText.toLowerCase();
+                let roleText = row.cells[1].innerText.toLowerCase().trim();
 
-                if (text.includes(searchValue) &&
-                    (roleValue === "" || roleText === roleValue) &&
-                    (statutValue === "" || statutText.includes(statutValue))) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+                let matchSearch = rowText.includes(searchValue);
+                let matchRole = roleValue === "" || roleText.includes(roleValue);
+
+                row.style.display = (matchSearch && matchRole) ? '' : 'none';
             });
         }
 
         document.getElementById('searchInput').addEventListener('keyup', filterTable);
         document.getElementById('roleFilter').addEventListener('change', filterTable);
-        document.getElementById('statutFilter').addEventListener('change', filterTable);
     </script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

@@ -3,7 +3,8 @@ from .views import Connexion, acceuil, Deconnexion, ajouter_patient, gestion_pat
     parametre, pharmacie, ajouter_medicament, modifier_medicament, hospitalisation, ajouter_hospitalisation, \
     consultation, ajouter_consultation, examens, ajouter_examen, pdf_consultation, enregistrer_sortie, sorties, \
     recu_sortie, modifier_patient, supprimer_patient, supprimer_Rdvs, modifier_Rdvs, modifier_consultation, \
-    supprimer_consultation, gestion_utilisateur, ajouter_utilisateur
+    supprimer_consultation, gestion_utilisateur, ajouter_utilisateur, export_utilisateurs_pdf, supprimer_user, \
+    modifier_utilisateur, modifier_profil
 
 app_name = 'Utilisateur'
 urlpatterns = [
@@ -19,6 +20,7 @@ urlpatterns = [
     path('ajouter_examen/', ajouter_examen, name='ajouter_examen'),
     path('pharmacie/', pharmacie, name='pharmacie'),
     path('gestion_utilisateur/', gestion_utilisateur, name='gestion_utilisateur'),
+    path('export_utilisateurs_pdf/', export_utilisateurs_pdf, name='export_utilisateurs_pdf'),
     path('examens/', examens, name='examens'),
     path('hospitalisation/', hospitalisation, name='hospitalisation'),
     path('sorties/', sorties, name='sorties'),
@@ -35,6 +37,9 @@ urlpatterns = [
     path('modifier_Rdvs/<int:id>/', modifier_Rdvs, name='modifier_Rdvs'),
     path('supprimer_Rdvs/<int:id>/', supprimer_Rdvs, name='supprimer_Rdvs'),
     path('modifier_consultation/<int:id>/', modifier_consultation, name='modifier_consultation'),
-    path('supprimer_consultation/<int:id>/', supprimer_consultation, name='supprimer_consultation')
+    path('supprimer_consultation/<int:id>/', supprimer_consultation, name='supprimer_consultation'),
+    path('supprimer_user/<int:id>/', supprimer_user, name='supprimer_user'),
+    path('modifier_utilisateur/<int:id>/', modifier_utilisateur, name='modifier_utilisateur'),
+    path('modifier_profil/', modifier_profil, name='modifier_profil'),
 
 ]
