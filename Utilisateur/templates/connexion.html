@@ -10,7 +10,7 @@
 
     <style>
         .bg-login {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(99, 102, 241, 0.8) 100%);
+            background: linear-gradient(135deg, rgba(241, 241, 241, 0.8) 0%, rgba(207, 208, 246, 0.8) 100%);
         }
 
         .login-card {
@@ -137,16 +137,15 @@
                     {% csrf_token %}
 
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Non
-                            d'utilisateur
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <i class="fas fa-envelope text-gray-400"></i>
                             </div>
-                            <input id="email" name="username" type="text" autocomplete="email" required
+                            <input id="email" name="username" type="email" autocomplete="email" required
                                    class="input-focus pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition duration-200"
-                                   placeholder="Votre nom d'utilisateur"
+                                   placeholder="Entrer votre mail"
                                    value="{{ form.username.value|default_if_none:'' }}">
                         </div>
                     </div>
@@ -195,7 +194,7 @@
                     </div>
 
                     <div class="mt-6 grid grid-cols-2 gap-3">
-                        
+
                     </div>
                 </div>
             </div>

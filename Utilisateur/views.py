@@ -25,7 +25,7 @@ from six import BytesIO
 from weasyprint import HTML
 
 from Model.models import Patient, RendezVous, Service, Medicament, Hospitalisation, Consultation, Examen, Ordonnance, \
-    ArretTravail, Recu, Prestation, Sortie, Antecedent, Analyse, Utilisateur, Role
+    ArretTravail, Recu, Prestation, Sortie, Antecedent, Utilisateur, Role
 from Utilisateur.forms import ConnexionForm
 from django.db import models
 
@@ -592,7 +592,8 @@ def pdf_consultation(request, consultation_id):
     ant_med = antecedents.ant_med if antecedents else ""
     ant_chirur = antecedents.ant_chirur if antecedents else ""
     ant_mal = antecedents.ant_mal if antecedents else ""
-
+    for arret in arrets:
+        arret.date_fin = arret.date_debut + timedelta(days=arret.nombre_jours)
     context = {
         'consultation': consultation,
         'ordonnances': ordonnances,
@@ -897,8 +898,10 @@ def ajouter_Rdvs(request):
             with transaction.atomic():
                 code_patient = request.POST.get('code_patient', '').strip()
                 patient = get_object_or_404(Patient, code_patient=code_patient)
-
-                service_id = request.POST.get('service', '').strip()
+                if request.user.role.designation == "MEDECIN":
+                    service_id = request.user.role.service.designation
+                else:
+                    service_id = request.POST.get('service', '').strip()
 
                 service = get_object_or_404(Service, designation=service_id)
                 print('service:', service)

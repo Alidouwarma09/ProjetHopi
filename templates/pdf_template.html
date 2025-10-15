@@ -151,7 +151,8 @@
                 <thead>
                 <tr>
                     <th>Nombre de jours</th>
-                    <th>Date début</th>
+                    <th>Date de début</th>
+                    <th>Date de fin</th>
                     <th>Médecin</th>
                 </tr>
                 </thead>
@@ -160,6 +161,7 @@
                     <tr>
                         <td>{{ arret.nombre_jours }}</td>
                         <td>{{ arret.date_debut|date:"d/m/Y" }}</td>
+                        <td>{{ arret.date_fin|date:"d/m/Y" }}</td>
                         <td>{{ arret.nom_med }}</td>
                     </tr>
                 {% endfor %}

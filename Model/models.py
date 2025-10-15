@@ -216,28 +216,6 @@ class Hospitalisation(models.Model):
         return f"Hospitalisation de {self.patient}"
 
 
-# -----------------------
-# ANALYSES & RÉSULTATS
-# -----------------------
-
-class Analyse(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='analyses')
-    type_analyse = models.CharField(max_length=100)
-    date = models.DateTimeField()
-    statue = models.CharField(blank=True, null=True, max_length=250)
-
-    def __str__(self):
-        return f"Analyse {self.type_analyse} de {self.patient}"
-
-
-class ResultatExam(models.Model):
-    analyse = models.OneToOneField(Analyse, on_delete=models.CASCADE, related_name='resultat_exam')
-    resultat = models.TextField()
-
-    def __str__(self):
-        return f"Résultat pour {self.analyse}"
-
-
 class Examen(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="examens")
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="examens", null=True, blank=True)
@@ -256,16 +234,6 @@ class Examen(models.Model):
 # -----------------------
 # ORDONNANCE / ARRET / BULLETIN
 # -----------------------
-
-
-class BulletinExamen(models.Model):
-    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, related_name='bulletins')
-    examen = models.ForeignKey(Examen, on_delete=models.CASCADE, related_name='examen')
-    age = models.CharField(blank=True, null=True, max_length=20)
-    date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Bulletin pour {self.consultation}"
 
 
 class Medicament(models.Model):

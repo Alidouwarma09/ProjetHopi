@@ -126,7 +126,7 @@
 
                                 <!-- Conteneur du modal -->
                                 <div @click.away="open = false"
-                                     class="relative bg-white dark:bg-gray-900 w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-h-[90vh] overflow-y-auto">
+                                     class="relative bg-white dark:bg-gray-900 w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-h-[80vh] overflow-y-auto">
 
                                     <!-- Bouton fermeture -->
                                     <button @click="open = false"
@@ -169,7 +169,7 @@
 
                                             <!-- Diagnostic -->
                                             <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Diagnostic</label>
+                                                <label class="block py-1.5 font-medium text-gray-700 dark:text-gray-300">Diagnostic</label>
                                                 <input type="text" name="diagnostic"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
@@ -235,7 +235,7 @@
                                             <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Taille
                                                     (cm)</label>
-                                                <input type="number" step="0.01" name="taille"
+                                                <input type="number" name="taille"
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
@@ -276,13 +276,44 @@
                                             </div>
 
                                             <!-- Ordonnance -->
-                                            <div class="col-span-4">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ordonnance
-                                                    (si nécessaire)</label>
-                                                <textarea name="contenu_ordonnance" rows="3"
-                                                          class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2"
-                                                          placeholder="Contenu de l'ordonnance"></textarea>
+                                            <!-- ... ton code précédent inchangé -->
+
+                                            <!-- 🔹 Bloc Ordonnance + Arrêt de travail sur la même ligne -->
+                                            <div class="col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 border-t pt-4">
+                                                <!-- 🧾 Ordonnance -->
+                                                <div>
+                                                    <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                                                        <i class="fas fa-prescription-bottle-alt text-blue-500"></i>
+                                                        Ordonnance (si nécessaire)
+                                                    </h3>
+                                                    <textarea name="contenu_ordonnance" rows="4"
+                                                              class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm"
+                                                              placeholder="Contenu de l'ordonnance"></textarea>
+                                                </div>
+
+                                                <!-- 🩺 Arrêt de travail -->
+                                                <div>
+                                                    <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                                                        <i class="fas fa-briefcase-medical text-green-500"></i>
+                                                        Arrêt de travail (si nécessaire)
+                                                    </h3>
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date
+                                                                de début</label>
+                                                            <input type="date" name="date_debut"
+                                                                   class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm">
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre
+                                                                de jours</label>
+                                                            <input type="number" name="nombre_jours" min="1"
+                                                                   class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm">
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
+
                                         </div>
 
                                         <!-- Messages et loader -->
@@ -300,6 +331,7 @@
                                             Enregistrer
                                         </button>
                                     </form>
+
                                 </div>
                             </div>
                         </div>
@@ -456,11 +488,11 @@
                                                         <!-- Bouton PDF -->
                                                         <div class="mt-6 text-center">
                                                             <a href="{% url 'Utilisateur:pdf_consultation' consult.id %}"
-                                                               target="_blank"
                                                                class="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
                                                                 Générer PDF
                                                             </a>
                                                         </div>
+
                                                     </div>
                                                 </div>
                                             </div>

@@ -7,7 +7,7 @@
         <span class="logo-text text-xl font-bold text-gray-800">MediCare</span>
     </div>
 
-    <!-- Menu -->
+    <!-- Menu principal -->
     <div class="flex-1 overflow-y-auto py-4">
         <div class="px-4 space-y-1">
             <!-- Tableau de bord -->
@@ -27,7 +27,6 @@
             </a>
 
             {% if request.user.role.designation == 'MEDECIN' or request.user.role.designation == 'CAISSE' %}
-                <!-- Rendez-vous -->
                 <a href="{% url 'Utilisateur:gestionRdvs' %}"
                    class="menu-item flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors duration-200
                    {% if request.resolver_match.url_name == 'gestionRdvs' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
@@ -37,7 +36,6 @@
             {% endif %}
 
             {% if request.user.role.designation == 'PHARMACIEN' or request.user.role.designation == 'ADMIN' %}
-                <!-- Pharmacie -->
                 <a href="{% url 'Utilisateur:pharmacie' %}"
                    class="menu-item flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors duration-200
                    {% if request.resolver_match.url_name == 'pharmacie' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
@@ -47,7 +45,6 @@
             {% endif %}
 
             {% if request.user.role.designation == 'MEDECIN' or request.user.role.designation == 'ADMIN' or request.user.role.designation == 'CAISSE' %}
-                <!-- Hospitalisation -->
                 <a href="{% url 'Utilisateur:hospitalisation' %}"
                    class="menu-item flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors duration-200
                    {% if request.resolver_match.url_name == 'hospitalisation' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
@@ -57,7 +54,6 @@
             {% endif %}
 
             {% if request.user.role.designation == 'ADMIN' or request.user.role.designation == 'CAISSE' %}
-                <!-- Reçus et Facturation -->
                 <a href="{% url 'Utilisateur:sorties' %}"
                    class="menu-item flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors duration-200
                    {% if request.resolver_match.url_name == 'sorties' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
@@ -67,7 +63,6 @@
             {% endif %}
 
             {% if request.user.role.designation == 'MEDECIN' or request.user.role.designation == 'ADMIN' %}
-                <!-- Consultation -->
                 <a href="{% url 'Utilisateur:consultation' %}"
                    class="menu-item flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors duration-200
                    {% if request.resolver_match.url_name == 'consultation' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
@@ -77,7 +72,6 @@
             {% endif %}
 
             {% if request.user.role.designation == 'TECHNICIEN' or request.user.role.designation == 'ADMIN' %}
-                <!-- Examens -->
                 <a href="{% url 'Utilisateur:examens' %}"
                    class="menu-item flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors duration-200
                    {% if request.resolver_match.url_name == 'examens' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
@@ -87,41 +81,38 @@
             {% endif %}
         </div>
 
-        <!-- Administration -->
-
-        <div class="px-4 mt-8">
-            <h3 class="text-xs uppercase font-semibold text-gray-400 px-3 mb-2">Administration</h3>
-            {% if request.user.role.designation == 'ADMIN' %}
-                <a href="{% url 'Utilisateur:gestion_utilisateur' %}"
-                   class="menu-item flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors duration-200
-                   {% if request.resolver_match.url_name == 'gestion_utilisateur' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
-                    <i class="fas fa-users-cog text-lg"></i>
-                    <span class="font-medium">Utilisateurs</span>
-                </a>
-            {% endif %}
-
-            <a href="{% url 'Utilisateur:parametre' %}"
-               class="menu-item flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors duration-200
-               {% if request.resolver_match.url_name == 'parametre' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
-                <i class="fas fa-cog text-lg"></i>
-                <span class="font-medium">Paramètres</span>
-            </a>
-
-
-        </div>
+ 
     </div>
 
-    <!-- Footer / Déconnexion -->
-    <div class="p-4 border-t bg-gray-50">
-        <div class="flex items-center space-x-3">
-            <div class="bg-blue-100 text-blue-700 p-2 rounded-full">
-                <i class="fas fa-user-nurse text-lg"></i>
+    <!-- Section Paramètres + Déconnexion -->
+    <div class="p-4 border-t bg-gray-50 space-y-2">
+        <h3 class="text-xs uppercase font-semibold text-gray-400 px-3 mb-2">GESTION DU COMPTE</h3>
+        {% if request.user.role.designation == 'ADMIN' %}
+            <a href="{% url 'Utilisateur:gestion_utilisateur' %}"
+               class="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all duration-200">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-users-cog text-lg"></i>
+                    <span>Utilisateurs</span>
+                </div>
+                <i class="fas fa-chevron-right text-xs text-gray-400"></i>
+            </a>
+        {% endif %}
+        <a href="{% url 'Utilisateur:parametre' %}"
+           class="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all duration-200">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-cog text-blue-600"></i>
+                <span>Paramètres</span>
             </div>
-            <div>
-                <a href="{% url 'Utilisateur:Deconnexion' %}" class="font-medium text-red-600 hover:underline">Se
-                    déconnecter</a>
-                <p class="text-xs text-gray-500">{{ request.user.role.designation }}</p>
+            <i class="fas fa-chevron-right text-xs text-gray-400"></i>
+        </a>
+
+        <a href="{% url 'Utilisateur:Deconnexion' %}"
+           class="flex items-center justify-between px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-all duration-200">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Se déconnecter</span>
             </div>
-        </div>
+            <i class="fas fa-chevron-right text-xs text-red-400"></i>
+        </a>
     </div>
 </div>

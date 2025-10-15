@@ -19,11 +19,11 @@
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-gray-800">Gestion des
                             rendez-vous {{ request.user.service.designation }}</h2>
-                        {% if request.user.role.designation == "CAISSE" or request.user.role.designation == "ADMIN" %}
+                        {% if request.user.role.designation == "CAISSE" or request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" %}
                             <div x-data="{ open: false }">
                                 <button @click="open = true"
                                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
-                                    <i class="fas fa-plus mr-2"></i> Nouveau rendez-vous
+                                    <i class="fas fa-plus mr-2"></i> Programmer un rendez-vous
                                 </button>
 
                                 <div x-show="open"
@@ -72,41 +72,44 @@
 
                                                     </textarea>
                                                 </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
-                                                    <select name="service" required
-                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                        <option value="" disabled selected>Choisir un service</option>
-                                                        <option value="Urgences">Urgences</option>
-                                                        <option value="Pédiatrie">Pédiatrie</option>
-                                                        <option value="Gynécologie / Obstétrique">Gynécologie /
-                                                            Obstétrique
-                                                        </option>
-                                                        <option value="Médecine générale">Médecine générale</option>
-                                                        <option value="Chirurgie">Chirurgie</option>
-                                                        <option value="Cardiologie">Cardiologie</option>
-                                                        <option value="Neurologie">Neurologie</option>
-                                                        <option value="Dermatologie">Dermatologie</option>
-                                                        <option value="Ophtalmologie">Ophtalmologie</option>
-                                                        <option value="Orthopédie">Orthopédie</option>
-                                                        <option value="Radiologie / Imagerie">Radiologie / Imagerie
-                                                        </option>
-                                                        <option value="Oncologie">Oncologie</option>
-                                                        <option value="Anesthésie / Réanimation">Anesthésie /
-                                                            Réanimation
-                                                        </option>
-                                                        <option value="Psychiatrie">Psychiatrie</option>
-                                                        <option value="ORL">ORL</option>
-                                                        <option value="Urologie">Urologie</option>
-                                                        <option value="Laboratoire">Laboratoire</option>
-                                                        <option value="Pharmacie">Pharmacie</option>
-                                                        <option value="Stomatologie / Odontologie">Stomatologie /
-                                                            Odontologie
-                                                        </option>
-                                                    </select>
+                                                {% if request.user.role.designation == 'CAISSE' %}
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
+                                                        <select name="service" required
+                                                                class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
+                                                            <option value="" disabled selected>Choisir un service
+                                                            </option>
+                                                            <option value="Urgences">Urgences</option>
+                                                            <option value="Pédiatrie">Pédiatrie</option>
+                                                            <option value="Gynécologie / Obstétrique">Gynécologie /
+                                                                Obstétrique
+                                                            </option>
+                                                            <option value="Médecine générale">Médecine générale</option>
+                                                            <option value="Chirurgie">Chirurgie</option>
+                                                            <option value="Cardiologie">Cardiologie</option>
+                                                            <option value="Neurologie">Neurologie</option>
+                                                            <option value="Dermatologie">Dermatologie</option>
+                                                            <option value="Ophtalmologie">Ophtalmologie</option>
+                                                            <option value="Orthopédie">Orthopédie</option>
+                                                            <option value="Radiologie / Imagerie">Radiologie / Imagerie
+                                                            </option>
+                                                            <option value="Oncologie">Oncologie</option>
+                                                            <option value="Anesthésie / Réanimation">Anesthésie /
+                                                                Réanimation
+                                                            </option>
+                                                            <option value="Psychiatrie">Psychiatrie</option>
+                                                            <option value="ORL">ORL</option>
+                                                            <option value="Urologie">Urologie</option>
+                                                            <option value="Laboratoire">Laboratoire</option>
+                                                            <option value="Pharmacie">Pharmacie</option>
+                                                            <option value="Stomatologie / Odontologie">Stomatologie /
+                                                                Odontologie
+                                                            </option>
+                                                        </select>
 
-                                                </div>
-
+                                                    </div>
+                                                {% else %}
+                                                {% endif %}
                                                 <div>
                                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date
                                                         du Rendez-vous</label>
@@ -135,7 +138,7 @@
                                             </button>
                                             <button id="enregistrer-autre-btn" type="button"
                                                     class="w-full mt-2 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition hidden">
-                                                Enregistrer un autre patient
+                                                Enregistrer un autre Rendez-vous
                                             </button>
                                         </form>
                                     </div>
@@ -288,8 +291,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <!-- 🟥 MODAL SUPPRESSION RDV -->
-                                            {% else %}
                                                 <div x-data="{ open: false, message: '' }">
                                                     <!-- Bouton Supprimer -->
                                                     <button @click="open = true"
@@ -310,7 +311,7 @@
 
                                                             <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
                                                             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                                                                Supprimer ce rendez-vous ?</h2>
+                                                                Annuler ce rendez-vous ?</h2>
                                                             <p class="text-gray-600 dark:text-gray-300 mb-6">Cette
                                                                 action
                                                                 est irréversible.</p>
@@ -330,13 +331,16 @@
                                                                     </button>
                                                                     <button type="submit"
                                                                             class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
-                                                                        Supprimer
+                                                                        Confirmer
                                                                     </button>
                                                                 </div>
                                                             </form>
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                <!-- 🟥 MODAL SUPPRESSION RDV -->
+                                            {% else %}
 
                                                 <button disabled
                                                         class="text-red-600 hover:text-red-900">
@@ -440,7 +444,6 @@
             const errorDiv = document.getElementById('error-message');
             const loader = document.getElementById('loader');
             const enregistrerBtn = document.getElementById('enregistrer-btn');
-            const enregistrerAutreBtn = document.getElementById('enregistrer-autre-btn');
 
             const showLoader = () => {
                 loader.style.display = 'block';
@@ -449,10 +452,6 @@
 
             const hideLoader = () => {
                 loader.style.display = 'none';
-            };
-
-            const showEnregistrerAutre = () => {
-                enregistrerAutreBtn.style.display = 'block';
             };
 
             form.addEventListener('submit', function (event) {
@@ -488,7 +487,9 @@
     </div>`;
 
                             form.reset();
-                            showEnregistrerAutre();
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500)
                         }
                     })
                     .catch(error => {
@@ -496,10 +497,6 @@
                         errorDiv.innerHTML = `<div class="alert alert-danger">Erreur. Veuillez vérifier tous les champs.</div>`;
                         enregistrerBtn.style.display = 'block';
                     });
-            });
-
-            enregistrerAutreBtn.addEventListener('click', function () {
-                window.location.reload(); // Recharge la page
             });
         });
     </script>
@@ -514,9 +511,6 @@
             loader.classList.add('hidden');
         };
 
-        const showEnregistrerAutre = () => {
-            enregistrerAutreBtn.classList.remove('hidden');
-        };
 
     </script>
 
