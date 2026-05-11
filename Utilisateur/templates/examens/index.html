@@ -108,7 +108,19 @@
                     <h2 class="text-2xl font-bold text-gray-800">Gestion des examens médicaux</h2>
 
 
-                    <div x-data="{ open: false }">
+                    <div x-data="{
+                                open: false,
+                                selectedCode: '',
+                                get selectedPatientName() {
+                                    if (!this.selectedCode) return '';
+                                    const option = document.querySelector(`#codes-patients option[value='${this.selectedCode}']`);
+                                    if (option) {
+                                        const parts = option.textContent.split(' - ');
+                                        return parts.length > 1 ? parts[1].trim() : '';
+                                    }
+                                    return '';
+                                }
+                            }">
                         <button @click="open = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg">➕ Nouvel
                             examen
                         </button>
@@ -126,6 +138,7 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Patient</label>
                                         <input list="codes-patients" id="code-patient" name="code_patient"
                                                placeholder="Entrer le code patient"
+                                               x-model="selectedCode"
                                                class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
 
                                         <datalist id="codes-patients">
@@ -134,6 +147,13 @@
                                                     - {{ patient.nom }}</option>
                                             {% endfor %}
                                         </datalist>
+
+                                    <div x-show="selectedPatientName"
+                                         x-transition
+                                         class="mt-2 p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-950/40 dark:border-blue-900/50 dark:text-blue-300 text-sm flex items-center gap-2">
+                                        <i class="fas fa-user-circle text-base"></i>
+                                        <span>Patient sélectionné : <strong x-text="selectedPatientName"></strong></span>
+                                    </div>
                                     </div>
 
                                     <label>Type d'examen</label>
