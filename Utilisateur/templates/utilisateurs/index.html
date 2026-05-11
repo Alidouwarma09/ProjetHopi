@@ -148,7 +148,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button onclick="genererLiteUsers()"
+                        <button onclick="genererListeUsers(event)"
                                 class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
                             <i class="fas fa-download mr-2"></i> Exporter
                         </button>
@@ -531,39 +531,55 @@
         }
     </script>
 
-    <script>
-        function genererLiteUsers() {
-            const overlay = document.getElementById("overlayLoader");
-            overlay.classList.remove("hidden");
+<script>
+    function genererListeUsers(event) {
+        // 1. Bloque toute action native ou propagation qui pourrait doubler la requête
+        event.preventDefault();
 
-            fetch(`/export_utilisateurs_pdf/`, {
-                method: 'GET',
-                headers: {'Accept': 'application/pdf'}
-            })
-                .then(resp => {
-                    if (!resp.ok) throw new Error('Erreur PDF');
-                    return resp.blob();
-                })
-                .then(blob => {
-                    // télécharge le PDF
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `Liste_utilisateurs.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                })
-                .catch(err => {
-                    alert("Erreur lors de la génération de la liste.");
-                    console.error(err);
-                })
-                .finally(() => {
-                    overlay.classList.add("hidden");
-                });
+        const overlay = document.getElementById("overlayLoader");
+        if (overlay) {
+            overlay.classList.remove("hidden"); // Affiche le loading
         }
-    </script>
+
+        // 2. Appel vers ta vue Django
+        fetch(`/export_utilisateurs_pdf/`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/pdf'
+            }
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Erreur lors de la génération du PDF');
+            }
+            return resp.blob(); // Récupère le flux binaire du PDF
+        })
+        .then(blob => {
+            // 3. Déclenche le téléchargement unique du fichier dans le navigateur
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+
+            // Formatage du nom de fichier
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = `Liste_utilisateurs_${date}.pdf`;
+
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+            alert("Une erreur est survenue lors de la génération de la liste.");
+            console.error(err);
+        })
+        .finally(() => {
+            if (overlay) {
+                overlay.classList.add("hidden"); // Cache le loading une fois terminé
+            }
+        });
+    }
+</script>
     <script>
         document.getElementById('searchInput').addEventListener('keyup', function () {
             let searchValue = this.value.toLowerCase();

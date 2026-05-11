@@ -307,18 +307,20 @@ def gestion_utilisateur(request):
 
 
 def export_utilisateurs_pdf(request):
-    utilisateurs = Utilisateur.objects.all()  # ou appliquer tes filtres
+    utilisateurs = Utilisateur.objects.all()
 
+    # Génération du template HTML
     html_string = render_to_string('export_utilisateurs.html', {
         'utilisateurs': utilisateurs,
-        'date_export': datetime.now(),
+        'date_export': timezone.now(),
     })
 
+    # Rendu PDF via WeasyPrint
     html = HTML(string=html_string)
     pdf = html.write_pdf()
 
+    # On renvoie simplement le PDF sous forme de flux binaire
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="Liste_utilisateurs.pdf"'
     return response
 
 

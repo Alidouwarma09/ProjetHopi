@@ -102,8 +102,7 @@
             <th>Nom & Prénom</th>
             <th>Username</th>
             <th>Rôle</th>
-            <th>Dernière connexion</th>
-            <th>Statut</th>
+            <th>Service</th>
         </tr>
         </thead>
         <tbody>
@@ -113,8 +112,7 @@
                 <td>{{ user.nom }} {{ user.prenom }}</td>
                 <td>{{ user.username }}</td>
                 <td>{{ user.role.designation }}</td>
-                <td>{{ user.last_activity|date:"d/m/Y H:i" }}</td>
-                <td>{% if user.est_en_ligne.en_ligne %}Actif{% else %}Hors ligne{% endif %}</td>
+                <td>{{ user.role.service }}</td>
             </tr>
         {% endfor %}
         </tbody>

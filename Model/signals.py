@@ -13,7 +13,7 @@ def create_default_admin(sender, **kwargs):
 
         Utilisateur.objects.create_user(
             username='SuperUser',
-            password='09102079Darius',
+            password='12345678',
             nom='SuperUser',
             prenom='Super',
             role=role,

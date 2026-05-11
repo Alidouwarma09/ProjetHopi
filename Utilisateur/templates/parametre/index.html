@@ -17,18 +17,7 @@
                         <h1 class="text-2xl font-bold text-gray-900">Gestion du compte</h1>
                     </div>
                     <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <button class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200">
-                                <i class="fas fa-bell text-xl"></i>
-                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-                            </button>
-                        </div>
-                        <div class="relative">
-                            <button class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200">
-                                <i class="fas fa-envelope text-xl"></i>
-                                <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
-                            </button>
-                        </div>
+
                         <div class="flex items-center space-x-2 ml-4">
                             <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                                 <span class="text-blue-600 font-semibold">{{ request.user.prenom|first|upper }}{{ request.user.nom|first|upper }}</span>
@@ -97,8 +86,7 @@
                                                        value="{{ request.user.prenom }}">
                                             </div>
                                             <div>
-                                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Adresse
-                                                    email</label>
+                                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Identifiant</label>
                                                 <input type="email" id="email" name="username"
                                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                                                        value="{{ request.user.username }}">
@@ -142,10 +130,10 @@
 
                                         <!-- Actions -->
                                         <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                                            <button type="button"
+                                            <a href="{% url 'Utilisateur:acceuil' %}" type="button"
                                                     class="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                                                 Annuler
-                                            </button>
+                                            </a>
                                             <button type="submit"
                                                     class="px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                                                 Enregistrer les modifications
