@@ -11,7 +11,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.views import LoginView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
-from django.db.models import Case, When, IntegerField, Value, FloatField
+from django.db.models import Case, When, IntegerField, Value, FloatField, BooleanField
 from django.db.models.functions import Cast
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -271,11 +271,9 @@ def supprimer_user(request, id):
     user = get_object_or_404(Utilisateur, id=id)
     user.delete()
 
-    # Si la requête vient d'un fetch (asynchrone)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': True})
 
-    # Sinon, redirection classique (navigation normale)
     messages.success(request, "Utilisateur supprimé avec succès.")
     return redirect('Utilisateur:gestion_utilisateur')
 
@@ -291,7 +289,6 @@ def gestion_utilisateur(request):
     utilisateurs_medecin = utilisateurs.filter(role__designation="MEDECIN").count()
     utilisateurs_total = utilisateurs.count()
 
-    # Calcul des utilisateurs actifs aujourd'hui
     today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
     utilisateurs_actifs_auj = utilisateurs.filter(last_activity__gte=today_start).count()
 
@@ -309,17 +306,14 @@ def gestion_utilisateur(request):
 def export_utilisateurs_pdf(request):
     utilisateurs = Utilisateur.objects.all()
 
-    # Génération du template HTML
     html_string = render_to_string('export_utilisateurs.html', {
         'utilisateurs': utilisateurs,
         'date_export': timezone.now(),
     })
 
-    # Rendu PDF via WeasyPrint
     html = HTML(string=html_string)
     pdf = html.write_pdf()
 
-    # On renvoie simplement le PDF sous forme de flux binaire
     response = HttpResponse(pdf, content_type='application/pdf')
     return response
 
@@ -485,21 +479,39 @@ def gestionRdvs(request):
     user_role = user_connect.role.designation
     services = Service.objects.all()
     patients = Patient.objects.all()
-    if user_role == "CAISSE":
-        rendez_vous = RendezVous.objects.all()
 
+    # Date et heure actuelles
+    maintenant = timezone.now()
+
+    # 1. Récupération initiale des rendez-vous selon le rôle
+    if user_role == "CAISSE":
+        queryset = RendezVous.objects.all()
     elif user_role == "MEDECIN":
         service_medecin = user_connect.role.service
-        rendez_vous = RendezVous.objects.filter(service=service_medecin)
+        queryset = RendezVous.objects.filter(service=service_medecin)
     elif user_role == "ADMIN":
-        rendez_vous = RendezVous.objects.all()
-
+        queryset = RendezVous.objects.all()
     else:
-        rendez_vous = RendezVous.objects.none()
+        queryset = RendezVous.objects.none()
+
+    # 2. Logique de tri complexe en SQL (Les à-venir en haut, les passés en bas)
+    # On ajoute un champ temporaire 'est_depasse' (True si la date du rdv < maintenant)
+    rendez_vous = queryset.annotate(
+        est_depasse=Case(
+            When(date__lt=maintenant, then=Value(True)),
+            default=Value(False),
+            output_field=BooleanField(),
+        )
+    ).order_by(
+        'est_depasse',  # False (à venir) apparaîtra en premier, True (passés) apparaîtra en bas
+        'date'  # Les rendez-vous à venir seront triés du plus proche au plus lointain
+    )
 
     patients_data = list(patients.values('code_patient', 'nom'))
+
     context = {
         'rendez_vous': rendez_vous,
+        'rdv_maintenant': maintenant,
         'patients': patients,
         'services': services,
         'patients_json': json.dumps(patients_data, cls=DjangoJSONEncoder)

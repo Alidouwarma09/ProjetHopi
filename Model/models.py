@@ -153,6 +153,13 @@ class RendezVous(models.Model):
     def __str__(self):
         return f"RDV de {self.patient} le {self.date}"
 
+    @property
+    def est_passe(self):
+
+        if self.date:
+            return self.date < timezone.now()
+        return False
+
 
 # -----------------------
 # CONSULTATIONS
