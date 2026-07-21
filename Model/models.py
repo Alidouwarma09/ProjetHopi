@@ -286,3 +286,18 @@ class Sortie(models.Model):
 
     def __str__(self):
         return f"Sortie de {self.hospitalisation.patient.nom} {self.hospitalisation.patient.prenom} - {self.date_sortie}"
+
+    @property
+    def montant_total_formate(self):
+        """Formate le montant total avec des espaces comme séparateurs de milliers (ex: 100 000.00)."""
+        # Conversion du décimal en entier si pas de décimales, ou formatage standard
+        montant_int = int(self.montant_total)
+        # Utilisation du formatage avec espace pour les milliers
+        formatted_int = f"{montant_int:,}".replace(",", " ")
+
+        # Récupération de la partie décimale
+        decimaux = f"{self.montant_total:.2f}".split(".")[1]
+
+        if decimaux == "00":
+            return f"{formatted_int} FCFA"
+        return f"{formatted_int},{decimaux} FCFA"
