@@ -94,6 +94,174 @@
                 color: #3B82F6;
                 font-weight: 500;
             }
+
+            /* Styles pour la carte patient */
+            .patient-card-modal {
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                max-width: 420px;
+                width: 100%;
+                padding: 30px;
+                position: relative;
+            }
+
+            .patient-card-modal .card-header {
+                text-align: center;
+                border-bottom: 2px solid #3B82F6;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+            }
+
+            .patient-card-modal .card-header h3 {
+                font-size: 20px;
+                font-weight: 700;
+                color: #1e293b;
+                letter-spacing: 1px;
+            }
+
+            .patient-card-modal .card-header .hospital-name {
+                font-size: 12px;
+                color: #64748b;
+                font-weight: 500;
+                letter-spacing: 2px;
+            }
+
+            .patient-card-modal .card-body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .patient-card-modal .code-patient {
+                background: #0f172a;
+                color: white;
+                font-size: 28px;
+                font-weight: 800;
+                padding: 12px 24px;
+                border-radius: 10px;
+                letter-spacing: 4px;
+                margin-bottom: 20px;
+                font-family: 'Courier New', monospace;
+            }
+
+            .patient-card-modal .patient-info {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+
+            .patient-card-modal .patient-info td {
+                padding: 6px 0;
+                font-size: 14px;
+                border-bottom: 1px dashed #e2e8f0;
+            }
+
+            .patient-card-modal .patient-info .label {
+                color: #64748b;
+                font-weight: 500;
+                width: 40%;
+            }
+
+            .patient-card-modal .patient-info .value {
+                color: #1e293b;
+                font-weight: 600;
+            }
+
+            .patient-card-modal .card-footer {
+                text-align: center;
+                font-size: 10px;
+                color: #94a3b8;
+                border-top: 2px solid #3B82F6;
+                padding-top: 15px;
+                margin-top: 10px;
+            }
+
+            .patient-card-modal .card-footer .barcode {
+                font-family: 'Courier New', monospace;
+                font-size: 18px;
+                letter-spacing: 3px;
+                color: #0f172a;
+            }
+
+            .patient-card-modal .print-btn {
+                background: #3B82F6;
+                color: white;
+                border: none;
+                padding: 12px 30px;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-top: 15px;
+                width: 100%;
+                font-size: 16px;
+            }
+
+            .patient-card-modal .print-btn:hover {
+                background: #2563eb;
+                transform: scale(1.02);
+            }
+
+            .patient-card-modal .close-btn {
+                position: absolute;
+                top: 12px;
+                right: 16px;
+                background: none;
+                border: none;
+                font-size: 22px;
+                color: #94a3b8;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+
+            .patient-card-modal .close-btn:hover {
+                color: #ef4444;
+            }
+
+            /* Animation d'impression - cacher les éléments d'impression */
+            @media print {
+                .no-print {
+                    display: none !important;
+                }
+                .patient-card-modal {
+                    box-shadow: none !important;
+                    padding: 20px !important;
+                }
+                .patient-card-modal .print-btn {
+                    display: none !important;
+                }
+                .patient-card-modal .close-btn {
+                    display: none !important;
+                }
+                body * {
+                    visibility: hidden;
+                }
+                .print-content, .print-content * {
+                    visibility: visible;
+                }
+                .print-content {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                }
+            }
+
+            /* Carte patient dans le tableau - cliquable */
+            .patient-clickable {
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .patient-clickable:hover {
+                background-color: #f1f5f9;
+            }
+
+            /* Overlay pour la modale */
+            .modal-overlay {
+                background: rgba(15, 23, 42, 0.7);
+                backdrop-filter: blur(4px);
+            }
         </style>
     <body class="bg-gray-100 font-sans">
     <div class="flex h-screen overflow-hidden">
@@ -258,7 +426,7 @@
                         <div class="grid grid-cols-1 md:grid-cols gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Recherche</label>
-                                <input id="searchInput" type="text" placeholder="Rechercher: Nom &, Code, Numero..."
+                                <input id="searchInput" type="text" placeholder="Rechercher: Nom, Code, Numero..."
                                        class="w-full border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             </div>
                         </div>
@@ -303,15 +471,13 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                 {% if patients %}
                                     {% for patient in patients %}
-                                        <tr class="hover:bg-gray-50">
+                                        <tr class="hover:bg-gray-50 patient-clickable" data-patient-id="{{ patient.id }}" onclick="openPatientCard('{{ patient.id }}')">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ forloop.counter }}</td>
 
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
                                                     <div class="flex-shrink-0 h-10 w-10">
-
-                                                        <i
-                                                                class="h-1 w-20 rounded-full fas fa-user-tie"></i>
+                                                        <i class="h-1 w-20 rounded-full fas fa-user-tie"></i>
                                                     </div>
                                                     <div class="ml-4">
                                                         <div class="text-sm font-medium text-gray-900">{{ patient.nom }}</div>
@@ -321,8 +487,6 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">{{ patient.code_patient }}</span>
-
-
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.age }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.sexe }}</td>
@@ -341,7 +505,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
                                                 {% if request.user.role.designation == "CAISSE" %}
                                                     <!-- 🟦 MODAL MODIFICATION -->
-                                                    <div x-data="{ open: false }">
+                                                    <div x-data="{ open: false }" @click.stop>
                                                         <!-- Bouton Modifier -->
                                                         <button
                                                                 @click="open = true"
@@ -367,7 +531,7 @@
                                                                     ✏️ Modifier le patient
                                                                 </h2>
 
-                                                                <form id="modifier-form" method="post"
+                                                                <form id="modifier-form-{{ patient.id }}" method="post"
                                                                       action="{% url 'Utilisateur:modifier_patient' %}"
                                                                       class="space-y-6">
                                                                     {% csrf_token %}
@@ -466,7 +630,7 @@
                                                                         </div>
                                                                     </div>
 
-                                                                    <div id="edit-message" class="mt-4 text-sm"></div>
+                                                                    <div id="edit-message-{{ patient.id }}" class="mt-4 text-sm"></div>
 
                                                                     <button type="submit"
                                                                             class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
@@ -479,7 +643,7 @@
                                                     </div>
 
                                                     <!-- 🟥 MODAL SUPPRESSION -->
-                                                    <div x-data="{ open: false, patientId: {{ patient.id }}, message: '' }">
+                                                    <div x-data="{ open: false, patientId: {{ patient.id }}, message: '' }" @click.stop>
                                                         <!-- Bouton Supprimer -->
                                                         <button @click="open = true"
                                                                 class="text-red-600 hover:text-red-900">
@@ -537,10 +701,9 @@
                                         </tr>
                                     {% endfor %}
                                 {% else %}
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Aucun patient
-                                        disponible
-                                    </td>
-
+                                    <tr>
+                                        <td colspan="9" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Aucun patient disponible</td>
+                                    </tr>
                                 {% endif %}
                                 </tbody>
                             </table>
@@ -551,14 +714,70 @@
 
         </div>
     </div>
+
+
+    <div id="patientCardModal" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay hidden" 
+         style="display: none;" onclick="closePatientCard(event)">
+        <div class="patient-card-modal print-content" onclick="event.stopPropagation()">
+            <button class="close-btn no-print" onclick="closePatientCard(event)">&times;</button>
+            
+            <div class="card-header">
+                <div class="hospital-name">MEDICARE HÔPITAL</div>
+                <h3>CARTE D'IDENTIFICATION PATIENT</h3>
+            </div>
+            
+            <div class="card-body">
+                <div class="code-patient" id="cardCodePatient">CODE-123456</div>
+                
+                <table class="patient-info">
+                    <tr>
+                        <td class="label">Nom complet</td>
+                        <td class="value" id="cardFullName">---</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Âge</td>
+                        <td class="value" id="cardAge">---</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Sexe</td>
+                        <td class="value" id="cardGender">---</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Groupe sanguin</td>
+                        <td class="value" id="cardBloodGroup">---</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Nationalité</td>
+                        <td class="value" id="cardNationality">---</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Téléphone</td>
+                        <td class="value" id="cardPhone">---</td>
+                    </tr>
+                </table>
+                
+                <div class="card-footer">
+                    <div style="margin-top: 5px;">Valable pour tous les services • À présenter à chaque visite</div>
+                    <div style="font-size: 8px; margin-top: 3px; color: #cbd5e1;">Document non transférable</div>
+                </div>
+            </div>
+
+            <button class="print-btn no-print" onclick="downloadPdfCard()">
+                <i class="fas fa-print mr-2"></i> Imprimer la carte
+            </button>
+        </div>
+    </div>
+
     </body>
 
     <script>
+        let activePatientId = null;
+
         function submitDelete(event) {
             const form = event.target;
 
             fetch(form.action, {
-                method: 'POST', // On utilise POST pour que Django le reconnaisse
+                method: 'POST',
                 headers: {
                     'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
                     'Accept': 'application/json',
@@ -567,7 +786,6 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-
                         console.log("succes")
                         location.reload();
                     } else {
@@ -580,37 +798,36 @@
         }
     </script>
 
-
     <script>
+        document.querySelectorAll('form[id^="modifier-form-"]').forEach(function(form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const patientId = this.querySelector('input[name="patient_id"]').value;
+                const msgDiv = document.getElementById('edit-message-' + patientId);
 
-        // Soumission du formulaire de modification
-        document.getElementById('modifier-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    const msg = document.getElementById('edit-message');
-                    if (data.success) {
-                        msg.innerHTML = `<div class='bg-green-100 text-green-800 p-3 rounded-lg'>${data.success}</div>`;
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        msg.innerHTML = `<div class='bg-red-100 text-red-800 p-3 rounded-lg'>${data.error}</div>`;
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
                     }
-                });
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            msgDiv.innerHTML = `<div class='bg-green-100 text-green-800 p-3 rounded-lg'>${data.success}</div>`;
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            msgDiv.innerHTML = `<div class='bg-red-100 text-red-800 p-3 rounded-lg'>${data.error}</div>`;
+                        }
+                    });
+            });
         });
-
     </script>
 
-
     <script>
+        // Recherche des patients
         document.getElementById('searchInput').addEventListener('keyup', function () {
             let searchValue = this.value.toLowerCase();
             let rows = document.querySelectorAll('#patientsTable tbody tr');
@@ -623,6 +840,7 @@
     </script>
 
     <script>
+        // Formulaire d'enregistrement
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.querySelector('#enregistrer-form');
             const errorDiv = document.getElementById('error-message');
@@ -630,82 +848,138 @@
             const enregistrerBtn = document.getElementById('enregistrer-btn');
             const enregistrerAutreBtn = document.getElementById('enregistrer-autre-btn');
 
-            const showLoader = () => {
-                loader.style.display = 'block';
-                enregistrerBtn.style.display = 'none';
-            };
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    loader.style.display = 'block';
+                    enregistrerBtn.style.display = 'none';
 
-            const hideLoader = () => {
-                loader.style.display = 'none';
-            };
+                    const formData = new FormData(form);
 
-            const showEnregistrerAutre = () => {
-                enregistrerAutreBtn.style.display = 'block';
-            };
+                    const delay = new Promise(resolve => setTimeout(resolve, 2000));
 
-            form.addEventListener('submit', function (event) {
-                event.preventDefault(); // Empêche la soumission classique
-                showLoader();
-
-                const formData = new FormData(form);
-
-                const delay = new Promise(resolve => setTimeout(resolve, 2000));
-
-                Promise.all([
-                    fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                        }
-                    }).then(response => response.json()),
-                    delay
-                ])
-                    .then(([data]) => {
-                        hideLoader();
-                        if (data.error) {
-                            errorDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    Promise.all([
+                        fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                            }
+                        }).then(response => response.json()),
+                        delay
+                    ])
+                        .then(([data]) => {
+                            loader.style.display = 'none';
+                            if (data.error) {
+                                errorDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                                enregistrerBtn.style.display = 'block';
+                            } else if (data.success) {
+                                errorDiv.innerHTML = `
+                                    <div class="flex items-center gap-2 p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-100 border border-green-300 animate-fade-in" role="alert">
+                                        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11V7a1 1 0 10-2 0v4a1 1 0 001 1h1a1 1 0 100-2h-.586l1.293-1.293a1 1 0 10-1.414-1.414L9 8.586V7a1 1 0 10-2 0v1a1 1 0 001 1h.586l-1.293 1.293a1 1 0 101.414 1.414L11 10.414V11a1 1 0 002 0v-1a1 1 0 00-1-1h-.586l1.293-1.293a1 1 0 10-1.414-1.414L11 8.586z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>${data.success}</span>
+                                    </div>`;
+                                form.reset();
+                                enregistrerAutreBtn.style.display = 'block';
+                            }
+                        })
+                        .catch(error => {
+                            loader.style.display = 'none';
+                            errorDiv.innerHTML = `<div class="alert alert-danger">Erreur. Veuillez vérifier tous les champs.</div>`;
                             enregistrerBtn.style.display = 'block';
-                        } else if (data.success) {
-                            errorDiv.innerHTML = `
-    <div class="flex items-center gap-2 p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-100 border border-green-300 animate-fade-in" role="alert">
-        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11V7a1 1 0 10-2 0v4a1 1 0 001 1h1a1 1 0 100-2h-.586l1.293-1.293a1 1 0 10-1.414-1.414L9 8.586V7a1 1 0 10-2 0v1a1 1 0 001 1h.586l-1.293 1.293a1 1 0 101.414 1.414L11 10.414V11a1 1 0 002 0v-1a1 1 0 00-1-1h-.586l1.293-1.293a1 1 0 10-1.414-1.414L11 8.586z" clip-rule="evenodd"/>
-        </svg>
-        <span>${data.success}</span>
-    </div>`;
+                        });
+                });
 
-                            form.reset();
-                            showEnregistrerAutre();
-                        }
-                    })
-                    .catch(error => {
-                        hideLoader();
-                        errorDiv.innerHTML = `<div class="alert alert-danger">Erreur. Veuillez vérifier tous les champs.</div>`;
-                        enregistrerBtn.style.display = 'block';
+                if (enregistrerAutreBtn) {
+                    enregistrerAutreBtn.addEventListener('click', function () {
+                        window.location.reload();
                     });
-            });
-
-            enregistrerAutreBtn.addEventListener('click', function () {
-                window.location.reload(); // Recharge la page
-            });
+                }
+            }
         });
     </script>
 
     <script>
-        const showLoader = () => {
-            loader.classList.remove('hidden');
-            enregistrerBtn.classList.add('hidden');
-        };
+        function openPatientCard(patientId) {
+            activePatientId = patientId;
 
-        const hideLoader = () => {
-            loader.classList.add('hidden');
-        };
+            const row = document.querySelector(`tr[data-patient-id="${patientId}"]`);
+            if (row) {
+                const data = row.dataset;
+                document.getElementById('cardCodePatient').textContent = data.codePatient || '---';
+                document.getElementById('cardFullName').textContent = data.fullName || '---';
+                document.getElementById('cardAge').textContent = (data.age ? data.age + ' ans' : '---');
+                document.getElementById('cardGender').textContent = data.gender || '---';
+                document.getElementById('cardBloodGroup').textContent = data.bloodGroup || '---';
+                document.getElementById('cardNationality').textContent = data.nationality || '---';
+                document.getElementById('cardPhone').textContent = data.phone ? '+225 ' + data.phone : '---';
+                
+                const barcode = (data.codePatient || '').replace(/[^0-9]/g, '').split('').map(() => '|').join('');
+            }
 
-        const showEnregistrerAutre = () => {
-            enregistrerAutreBtn.classList.remove('hidden');
-        };
+            const modal = document.getElementById('patientCardModal');
+            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
 
+        function downloadPdfCard() {
+            if (activePatientId) {
+                const url = `{% url 'Utilisateur:carte_patient' 0 %}`.replace('0', activePatientId);
+                window.open(url, '_blank');
+            }
+        }
+
+        function closePatientCard(event) {
+            if (event && event.target && !event.target.closest('.patient-card-modal')) {
+                const modal = document.getElementById('patientCardModal');
+                modal.style.display = 'none';
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            } else if (!event || event.target.classList.contains('close-btn')) {
+                const modal = document.getElementById('patientCardModal');
+                modal.style.display = 'none';
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('#patientsTable tbody tr');
+            rows.forEach(function(row) {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 8) {
+                    const codePatient = cells[2]?.textContent.trim() || '';
+                    const fullName = cells[1]?.textContent.trim().replace(/\s+/g, ' ') || '';
+                    const age = cells[3]?.textContent.trim() || '';
+                    const gender = cells[4]?.textContent.trim() || '';
+                    const bloodGroup = cells[5]?.textContent.trim() || '';
+                    const nationality = cells[6]?.textContent.trim() || '';
+                    const phone = cells[7]?.textContent.trim().replace('+225', '').trim() || '';
+                    
+                    row.dataset.codePatient = codePatient;
+                    row.dataset.fullName = fullName;
+                    row.dataset.age = age;
+                    row.dataset.gender = gender;
+                    row.dataset.bloodGroup = bloodGroup;
+                    row.dataset.nationality = nationality;
+                    row.dataset.phone = phone;
+                }
+            });
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('patientCardModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    modal.style.display = 'none';
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
     </script>
 
 {% endblock %}

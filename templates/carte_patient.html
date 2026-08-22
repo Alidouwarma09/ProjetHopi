@@ -1,0 +1,343 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Carte Patient - {{ patient.code_patient }}</title>
+
+    <style>
+        /* Structure générale identique au reçu de sortie */
+        body {
+            font-family: DejaVu Sans, Arial, Helvetica, sans-serif;
+            color: #0f172a;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page {
+            padding: 10px;
+        }
+
+        /* Entête bleu & logo */
+        .header {
+            display: flex;
+            align-items: center;
+            border-bottom: 6px solid #0b5ed7;
+            padding-bottom: 14px;
+            margin-bottom: 18px;
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .ministere {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0b5ed7;
+            letter-spacing: 1px;
+        }
+
+        .etablissement {
+            font-size: 18px;
+            font-weight: 800;
+            margin-top: 6px;
+        }
+
+        .address {
+            font-size: 10.5px;
+            color: #334155;
+            margin-top: 4px;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .header-right .label {
+            font-size: 12px;
+            color: #0b5ed7;
+            font-weight: 700;
+        }
+
+        .header-right .info {
+            font-size: 11px;
+            color: #334155;
+        }
+
+        /* Titre carte */
+        .card-title {
+            text-align: center;
+            background: linear-gradient(90deg, #e7f0ff, #ffffff);
+            color: #073b9a;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            border: 1px solid #dbeafe;
+        }
+
+        /* ============================================
+           CODE PATIENT - EN EVIDENCE
+           ============================================ */
+        .code-patient-block {
+            text-align: center;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 3px solid #3B82F6;
+        }
+
+        .code-patient-block .label {
+            font-size: 10px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .code-patient-block .code {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            color: #60A5FA;
+        }
+
+        .code-patient-block .sub {
+            font-size: 9px;
+            color: #64748b;
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+
+        /* Bloc info */
+        .infos {
+            width: 100%;
+            margin-bottom: 14px;
+        }
+
+        .infos .left, .infos .right {
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .infos .left {
+            width: 60%;
+        }
+
+        .infos .right {
+            width: 38%;
+            text-align: right;
+        }
+
+        .infos p {
+            margin: 6px 0;
+            font-size: 12px;
+        }
+
+        .infos p strong {
+            color: #475569;
+        }
+
+        .infos p .value {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        /* Table récap */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        .table th, .table td {
+            border: 1px solid #e6eefb;
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+        .table th {
+            background: #f1f8ff;
+            color: #0b5ed7;
+            text-align: left;
+        }
+
+        .table td .statut-actif {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            padding: 1px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        /* Barcode */
+        .barcode-section {
+            text-align: center;
+            padding: 10px 0;
+            border-top: 2px dashed #e2e8f0;
+            border-bottom: 2px dashed #e2e8f0;
+            margin: 12px 0;
+        }
+
+        .barcode {
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            letter-spacing: 3px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .barcode-text {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 26px;
+            font-size: 11px;
+            color: #475569;
+            border-top: 1px dashed #e6eefb;
+            padding-top: 10px;
+        }
+
+        .signature {
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .signature .right {
+            text-align: center;
+        }
+
+        .signature .right .stamp {
+            border: 2px solid #0b5ed7;
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-weight: 700;
+            color: #0b5ed7;
+            font-size: 11px;
+        }
+
+        .small-note {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        /* Impression */
+        @media print {
+            body {
+                background: white;
+            }
+            .code-patient-block {
+                border: 3px solid #3B82F6;
+            }
+            .code-patient-block .code {
+                color: #60A5FA;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <!-- ==========================================
+    ENTÊTE
+    ========================================== -->
+    <div class="header">
+        <div class="header-text">
+            <div class="ministere">République de Côte d'Ivoire — Ministère de la Santé</div>
+            <div class="etablissement">Hôpital / Centre Médical</div>
+            <div class="address">Adresse : Cocody Riviera 2 — Tél : +225 0102030405</div>
+        </div>
+        <div class="header-right">
+            <div class="label">CARTE PATIENT</div>
+            <div class="info">Code : {{ patient.code_patient }}</div>
+            <div class="info">Édition : {% now "d/m/Y H:i" %}</div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+    TITRE
+    ========================================== -->
+    <div class="card-title">FICHE D'IDENTIFICATION DU PATIENT</div>
+
+    <!-- ==========================================
+    CODE PATIENT EN EVIDENCE
+    ========================================== -->
+    <div class="code-patient-block">
+        <span class="label">CODE PATIENT</span>
+        <div class="code">{{ patient.code_patient }}</div>
+        <span class="sub">• Identifiant unique •</span>
+    </div>
+
+    <!-- ==========================================
+    INFORMATIONS PATIENT
+    ========================================== -->
+    <div class="infos">
+        <div class="left">
+            <p><strong>Nom et Prénom :</strong> <span class="value">{{ patient.nom|upper }} {{ patient.prenom|capfirst }}</span></p>
+            <p><strong>Profession :</strong> <span class="value">{{ patient.profession|default:"—" }}</span></p>
+            <p><strong>Nationalité :</strong> <span class="value">{{ patient.nationalite|default:"—" }}</span></p>
+            <p><strong>Lieu d'habitation :</strong> <span class="value">{{ patient.lieu_habitation|default:"—" }}</span></p>
+        </div>
+        <div class="right">
+            <p><strong>Age / Sexe :</strong> <span class="value">{{ patient.age }} ans / {{ patient.sexe }}</span></p>
+            <p><strong>Statut conjugal :</strong> <span class="value">{{ patient.statut_conjugal|default:"—" }}</span></p>
+            <p><strong>Groupe sanguin :</strong> <span class="value">{{ patient.groupe_sanguin|default:"—" }}</span></p>
+            <p><strong>Téléphone :</strong> <span class="value">{% if patient.numero %}+225 {{ patient.numero }}{% else %}—{% endif %}</span></p>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Renseignements Médicaux de Base</th>
+            <th style="width:150px; text-align:right">Statut / Valeur</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Dossier médical informatisé</td>
+            <td style="text-align:right"><span class="statut-actif">Actif</span></td>
+        </tr>
+        <tr>
+            <td>Enregistré le</td>
+            <td style="text-align:right">{{ patient.created_at|date:"d/m/Y"|default:"—" }}</td>
+        </tr>
+        {% if patient.groupe_sanguin %}
+        <tr>
+            <td>Groupe sanguin</td>
+            <td style="text-align:right; font-weight:700; color:#0b5ed7;">{{ patient.groupe_sanguin }}</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <div>Observations : Carte à présenter obligatoirement lors de chaque consultation ou passage à l'hôpital.</div>
+
+        <div class="signature">
+            <div class="left">
+                <div class="small-note">Établi par : Service d'accueil / Admission</div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

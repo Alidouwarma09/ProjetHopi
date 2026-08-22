@@ -656,6 +656,26 @@ def recu_sortie(request, sortie_id):
     response["Content-Disposition"] = f'attachment; filename = f"Recu_{sortie.id}_{uuid.uuid4().hex}.pdf"'
     return response
 
+def carte_patient(request, patient_id):
+    patient = get_object_or_404(Patient, id=patient_id)
+    context = {
+        "patient": patient,
+    }
+
+    html_string = render_to_string("carte_patient.html", context)
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    try:
+        HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(temp_file.name)
+        temp_file.seek(0)
+        pdf = temp_file.read()
+    finally:
+        temp_file.close()
+        os.unlink(temp_file.name)
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="Carte_Patient_{patient.code_patient}_{uuid.uuid4().hex}.pdf"'
+    return response
 
 @login_required(login_url='Utilisateur:Connexion')
 def enregistrer_sortie(request, hosp_id):

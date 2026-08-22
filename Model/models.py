@@ -19,7 +19,7 @@ class MyUserManager(BaseUserManager):
 
         user = self.model(
             username=username,
-            **extra_fields  # Ajout des champs supplémentaires
+            **extra_fields
         )
         user.set_password(password)
         user.save(using=self._db)
@@ -92,11 +92,11 @@ class Utilisateur(AbstractBaseUser):
         """
         now = timezone.now()
         delta = now - self.last_activity
-        en_ligne = delta <= timedelta(minutes=2)  # seuil pour considérer l'utilisateur en ligne
+        en_ligne = delta <= timedelta(minutes=2)
 
         return {
             'en_ligne': en_ligne,
-            'derniere_connexion': self.last_activity,  # datetime
+            'derniere_connexion': self.last_activity,
         }
 
 
@@ -226,7 +226,7 @@ class Hospitalisation(models.Model):
 class Examen(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="examens")
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="examens", null=True, blank=True)
-    type_examen = models.CharField(max_length=200)  # Ex: "Biologie", "Radio", "Scanner"
+    type_examen = models.CharField(max_length=200)
     resultat = models.TextField(blank=True, null=True)
     date_examen = models.DateTimeField(default=timezone.now)
     statut = models.CharField(max_length=50, choices=[
@@ -280,8 +280,8 @@ class ArretTravail(models.Model):
 class Sortie(models.Model):
     hospitalisation = models.OneToOneField(Hospitalisation, on_delete=models.CASCADE, related_name="sortie")
     date_sortie = models.DateTimeField(default=timezone.now)
-    observation = models.TextField(blank=True, null=True)  # Notes médicales ou raison de la sortie
-    montant_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # montant payé
+    observation = models.TextField(blank=True, null=True)
+    montant_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     recu = models.OneToOneField(Recu, on_delete=models.SET_NULL, null=True, blank=True, related_name="sortie")
 
     def __str__(self):
@@ -289,13 +289,11 @@ class Sortie(models.Model):
 
     @property
     def montant_total_formate(self):
-        """Formate le montant total avec des espaces comme séparateurs de milliers (ex: 100 000.00)."""
-        # Conversion du décimal en entier si pas de décimales, ou formatage standard
+
         montant_int = int(self.montant_total)
-        # Utilisation du formatage avec espace pour les milliers
+
         formatted_int = f"{montant_int:,}".replace(",", " ")
 
-        # Récupération de la partie décimale
         decimaux = f"{self.montant_total:.2f}".split(".")[1]
 
         if decimaux == "00":

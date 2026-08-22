@@ -4,7 +4,7 @@ from .views import Connexion, acceuil, Deconnexion, ajouter_patient, gestion_pat
     consultation, ajouter_consultation, examens, ajouter_examen, pdf_consultation, enregistrer_sortie, sorties, \
     recu_sortie, modifier_patient, supprimer_patient, supprimer_Rdvs, modifier_Rdvs, modifier_consultation, \
     supprimer_consultation, gestion_utilisateur, ajouter_utilisateur, export_utilisateurs_pdf, supprimer_user, \
-    modifier_utilisateur, modifier_profil
+    modifier_utilisateur, modifier_profil, carte_patient
 
 app_name = 'Utilisateur'
 urlpatterns = [
@@ -25,6 +25,7 @@ urlpatterns = [
     path('hospitalisation/', hospitalisation, name='hospitalisation'),
     path('sorties/', sorties, name='sorties'),
     path('recu_sortie/<int:sortie_id>/', recu_sortie, name='recu_sortie'),
+    path('carte/<int:patient_id>/', carte_patient, name='carte_patient'),
     path('enregistrer_sortie/<int:hosp_id>/', enregistrer_sortie, name='enregistrer_sortie'),
     path('consultation/', consultation, name='consultation'),
     path('gestionPatient/', gestion_patients, name='gestion_patients'),
