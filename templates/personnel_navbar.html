@@ -122,12 +122,13 @@
             {% endif %}
 
             <!-- Séparateur -->
-            <div class="px-3 py-2 mt-2">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Finances</span>
-            </div>
+
 
             <!-- Reçus & Facturation -->
             {% if request.user.role.designation == 'ADMIN' or request.user.role.designation == 'CAISSE' %}
+                <div class="px-3 py-2 mt-2">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Finances</span>
+            </div>
             <a href="{% url 'Utilisateur:sorties' %}"
                class="menu-item flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                {% if request.resolver_match.url_name == 'sorties' %}bg-blue-50 text-blue-600 shadow-sm{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">

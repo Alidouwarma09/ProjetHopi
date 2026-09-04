@@ -60,18 +60,81 @@
                                                     <input type="text" name="code" required
                                                            class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                                 </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type
-                                                        du médicament</label>
-                                                    <input list="codes-patients" id="code-patient"
-                                                           name="type_medicament"
-                                                           placeholder="Entrer le code patient"
-                                                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+                                                <!-- Remplacer la section du type de médicament par : -->
 
-                                                    <datalist id="codes-patients">
-                                                        <option value="dffd">Anti-douleur</option>
-                                                    </datalist>
-                                                </div>
+<div>
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type du médicament</label>
+    <input list="type-medicaments" id="type-medicament"
+           name="type_medicament"
+           placeholder="Entrer le type de médicament"
+           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 px-4 py-2">
+
+    <datalist id="type-medicaments">
+        <option value="Antibiotique">
+        <option value="Antidouleur">
+        <option value="Antipyrétique">
+        <option value="Antihistaminique">
+        <option value="Antihypertenseur">
+        <option value="Antidiabétique">
+        <option value="Anticoagulant">
+        <option value="Antidépresseur">
+        <option value="Antipsychotique">
+        <option value="Antiviral">
+        <option value="Antifongique">
+        <option value="Antibactérien">
+        <option value="Antiparasitaire">
+        <option value="Antispasmodique">
+        <option value="Anti-inflammatoire">
+        <option value="Bronchodilatateur">
+        <option value="Corticostéroïde">
+        <option value="Diurétique">
+        <option value="Immunosuppresseur">
+        <option value="Vaccin">
+        <option value="Vitamine">
+        <option value="Minéral">
+        <option value="Homéopathique">
+        <option value="Phytothérapie">
+        <option value="Anesthésique">
+        <option value="Anticonvulsivant">
+        <option value="Antiparkinsonien">
+        <option value="Antinéoplasique">
+        <option value="Antirétroviral">
+        <option value="Antituberculeux">
+        <option value="Antileptique">
+        <option value="Antipaludéen">
+        <option value="Anthelmintique">
+        <option value="Antiacide">
+        <option value="Antidiarrhéique">
+        <option value="Antiemétique">
+        <option value="Antitussif">
+        <option value="Expectorant">
+        <option value="Mucolytique">
+        <option value="Laxatif">
+        <option value="Antispasmodique">
+        <option value="Stimulant">
+        <option value="Sédatif">
+        <option value="Hypnotique">
+        <option value="Neuroleptique">
+        <option value="Antiangineux">
+        <option value="Antiarythmique">
+        <option value="Hypolipémiant">
+        <option value="Antihémorragique">
+        <option value="Antianémique">
+        <option value="Antithyroïdien">
+        <option value="Antihormone">
+        <option value="Antiestrogène">
+        <option value="Androgène">
+        <option value="Progestérone">
+        <option value="Testostérone">
+        <option value="Insuline">
+        <option value="Antidiarrhéique">
+        <option value="Anti-inflammatoire non stéroïdien">
+        <option value="Antibiotique local">
+        <option value="Antibiotique systémique">
+        <option value="Antibiotique à large spectre">
+        <option value="Antibiotique à spectre étroit">
+    </datalist>
+</div>
 
                                             </div>
 
