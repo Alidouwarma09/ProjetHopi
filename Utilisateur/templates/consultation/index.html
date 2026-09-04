@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
@@ -117,10 +118,12 @@
                                     return '';
                                 }
                             }">
+                       {% if request.user.role.designation == 'ADMIN' %}
                             <button @click="open = true"
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition shadow-sm">
                                 <i class="fas fa-plus mr-2"></i> Nouvelle consultation
                             </button>
+                       {% endif %}
 
                             <div x-show="open"
                                  x-transition
@@ -207,12 +210,6 @@
                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
                                             </div>
 
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Résultat
-                                                    examen</label>
-                                                <input type="text" name="resultat_examen"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
 
                                             <div class="col-span-1">
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut</label>
@@ -266,15 +263,42 @@
                                             </div>
 
                                             <div class="col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 border-t pt-4">
-                                                <div>
-                                                    <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
-                                                        <i class="fas fa-prescription-bottle-alt text-blue-500"></i>
-                                                        Ordonnance (si nécessaire)
-                                                    </h3>
-                                                    <textarea name="contenu_ordonnance" rows="4"
-                                                              class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm"
-                                                              placeholder="Contenu de l'ordonnance"></textarea>
-                                                </div>
+                                                <!-- Remplacer la section Ordonnance (si nécessaire) par : -->
+                                                    <div>
+                                                        <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                                                            <i class="fas fa-prescription-bottle-alt text-blue-500"></i>
+                                                            Ordonnance (si nécessaire)
+                                                        </h3>
+
+                                                        <!-- Liste des médicaments ajoutés -->
+                                                        <div id="medicament-list" class="mb-3 space-y-1.5 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-800/30 min-h-[40px]">
+                                                            <!-- Les médicaments ajoutés s'afficheront ici -->
+                                                            <p class="text-xs text-gray-400 dark:text-gray-500 text-center" id="empty-medicament-msg">Aucun médicament ajouté</p>
+                                                        </div>
+
+                                                        <!-- Ligne de saisie -->
+                                                        <div class="flex gap-2">
+                                                            <div class="flex-1">
+                                                                <input type="text" id="medicament-input"
+                                                                       placeholder="Nom du médicament..."
+                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-2 text-sm">
+                                                            </div>
+                                                            <div class="w-24">
+                                                                <input type="number" id="quantite-input"
+                                                                       placeholder="Qté"
+                                                                       min="1"
+                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-2 text-sm">
+                                                            </div>
+                                                            <button type="button" id="add-medicament-btn"
+                                                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition text-sm font-semibold whitespace-nowrap">
+                                                                <i class="fas fa-plus mr-1"></i> Ajouter
+                                                            </button>
+                                                        </div>
+
+                                                        <!-- Champ caché pour stocker les médicaments -->
+                                                        <textarea name="contenu_ordonnance" id="ordonnance-contenu" rows="1"
+                                                                  class="hidden"></textarea>
+                                                    </div>
 
                                                 <div>
                                                     <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
@@ -297,6 +321,47 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                        <!-- Dans le formulaire, après la section Ordonnance et Arrêt de travail -->
+<div class="col-span-4 grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 border-t pt-4">
+
+    <!-- Ordonnance -->
+    <div>
+        <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+            <i class="fas fa-prescription-bottle-alt text-blue-500"></i>
+            Ordonnance (si nécessaire)
+        </h3>
+        <!-- ... code existant ... -->
+    </div>
+
+    <!-- Arrêt de travail -->
+    <div>
+        <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+            <i class="fas fa-briefcase-medical text-green-500"></i>
+            Arrêt de travail (si nécessaire)
+        </h3>
+        <!-- ... code existant ... -->
+    </div>
+
+    <!-- ==========================================
+    FRAIS DE CONSULTATION - AJOUTER CE BLOC
+    ========================================== -->
+    <div>
+        <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+            <i class="fas fa-money-bill-wave text-yellow-500"></i>
+            Frais de consultation
+        </h3>
+        <div class="space-y-3">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Prix (FCFA)
+                </label>
+                <input type="number" name="prix_prestation" step="0.01" value="0"
+                       placeholder="0"
+                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm">
+            </div>
+        </div>
+    </div>
+</div>
 
                                         </div>
 
@@ -382,243 +447,390 @@
                                                 {{ consult.date|date:"d/m/Y H:i" }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center gap-3">
-                                            <div x-data="{ openDetails: false, consultData: {} }">
-                                                <button @click="openDetails = true; consultData = JSON.parse(document.getElementById('consult-{{ consult.id }}').textContent)"
-                                                        class="bg-blue-600 text-white px-3 py-1.5 rounded-lg shadow hover:bg-blue-700 transition font-semibold text-xs flex items-center gap-1.5">
-                                                    <i class="fas fa-receipt"></i> Détails / Reçu
-                                                </button>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <div x-data="{ openDetails: false }">
+                                                    <button @click="openDetails = true"
+                                                            class="bg-blue-600 text-white px-3 py-1.5 rounded-lg shadow hover:bg-blue-700 transition font-semibold text-xs flex items-center gap-1.5">
+                                                        <i class="fas fa-file-medical-alt"></i> Fiche
+                                                    </button>
 
-                                                <div x-show="openDetails" x-transition
-                                                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-                                                    <div @click.away="openDetails = false"
-                                                         class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+                                                    <div x-show="openDetails" x-transition
+                                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+                                                        <div @click.away="openDetails = false"
+                                                             class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
 
-                                                        <button @click="openDetails = false"
-                                                                class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200"
-                                                                title="Fermer">
-                                                            <i class="fas fa-times text-sm"></i>
-                                                        </button>
-
-                                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
-                                                            Détails de la Consultation
-                                                        </h2>
-
-                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 dark:bg-gray-800/40 p-5 rounded-xl border border-gray-100 dark:border-gray-850">
-                                                            <div class="space-y-3">
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Patient :</span> {{ consult.patient }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Service :</span> {{ consult.service }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Motif :</span> {{ consult.motif }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Poids :</span> {{ consult.poids }} kg</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Taille :</span> {{ consult.taille }} cm</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">IMC :</span> {{ consult.IMC }}</p>
-                                                            </div>
-                                                            <div class="space-y-3">
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Pouls :</span> {{ consult.pouls }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">TA :</span> {{ consult.TA }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Diagnostic :</span> {{ consult.diagnostic }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Constat :</span> {{ consult.constat_consultation }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Examen demandé :</span> {{ consult.examen_demande }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Traitement :</span> {{ consult.traitement }}</p>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="mt-4 p-5 bg-gray-50 dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-850 space-y-3">
-                                                            <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Issue :</span> {{ consult.issue_consultation }}</p>
-                                                            <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Résultat examen :</span> {{ consult.resultat_examen }}</p>
-                                                            <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Statut :</span> {{ consult.statue }}</p>
-                                                        </div>
-
-                                                        {% if consult.ordonnances %}
-                                                            <div class="mt-6">
-                                                                <h4 class="font-bold text-lg mb-2 text-gray-800 dark:text-white">Ordonnances</h4>
-                                                                <ul class="list-disc list-inside space-y-1">
-                                                                    {% for ord in consult.ordonnances %}
-                                                                        <li class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-sm text-gray-700 dark:text-gray-300 border border-gray-150">{{ ord.contenu }}</li>
-                                                                    {% endfor %}
-                                                                </ul>
-                                                            </div>
-                                                        {% endif %}
-
-                                                        <div class="mt-6 text-center">
-                                                            <a href="{% url 'Utilisateur:pdf_consultation' consult.id %}"
-                                                               class="inline-block bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 transition font-semibold shadow-sm">
-                                                                Générer PDF
-                                                            </a>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div x-data="{ openModifier: false }">
-                                                <button @click="openModifier = true"
-                                                        class="text-blue-600 hover:text-blue-800 p-1.5 rounded-md hover:bg-blue-50 transition"
-                                                        title="Modifier">
-                                                    <i class="fas fa-pencil-alt"></i>
-                                                </button>
-
-                                                <div x-show="openModifier" x-transition
-                                                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-                                                    <div @click.away="openModifier = false"
-                                                         class="bg-white dark:bg-gray-900 w-full max-w-5xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
-
-                                                        <button @click="openModifier = false"
-                                                                class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200"
-                                                                title="Fermer">
-                                                            <i class="fas fa-times text-sm"></i>
-                                                        </button>
-
-                                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
-                                                            ✏️ Modifier la consultation de {{ consult.patient }}
-                                                        </h2>
-
-                                                        <form method="post" class="space-y-4"
-                                                              action="{% url 'Utilisateur:modifier_consultation' consult.id %}">
-                                                            {% csrf_token %}
-                                                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                                                                <div class="col-span-1">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Patient</label>
-                                                                    <input type="text" name="patient"
-                                                                           value="{{ consult.patient }}"
-                                                                           class="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-800 dark:text-white border-gray-200"
-                                                                           readonly>
-                                                                </div>
-
-                                                                <div class="col-span-1">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motif</label>
-                                                                    <input type="text" name="motif"
-                                                                           value="{{ consult.motif }}"
-                                                                           class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                </div>
-
-                                                                <div class="col-span-1">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnostic</label>
-                                                                    <input type="text" name="diagnostic"
-                                                                           value="{{ consult.diagnostic }}"
-                                                                           class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                </div>
-
-                                                                <div class="col-span-1">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Poids (kg)</label>
-                                                                    <input type="number" step="0.1" name="poids"
-                                                                           value="{{ consult.poids|floatformat:'2' }}"
-                                                                           class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                </div>
-
-                                                                <div class="col-span-1">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Taille (cm)</label>
-                                                                    <input type="number" step="0.1" name="taille"
-                                                                           value="{{ consult.taille|floatformat:'2' }}"
-                                                                           class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                </div>
-
-                                                                <div class="col-span-1">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pouls</label>
-                                                                    <input type="number" name="pouls"
-                                                                           value="{{ consult.pouls|floatformat:'0' }}"
-                                                                           class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                </div>
-
-                                                                <div class="col-span-1">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">TA</label>
-                                                                    <input type="number" name="TA"
-                                                                           value="{{ consult.TA|floatformat:'0' }}"
-                                                                           class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                </div>
-
-                                                                <div class="col-span-1">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut</label>
-                                                                    <input type="text" name="statue"
-                                                                           value="{{ consult.statue }}"
-                                                                           class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                </div>
-
-                                                                <div class="col-span-1">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Issue</label>
-                                                                    <input type="text" name="issue_consultation"
-                                                                           value="{{ consult.issue_consultation }}"
-                                                                           class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                </div>
-
-                                                                <div class="col-span-5">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Constat</label>
-                                                                    <textarea name="constat_consultation" rows="2"
-                                                                              class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.constat_consultation }}</textarea>
-                                                                </div>
-
-                                                                <div class="col-span-5">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Examen demandé</label>
-                                                                    <textarea name="examen_demande" rows="2"
-                                                                              class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.examen_demande }}</textarea>
-                                                                </div>
-
-                                                                <div class="col-span-5">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Traitement</label>
-                                                                    <textarea name="traitement" rows="3"
-                                                                              class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.traitement }}</textarea>
-                                                                </div>
-
-                                                                <div class="col-span-5">
-                                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Résultat examen</label>
-                                                                    <textarea name="resultat_examen" rows="2"
-                                                                              class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.resultat_examen }}</textarea>
-                                                                </div>
-                                                            </div>
-
-                                                            <button type="submit"
-                                                                    class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                                                                💾 Mettre à jour
+                                                            <button @click="openDetails = false"
+                                                                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200"
+                                                                    title="Fermer">
+                                                                <i class="fas fa-times text-sm"></i>
                                                             </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
 
-                                            <div x-data="{ open: false, message: '' }">
-                                                <button @click="open = true"
-                                                        class="text-red-600 hover:text-red-800 p-1.5 rounded-md hover:bg-red-50 transition"
-                                                        title="Supprimer">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
+                                                            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                                                📋 Fiche de Consultation
+                                                            </h2>
 
-                                                <div x-show="open"
-                                                     class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
-                                                     x-transition>
-                                                    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-8 relative border border-gray-200 dark:border-gray-700 text-center">
-
-                                                        <button @click="open = false"
-                                                                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
-                                                            &times;
-                                                        </button>
-
-                                                        <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
-                                                        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                                                            Supprimer cette consultation ?</h2>
-                                                        <p class="text-gray-600 dark:text-gray-300 mb-6 text-sm">Cette
-                                                            action est irréversible.</p>
-
-                                                        <div x-text="message" class="mb-4 text-sm"></div>
-
-                                                        <form @submit.prevent="submitDelete"
-                                                              action="{% url 'Utilisateur:supprimer_consultation' consult.id %}"
-                                                              method="post">
-                                                            {% csrf_token %}
-                                                            <div class="flex justify-center space-x-4">
-                                                                <button type="button" @click="open = false"
-                                                                        class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-sm">
-                                                                    Annuler
-                                                                </button>
-                                                                <button type="submit"
-                                                                        class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm">
-                                                                    Supprimer
-                                                                </button>
+                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 dark:bg-gray-800/40 p-5 rounded-xl border border-gray-100 dark:border-gray-850">
+                                                                <div class="space-y-3">
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Patient :</span> {{ consult.patient }}</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Service :</span> {{ consult.service }}</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Motif :</span> {{ consult.motif }}</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Poids :</span> {{ consult.poids }} kg</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Taille :</span> {{ consult.taille }} cm</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">IMC :</span> {{ consult.IMC }}</p>
+                                                                </div>
+                                                                <div class="space-y-3">
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Pouls :</span> {{ consult.pouls }}</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">TA :</span> {{ consult.TA }}</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Diagnostic :</span> {{ consult.diagnostic }}</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Constat :</span> {{ consult.constat_consultation }}</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Examen demandé :</span> {{ consult.examen_demande }}</p>
+                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Traitement :</span> {{ consult.traitement }}</p>
+                                                                </div>
                                                             </div>
-                                                        </form>
+
+                                                            <div class="mt-4 p-5 bg-gray-50 dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-850 space-y-3">
+                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Issue :</span> {{ consult.issue_consultation }}</p>
+                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Statut :</span> {{ consult.statue }}</p>
+                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Date :</span> {{ consult.date|date:"d/m/Y H:i" }}</p>
+                                                            </div>
+
+                                                            <div class="mt-6 text-center">
+                                                                <a href="{% url 'Utilisateur:pdf_consultation' consult.id %}"
+                                                                   class="inline-block bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 transition font-semibold shadow-sm">
+                                                                    <i class="fas fa-file-pdf mr-2"></i> Télécharger PDF
+                                                                </a>
+                                                            </div>
+
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
+                                                <!-- ==========================================
+                                                BOUTON 2 : ARRÊT DE TRAVAIL (ORANGE)
+                                                ========================================== -->
+                                                {% if consult.arrets %}
+                                                <div x-data="{ openArret: false }">
+                                                    <button @click="openArret = true"
+                                                            class="bg-orange-500 text-black px-3 py-1.5 rounded-lg shadow hover:bg-orange-600 transition font-semibold text-xs flex items-center gap-1.5">
+                                                        <i class="fas fa-file-signature"></i> Arrêt
+                                                    </button>
+
+                                                    <div x-show="openArret" x-transition
+                                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+                                                        <div @click.away="openArret = false"
+                                                             class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+
+                                                            <button @click="openArret = false"
+                                                                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200">
+                                                                <i class="fas fa-times text-sm"></i>
+                                                            </button>
+
+                                                            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                                                📄 Fiche d'Arrêt de Travail
+                                                            </h2>
+
+                                                            <div class="space-y-4">
+                                                                <div class="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-xl border border-gray-100">
+                                                                    <p class="text-sm"><span class="font-semibold">Patient :</span> {{ consult.patient }}</p>
+                                                                    <p class="text-sm"><span class="font-semibold">Médecin :</span> 
+                                                                        {% for arret in consult.arrets %}
+                                                                            {{ arret.nom_med }}{% if not forloop.last %}, {% endif %}
+                                                                        {% endfor %}
+                                                                    </p>
+                                                                    <p class="text-sm"><span class="font-semibold">Date de début :</span> 
+                                                                        {% for arret in consult.arrets %}
+                                                                            {{ arret.date_debut|date:"d/m/Y" }}{% if not forloop.last %}, {% endif %}
+                                                                        {% endfor %}
+                                                                    </p>
+                                                                    <p class="text-sm"><span class="font-semibold">Nombre de jours :</span> 
+                                                                        {% for arret in consult.arrets %}
+                                                                            {{ arret.nombre_jours }}{% if not forloop.last %}, {% endif %}
+                                                                        {% endfor %}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="bg-yellow-50 dark:bg-yellow-950/30 p-4 rounded-lg border border-yellow-200">
+                                                                    <p class="text-sm text-yellow-800 dark:text-yellow-300">
+                                                                        <i class="fas fa-info-circle mr-2"></i>
+                                                                        Arrêt de travail prescrit par le médecin traitant.
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="mt-6 text-center">
+                                                                <a href="{% url 'Utilisateur:pdf_arret' consult.id %}"
+                                                                   class="inline-block bg-orange-500 text-blqck px-6 py-2.5 rounded-lg hover:bg-orange-600 transition font-semibold shadow-sm">
+                                                                    <i class="fas fa-file-pdf mr-2"></i> Télécharger PDF
+                                                                </a>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+
+                                                <!-- ==========================================
+                                                BOUTON 3 : ORDONNANCE (VIOLET)
+                                                ========================================== -->
+                                                {% if consult.ordonnances %}
+                                                <div x-data="{ openOrdonnance: false }">
+                                                    <button @click="openOrdonnance = true"
+                                                            class="bg-purple-600 text-white px-3 py-1.5 rounded-lg shadow hover:bg-purple-700 transition font-semibold text-xs flex items-center gap-1.5">
+                                                        <i class="fas fa-prescription"></i> Ordonnance
+                                                    </button>
+
+                                                    <div x-show="openOrdonnance" x-transition
+                                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+                                                        <div @click.away="openOrdonnance = false"
+                                                             class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+
+                                                            <button @click="openOrdonnance = false"
+                                                                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200">
+                                                                <i class="fas fa-times text-sm"></i>
+                                                            </button>
+
+                                                            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                                                💊 Ordonnance Médicale
+                                                            </h2>
+
+                                                            <div class="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-xl border border-gray-100">
+                                                                <p class="text-sm mb-3"><span class="font-semibold">Patient :</span> {{ consult.patient }}</p>
+                                                                <div class="space-y-3">
+                                                                    {% for ord in consult.ordonnances %}
+                                                                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200">
+                                                                            <p class="text-sm text-gray-700 dark:text-gray-300">{{ ord.contenu|linebreaks }}</p>
+                                                                            <p class="text-xs text-gray-400 mt-2">Date : {{ ord.date|date:"d/m/Y H:i" }}</p>
+                                                                        </div>
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="mt-6 text-center">
+                                                                <a href="{% url 'Utilisateur:pdf_ordonnance' consult.id %}"
+                                                                   class="inline-block bg-purple-600 text-white px-6 py-2.5 rounded-lg hover:bg-purple-700 transition font-semibold shadow-sm">
+                                                                    <i class="fas fa-file-pdf mr-2"></i> Télécharger PDF
+                                                                </a>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+
+                                                <!-- ==========================================
+                                                BOUTON MODIFIER
+                                                ========================================== -->
+                                                <div x-data="{ openModifier: false }">
+                                                    <button @click="openModifier = true"
+                                                            class="text-blue-600 hover:text-blue-800 p-1.5 rounded-md hover:bg-blue-50 transition"
+                                                            title="Modifier">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                    </button>
+
+                                                    <div x-show="openModifier" x-transition
+                                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+                                                        <div @click.away="openModifier = false"
+                                                             class="bg-white dark:bg-gray-900 w-full max-w-5xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
+
+                                                            <button @click="openModifier = false"
+                                                                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200"
+                                                                    title="Fermer">
+                                                                <i class="fas fa-times text-sm"></i>
+                                                            </button>
+
+                                                            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                                                                ✏️ Modifier la consultation de {{ consult.patient }}
+                                                            </h2>
+
+                                                            <form method="post" class="space-y-4"
+                                                                  action="{% url 'Utilisateur:modifier_consultation' consult.id %}">
+                                                                {% csrf_token %}
+                                                                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                                                    <div class="col-span-1">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Patient</label>
+                                                                        <input type="text" name="patient"
+                                                                               value="{{ consult.patient }}"
+                                                                               class="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-800 dark:text-white border-gray-200"
+                                                                               readonly>
+                                                                    </div>
+
+                                                                    <div class="col-span-1">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motif</label>
+                                                                        <input type="text" name="motif"
+                                                                               value="{{ consult.motif }}"
+                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
+                                                                    </div>
+
+                                                                    <div class="col-span-1">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnostic</label>
+                                                                        <input type="text" name="diagnostic"
+                                                                               value="{{ consult.diagnostic }}"
+                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
+                                                                    </div>
+
+                                                                    <div class="col-span-1">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Poids (kg)</label>
+                                                                        <input type="number" step="0.1" name="poids"
+                                                                               value="{{ consult.poids|floatformat:'2' }}"
+                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
+                                                                    </div>
+
+                                                                    <div class="col-span-1">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Taille (cm)</label>
+                                                                        <input type="number" step="0.1" name="taille"
+                                                                               value="{{ consult.taille|floatformat:'2' }}"
+                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
+                                                                    </div>
+
+                                                                    <div class="col-span-1">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pouls</label>
+                                                                        <input type="number" name="pouls"
+                                                                               value="{{ consult.pouls|floatformat:'0' }}"
+                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
+                                                                    </div>
+
+                                                                    <div class="col-span-1">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">TA</label>
+                                                                        <input type="number" name="TA"
+                                                                               value="{{ consult.TA|floatformat:'0' }}"
+                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
+                                                                    </div>
+
+                                                                    <div class="col-span-1">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut</label>
+                                                                        <input type="text" name="statue"
+                                                                               value="{{ consult.statue }}"
+                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
+                                                                    </div>
+
+                                                                    <div class="col-span-1">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Issue</label>
+                                                                        <input type="text" name="issue_consultation"
+                                                                               value="{{ consult.issue_consultation }}"
+                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
+                                                                    </div>
+
+                                                                    <div class="col-span-5">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Constat</label>
+                                                                        <textarea name="constat_consultation" rows="2"
+                                                                                  class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.constat_consultation }}</textarea>
+                                                                    </div>
+
+                                                                    <div class="col-span-5">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Examen demandé</label>
+                                                                        <textarea name="examen_demande" rows="2"
+                                                                                  class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.examen_demande }}</textarea>
+                                                                    </div>
+
+                                                                    <div class="col-span-5">
+                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Traitement</label>
+                                                                        <textarea name="traitement" rows="3"
+                                                                                  class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.traitement }}</textarea>
+                                                                    </div>
+
+
+                                                                </div>
+
+                                                                <button type="submit"
+                                                                        class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                                                    💾 Mettre à jour
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- ==========================================
+                                                BOUTON SUPPRIMER
+                                                ========================================== -->
+                                                <div x-data="{ open: false, message: '' }">
+                                                    <button @click="open = true"
+                                                            class="text-red-600 hover:text-red-800 p-1.5 rounded-md hover:bg-red-50 transition"
+                                                            title="Supprimer">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+
+                                                    <div x-show="open"
+                                                         class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+                                                         x-transition>
+                                                        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-8 relative border border-gray-200 dark:border-gray-700 text-center">
+
+                                                            <button @click="open = false"
+                                                                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
+                                                                &times;
+                                                            </button>
+
+                                                            <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
+                                                            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                                                                Supprimer cette consultation ?</h2>
+                                                            <p class="text-gray-600 dark:text-gray-300 mb-6 text-sm">Cette
+                                                                action est irréversible.</p>
+
+                                                            <div x-text="message" class="mb-4 text-sm"></div>
+
+                                                            <form @submit.prevent="submitDelete"
+                                                                  action="{% url 'Utilisateur:supprimer_consultation' consult.id %}"
+                                                                  method="post">
+                                                                {% csrf_token %}
+                                                                <div class="flex justify-center space-x-4">
+                                                                    <button type="button" @click="open = false"
+                                                                            class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-sm">
+                                                                        Annuler
+                                                                    </button>
+                                                                    <button type="submit"
+                                                                            class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm">
+                                                                        Supprimer
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <div x-data="{ openRecu: false }">
+    <button @click="openRecu = true"
+            class="bg-green-600 text-white px-3 py-1.5 rounded-lg shadow hover:bg-green-700 transition font-semibold text-xs flex items-center gap-1.5">
+        <i class="fas fa-file-invoice"></i> Reçu
+    </button>
+
+    <div x-show="openRecu" x-transition
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div @click.away="openRecu = false"
+             class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl p-8 relative border border-gray-200 dark:border-gray-700">
+
+            <button @click="openRecu = false"
+                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl">
+                &times;
+            </button>
+
+            <div class="text-center">
+                <i class="fas fa-file-invoice-dollar text-5xl text-green-500 mb-4"></i>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Générer le reçu</h2>
+                <p class="text-gray-600 text-sm mb-4">
+                    Voulez-vous générer le reçu pour la consultation de <strong>{{ consult.patient }}</strong> ?
+                </p>
+
+                <div class="bg-gray-50 p-4 rounded-lg text-left text-sm space-y-1 mb-4">
+                    <p><span class="text-gray-500">Date :</span> {{ consult.date|date:"d/m/Y H:i" }}</p>
+                    <p><span class="text-gray-500">Service :</span> {{ consult.service }}</p>
+                    <p><span class="text-gray-500">Motif :</span> {{ consult.motif|default:"Non renseigné" }}</p>
+                </div>
+
+                <div class="flex justify-center gap-3">
+                    <button @click="openRecu = false"
+                            class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition">
+                        Annuler
+                    </button>
+                    <a href="{% url 'Utilisateur:recu_consultation' consult.id %}" target="_blank"
+                       class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition shadow-sm">
+                        <i class="fas fa-file-pdf mr-2"></i> Générer PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+                                            </div>
                                         </td>
                                     </tr>
                                 {% empty %}
@@ -652,13 +864,148 @@
         </div>
     </div>
     </body>
-    <script>
 
+    <script>
+    // ==========================================
+    // GESTION DES MÉDICAMENTS DANS L'ORDONNANCE
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const medicaments = [];
+        let counter = 1;
+        const listContainer = document.getElementById('medicament-list');
+        const emptyMsg = document.getElementById('empty-medicament-msg');
+        const medicamentInput = document.getElementById('medicament-input');
+        const quantiteInput = document.getElementById('quantite-input');
+        const addBtn = document.getElementById('add-medicament-btn');
+        const ordonnanceContenu = document.getElementById('ordonnance-contenu');
+
+        // Fonction pour mettre à jour le texte caché
+        function updateOrdonnanceContenu() {
+            if (medicaments.length === 0) {
+                ordonnanceContenu.value = '';
+                return;
+            }
+            let texte = '';
+            medicaments.forEach((med, index) => {
+                texte += `${index + 1}. ${med.nom}`;
+                if (med.quantite) {
+                    texte += ` : ${med.quantite}`;
+                }
+                texte += '\n';
+            });
+            ordonnanceContenu.value = texte.trim();
+        }
+
+        // Fonction pour rafraîchir l'affichage
+        function renderList() {
+            listContainer.innerHTML = '';
+
+            if (medicaments.length === 0) {
+                listContainer.innerHTML = `
+                    <p class="text-xs text-gray-400 dark:text-gray-500 text-center" id="empty-medicament-msg">
+                        Aucun médicament ajouté
+                    </p>
+                `;
+                updateOrdonnanceContenu();
+                return;
+            }
+
+            medicaments.forEach((med, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition';
+
+                const span = document.createElement('span');
+                span.className = 'text-gray-700 dark:text-gray-300 flex-1';
+                let text = `${index + 1}. ${med.nom}`;
+                if (med.quantite) {
+                    text += ` <span class="text-blue-600 dark:text-blue-400 font-semibold">× ${med.quantite}</span>`;
+                }
+                span.innerHTML = text;
+
+                const delBtn = document.createElement('button');
+                delBtn.type = 'button';
+                delBtn.className = 'text-red-400 hover:text-red-600 transition opacity-0 group-hover:opacity-100 ml-2';
+                delBtn.innerHTML = '<i class="fas fa-times"></i>';
+                delBtn.onclick = function() {
+                    medicaments.splice(index, 1);
+                    renderList();
+                };
+
+                div.appendChild(span);
+                div.appendChild(delBtn);
+                listContainer.appendChild(div);
+            });
+
+            updateOrdonnanceContenu();
+        }
+
+        // Ajouter un médicament
+        function addMedicament() {
+            const nom = medicamentInput.value.trim();
+            const quantite = quantiteInput.value.trim();
+
+            if (!nom) {
+                medicamentInput.focus();
+                medicamentInput.classList.add('border-red-500');
+                setTimeout(() => medicamentInput.classList.remove('border-red-500'), 1500);
+                return;
+            }
+
+            medicaments.push({
+                nom: nom,
+                quantite: quantite || ''
+            });
+
+            medicamentInput.value = '';
+            quantiteInput.value = '';
+            medicamentInput.focus();
+            renderList();
+        }
+
+        // Événements
+        addBtn.addEventListener('click', addMedicament);
+
+        medicamentInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (this.value.trim()) {
+                    addMedicament();
+                }
+            }
+        });
+
+        quantiteInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (medicamentInput.value.trim()) {
+                    addMedicament();
+                } else {
+                    medicamentInput.focus();
+                }
+            }
+        });
+
+        // Initialiser le champ caché lors de la soumission du formulaire
+        const form = document.querySelector('#enregistrer-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                updateOrdonnanceContenu();
+            });
+        }
+
+        // Rendre la fonction disponible globalement pour le reset
+        window.resetMedicaments = function() {
+            medicaments.length = 0;
+            renderList();
+        };
+    });
+</script>
+    <script>
         function submitDelete(event) {
             const form = event.target;
 
             fetch(form.action, {
-                method: 'POST', // Django POST avec CSRF
+                method: 'POST',
                 headers: {
                     'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
                     'Accept': 'application/json',
@@ -693,12 +1040,10 @@
                 }
             });
 
-            // Masquer l'état vide de base pendant une recherche
             if (emptyDbRow) {
                 emptyDbRow.style.display = searchValue === '' ? '' : 'none';
             }
 
-            // Gérer l'affichage de la ligne vide dynamique en cas de recherche infructueuse
             if (visibleRowsCount === 0 && searchValue !== '') {
                 noResultsRow.classList.remove('hidden');
             } else {
@@ -726,7 +1071,7 @@
 
             if (form) {
                 form.addEventListener('submit', function (event) {
-                    event.preventDefault(); // Empêche la soumission classique
+                    event.preventDefault();
                     showLoader();
 
                     const formData = new FormData(form);

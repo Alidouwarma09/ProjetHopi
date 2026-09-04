@@ -22,7 +22,7 @@
                 <!-- Nom de l'utilisateur -->
                 <span class="text-gray-700 font-medium hidden md:inline">
                     {{ request.user.nom }}
-                    <p class="text-xs text-gray-500">{{ request.user.role.designation }}</p>
+                    <p class="text-xs text-gray-500">{{ request.user.role.designation }}{% if request.user.role.designation == "CAISSE" %}/SECRETARIAT{% endif %}</p>
                 </span>
             </div>
         </div>

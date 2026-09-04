@@ -76,14 +76,14 @@ def acceuil(request):
     # Médicaments avec le stock le plus faible (conversion du champ stock en float)
     medicaments_stock_bas = (
         Medicament.objects
-            .annotate(stock_num=Cast('stock', FloatField()))
-            .order_by('stock_num')[:5]
+        .annotate(stock_num=Cast('stock', FloatField()))
+        .order_by('stock_num')[:5]
     )
 
     # Statistiques utilisateurs par service
     stats_services = (
         Utilisateur.objects.values('role__designation')
-            .annotate(nombre=models.Count('id'))
+        .annotate(nombre=models.Count('id'))
     )
 
     return render(request, 'accueil/index.html', {
@@ -597,21 +597,16 @@ def pdf_consultation(request, consultation_id):
         id=consultation_id
     )
     ordonnances = consultation.ordonnances.all()
-    arrets = consultation.arrets.all()
     recu = consultation.recus.first()
     prestations = recu.bulletins.all() if recu else []
 
-    # Récupérer les antécédents du patient
     antecedents = consultation.patient.antecedents.first()  # si plusieurs, prends le premier
     ant_med = antecedents.ant_med if antecedents else ""
     ant_chirur = antecedents.ant_chirur if antecedents else ""
     ant_mal = antecedents.ant_mal if antecedents else ""
-    for arret in arrets:
-        arret.date_fin = arret.date_debut + timedelta(days=arret.nombre_jours)
     context = {
         'consultation': consultation,
         'ordonnances': ordonnances,
-        'arrets': arrets,
         'recu': recu,
         'prestations': prestations,
         'ant_med': ant_med,
@@ -636,13 +631,33 @@ def pdf_consultation(request, consultation_id):
     return response
 
 
-def recu_sortie(request, sortie_id):
-    sortie = get_object_or_404(Sortie.objects.select_related('hospitalisation__patient'), id=sortie_id)
-    context = {"sortie": sortie, "hospitalisation": sortie.hospitalisation, "patient": sortie.hospitalisation.patient}
+def pdf_arret(request, consultation_id):
+    consultation = get_object_or_404(
+        Consultation.objects.select_related('patient', 'service'),
+        id=consultation_id
+    )
+    arrets = consultation.arrets.all()
 
-    html_string = render_to_string("recu_sortie.html", context)
+    # Créer une liste avec les données formatées
+    arrets_data = []
+    for arret in arrets:
+        date_fin = arret.date_debut + timedelta(days=arret.nombre_jours)
+        print("date_fin", date_fin)
+        arrets_data.append({
+            'nom_med': arret.nom_med,
+            'date_debut': arret.date_debut,
+            'date_fin': date_fin,
+            'nombre_jours': arret.nombre_jours,
+        })
 
-    # Générer PDF avec WeasyPrint
+    context = {
+        'consultation': consultation,
+        'arrets_data': arrets_data,  # <-- CHANGEMENT ICI : utiliser arrets_data
+        'date_generation': timezone.now(),
+    }
+
+    html_string = render_to_string("pdf_arret.html", context)
+
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
     try:
         HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(temp_file.name)
@@ -650,11 +665,79 @@ def recu_sortie(request, sortie_id):
         pdf = temp_file.read()
     finally:
         temp_file.close()
-        os.unlink(temp_file.name)  # suppression du fichier
+        os.unlink(temp_file.name)
 
     response = HttpResponse(pdf, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename = f"Recu_{sortie.id}_{uuid.uuid4().hex}.pdf"'
+    response["Content-Disposition"] = f'attachment; filename="Arret_Travail_{consultation.id}_{uuid.uuid4().hex}.pdf"'
     return response
+
+
+def pdf_ordonnance(request, consultation_id):
+    consultation = get_object_or_404(
+        Consultation.objects.select_related('patient'),
+        id=consultation_id
+    )
+    ordonnances = consultation.ordonnances.all()
+
+    context = {
+        'consultation': consultation,
+        'ordonnances': ordonnances,
+        'date_generation': timezone.now(),
+    }
+
+    html_string = render_to_string("pdf_ordonnance.html", context)
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    try:
+        HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(temp_file.name)
+        temp_file.seek(0)
+        pdf = temp_file.read()
+    finally:
+        temp_file.close()
+        os.unlink(temp_file.name)
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="Ordonnance_{consultation.id}_{uuid.uuid4().hex}.pdf"'
+    return response
+
+
+def recu_sortie(request, sortie_id):
+    sortie = get_object_or_404(Sortie.objects.select_related('hospitalisation__patient'), id=sortie_id)
+
+    # Récupérer la consultation associée
+    consultation = sortie.hospitalisation.patient.consultations.order_by('-date').first()
+    prix_consultation = Decimal('0')
+    if consultation and consultation.recus.first():
+        prix_consultation = consultation.recus.first().total or Decimal('0')
+
+    # Calculer le total global
+    total_global = sortie.montant_total + prix_consultation
+
+    context = {
+        "sortie": sortie,
+        "hospitalisation": sortie.hospitalisation,
+        "patient": sortie.hospitalisation.patient,
+        "consultation": consultation,
+        "prix_consultation": prix_consultation,
+        "total_global": total_global,
+        "date_generation": timezone.now(),
+    }
+
+    html_string = render_to_string("recu_sortie.html", context)
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    try:
+        HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(temp_file.name)
+        temp_file.seek(0)
+        pdf = temp_file.read()
+    finally:
+        temp_file.close()
+        os.unlink(temp_file.name)
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="Recu_Sortie_{sortie.id}_{uuid.uuid4().hex}.pdf"'
+    return response
+
 
 def carte_patient(request, patient_id):
     patient = get_object_or_404(Patient, id=patient_id)
@@ -674,22 +757,56 @@ def carte_patient(request, patient_id):
         os.unlink(temp_file.name)
 
     response = HttpResponse(pdf, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="Carte_Patient_{patient.code_patient}_{uuid.uuid4().hex}.pdf"'
+    response[
+        "Content-Disposition"] = f'attachment; filename="Carte_Patient_{patient.code_patient}_{uuid.uuid4().hex}.pdf"'
     return response
+
 
 @login_required(login_url='Utilisateur:Connexion')
 def enregistrer_sortie(request, hosp_id):
     hospitalisation = get_object_or_404(Hospitalisation, id=hosp_id)
 
     if request.method == "POST":
-        montant_total = request.POST.get("montant_total", 0)
-        observation = request.POST.get("observation", "")
+        date_fin_str = request.POST.get('date_fin', '').strip()
+        prix_soins = request.POST.get('prix_soins', '0')
+        prix_hospitalisation = request.POST.get('prix_hospitalisation', '0')
+        montant_total = request.POST.get('montant_total', '0')
+        observation = request.POST.get('observation', '').strip()
 
         with transaction.atomic():
-            # Création du reçu
+            # Nettoyer les valeurs pour Decimal
+            def to_decimal(value):
+                if not value or value.strip() == '':
+                    return Decimal('0')
+                try:
+                    return Decimal(value.strip())
+                except:
+                    return Decimal('0')
+
+            prix_soins_dec = to_decimal(prix_soins)
+            prix_hospitalisation_dec = to_decimal(prix_hospitalisation)
+            montant_total_dec = to_decimal(montant_total)
+
+            # Mettre à jour l'hospitalisation avec les prix et la date de fin
+            hospitalisation.date_fin = datetime.strptime(date_fin_str, "%Y-%m-%dT%H:%M")
+            hospitalisation.prix_soins = prix_soins_dec
+            hospitalisation.prix_hospitalisation = prix_hospitalisation_dec
+            hospitalisation.prix_total = montant_total_dec
+            hospitalisation.statut = "Terminé"
+            hospitalisation.save()
+
+            # Récupérer la consultation associée (si elle existe)
+            consultation = hospitalisation.patient.consultations.order_by('-date').first()
+            prix_consultation = Decimal('0')
+
+            if consultation and consultation.recus.first():
+                prix_consultation = consultation.recus.first().total or Decimal('0')
+
+            # Création du reçu avec tous les frais
             recu = Recu.objects.create(
-                montant=montant_total,
-                total=montant_total,
+                consultation=consultation,
+                montant=montant_total_dec,
+                total=montant_total_dec + prix_consultation,
                 monnaie=0,
                 details=f"Sortie après hospitalisation - {hospitalisation.patient.nom}"
             )
@@ -697,12 +814,15 @@ def enregistrer_sortie(request, hosp_id):
             # Création de la sortie
             sortie = Sortie.objects.create(
                 hospitalisation=hospitalisation,
-                montant_total=montant_total,
+                montant_total=montant_total_dec,
                 observation=observation,
                 recu=recu
             )
 
-        return redirect("Utilisateur:hospitalisation")
+            messages.success(request, f"Sortie enregistrée avec succès ! Total: {recu.total} FCFA")
+            return redirect("Utilisateur:hospitalisation")
+
+    return redirect("Utilisateur:hospitalisation")
 
 
 @login_required(login_url='Utilisateur:Connexion')
@@ -782,49 +902,115 @@ def ajouter_medicament(request):
     return JsonResponse({'error': 'Requête invalide.'}, status=400)
 
 
+# views.py - Ajouter cette fonction
+
+@login_required(login_url='Utilisateur:Connexion')
+def get_derniere_consultation(request, code_patient):
+    try:
+        patient = get_object_or_404(Patient, code_patient=code_patient)
+        derniere_consultation = Consultation.objects.filter(patient=patient).order_by('-date').first()
+
+        if derniere_consultation:
+            return JsonResponse({
+                'success': True,
+                'motif': derniere_consultation.motif or '',
+                'diagnostic': derniere_consultation.diagnostic or '',
+                'decision': derniere_consultation.issue_consultation or '',
+                'traitement': derniere_consultation.traitement or '',
+                'examen': derniere_consultation.examen_demande or '',
+            })
+        else:
+            return JsonResponse({
+                'success': True,
+                'motif': '',
+                'diagnostic': '',
+                'decision': '',
+                'traitement': '',
+                'examen': '',
+            })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
 @login_required(login_url='Utilisateur:Connexion')
 def ajouter_hospitalisation(request):
     if request.method == "POST":
         try:
             with transaction.atomic():
-                # Récupération des données du formulaire
                 code_patient = request.POST.get('code_patient', '').strip()
                 patient = get_object_or_404(Patient, code_patient=code_patient)
 
-                motif = request.POST.get('motif', '').strip()
-                diagnostic = request.POST.get('diagnostic', '').strip()
-                decision = request.POST.get('decision', '').strip()
-                traitement = request.POST.get('traitement', '').strip()
-                examen = request.POST.get('examen', '').strip()
-                details = request.POST.get('details', '').strip()
-                statut = request.POST.get('statut', '').strip()
-                type_hosp = request.POST.get('type', '').strip()
-                info_supp = request.POST.get('info_supp', '').strip()
+                # Récupérer la dernière consultation du patient
+                derniere_consultation = Consultation.objects.filter(patient=patient).order_by('-date').first()
 
-                # Création de l'hospitalisation
+                # Date de début (si fournie, sinon date du jour)
+                date_debut_str = request.POST.get('date_debut', '').strip()
+                if date_debut_str:
+                    date_debut = datetime.strptime(date_debut_str, "%Y-%m-%d")
+
+                # Création de l'hospitalisation avec les infos de la consultation
                 Hospitalisation.objects.create(
                     patient=patient,
-                    motif=motif,
-                    diagnotic=diagnostic,
-                    decision=decision,
-                    traitement=traitement,
-                    examen=examen,
-                    details=details,
-                    statut=statut,
-                    type=type_hosp,
-                    info_supp=info_supp
+                    motif=request.POST.get('motif', '').strip() or (
+                        derniere_consultation.motif if derniere_consultation else ''),
+                    diagnotic=request.POST.get('diagnostic', '').strip() or (
+                        derniere_consultation.diagnostic if derniere_consultation else ''),
+                    decision=request.POST.get('decision', '').strip() or (
+                        derniere_consultation.issue_consultation if derniere_consultation else ''),
+                    traitement=request.POST.get('traitement', '').strip() or (
+                        derniere_consultation.traitement if derniere_consultation else ''),
+                    examen=request.POST.get('examen', '').strip() or (
+                        derniere_consultation.examen_demande if derniere_consultation else ''),
+                    details=request.POST.get('details', '').strip() or '',
+                    statut=request.POST.get('statut', '').strip() or "En cours",
+                    type=request.POST.get('type', '').strip() or "Urgence",
+                    info_supp=request.POST.get('info_supp', '').strip() or '',
+                    date_debut=date_debut,
                 )
 
             return JsonResponse({'success': 'Hospitalisation enregistrée avec succès !'})
 
-        except ValueError as e:
-            print(f"Erreur de validation : {e}")
-            return JsonResponse(
-                {'error': 'Une erreur de validation est survenue. Veuillez vérifier les informations saisies.'},
-                status=400
-            )
+        except Exception as e:
+            print(f"Erreur : {e}")
+            return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Requête invalide.'}, status=400)
+
+
+def recu_consultation(request, consultation_id):
+    consultation = get_object_or_404(
+        Consultation.objects.select_related('patient', 'service'),
+        id=consultation_id
+    )
+
+    recu = consultation.recus.first()
+    prix_consultation = recu.total if recu else Decimal('0')
+
+    total_global = prix_consultation
+    context = {
+        "consultation": consultation,
+        "recu": recu,
+        "patient": consultation.patient,
+        "prix_consultation": prix_consultation,
+        "total_global": total_global,
+        "date_generation": timezone.now(),
+    }
+
+    html_string = render_to_string("recu_consultation.html", context)
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    try:
+        # ✅ AJOUT DE base_url ICI :
+        HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(temp_file.name)
+        temp_file.seek(0)
+        pdf = temp_file.read()
+    finally:
+        temp_file.close()
+        os.unlink(temp_file.name)
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="Recu_Consultation_{consultation.id}_{uuid.uuid4().hex}.pdf"'
+    return response
 
 
 @login_required(login_url='Utilisateur:Connexion')
@@ -845,6 +1031,8 @@ def ajouter_consultation(request):
                         ant_mal=ant_mal,
                         ant_chirur=ant_chirur
                     )
+
+                prix_prestation = request.POST.get('prix_prestation', '').strip()
 
                 def parse_decimal(value):
                     if value and value.strip():
@@ -879,11 +1067,27 @@ def ajouter_consultation(request):
                     resultat_examen=request.POST.get('resultat_examen', '').strip(),
                     statue=request.POST.get('statue', '').strip()
                 )
+                if prix_prestation:
+                    prix_val = float(prix_prestation)
+                    recu = Recu.objects.create(
+                        consultation=consultation,
+                        montant=prix_val,
+                        total=prix_val,
+                        monnaie=0,
+                    )
+                    Prestation.objects.create(
+                        recu=recu,
+                        designation="Consultation",
+                        prix=prix_val
+                    )
 
                 # Ordonnance
                 contenu_ord = request.POST.get('contenu_ordonnance', '').strip()
                 if contenu_ord:
-                    Ordonnance.objects.create(consultation=consultation, contenu=contenu_ord)
+                    Ordonnance.objects.create(
+                        consultation=consultation,
+                        contenu=contenu_ord
+                    )
 
                 # Arret
                 nombre_jours = request.POST.get('nombre_jours', '').strip()

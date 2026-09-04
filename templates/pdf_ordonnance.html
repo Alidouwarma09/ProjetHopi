@@ -1,0 +1,72 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <title>Ordonnance Médicale</title>
+    <style>
+        body { font-family: DejaVu Sans, Arial, sans-serif; color: #0f172a; padding: 20px; }
+        .header { border-bottom: 3px solid #7c3aed; padding-bottom: 10px; margin-bottom: 20px; }
+        .hospital { font-size: 20px; font-weight: 800; color: #7c3aed; }
+        .sub { font-size: 12px; color: #64748b; }
+        .title { text-align: center; font-size: 18px; font-weight: 700; margin: 20px 0; color: #7c3aed; }
+        .info { margin: 10px 0; }
+        .info strong { color: #475569; }
+        .info-grid { display: flex; gap: 40px; margin: 15px 0; flex-wrap: wrap; }
+        .info-grid .item { font-size: 13px; }
+        .info-grid .item strong { color: #475569; }
+        .ordonnance-item { background: #f8fafc; padding: 12px 16px; border-radius: 8px; margin: 6px 0; border-left: 4px solid #7c3aed; white-space: pre-wrap; }
+        .ordonnance-item .num { font-weight: 700; color: #7c3aed; margin-right: 6px; }
+        .ordonnance-item .med { font-weight: 600; }
+        .ordonnance-item .qte { color: #7c3aed; font-weight: 600; }
+        .footer { margin-top: 30px; border-top: 1px dashed #e2e8f0; padding-top: 10px; font-size: 10px; color: #94a3b8; }
+        .signature { margin-top: 30px; text-align: right; }
+        .signature .stamp { border: 2px solid #7c3aed; padding: 6px 20px; border-radius: 4px; font-weight: 700; color: #7c3aed; display: inline-block; font-size: 11px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="hospital"> MEDICARE</div>
+        <div class="sub">Cocody Riviera 2 — Tél : +225 0102030405</div>
+    </div>
+
+    <div class="title"> ORDONNANCE MÉDICALE</div>
+
+    <div class="info-grid">
+        <div class="item"><strong>Patient :</strong> {{ consultation.patient.nom|upper }} {{ consultation.patient.prenom|capfirst }}</div>
+        <div class="item"><strong>Code :</strong> {{ consultation.patient.code_patient }}</div>
+        <div class="item"><strong>Âge :</strong> {{ consultation.patient.age }} ans</div>
+        <div class="item"><strong>Date :</strong> {% now "d/m/Y" %}</div>
+    </div>
+
+    <hr style="border: 1px dashed #e2e8f0;">
+
+    <h3 style="color: #1e293b; margin: 15px 0 10px 0;"> Traitement prescrit :</h3>
+
+    {% for ord in ordonnances %}
+        <div class="ordonnance-item">
+            {{ ord.contenu|linebreaksbr }}
+            <div style="font-size: 9px; color: #94a3b8; margin-top: 6px; border-top: 1px dashed #e2e8f0; padding-top: 4px;">
+                Prescrit le : {{ ord.date|date:"d/m/Y H:i" }}
+            </div>
+        </div>
+    {% empty %}
+        <p style="color: #94a3b8; font-style: italic;">Aucune ordonnance prescrite.</p>
+    {% endfor %}
+
+    <div style="margin-top: 20px; padding: 10px; background: #f3e8ff; border-radius: 8px;">
+        <p style="font-size: 11px; color: #5b21b6;">
+            <strong> Conseil :</strong> Respecter strictement la posologie indiquée.
+            En cas de doute, contacter votre médecin traitant.
+        </p>
+    </div>
+
+    <div class="footer">
+        <div>Émis le : {% now "d/m/Y H:i" %}</div>
+        <div class="signature">
+            <div class="stamp">CACHET HÔPITAL</div>
+            <div style="margin-top: 8px; font-weight: 600; color: #0f172a;">Dr. {{ consultation.service.designation }}</div>
+        </div>
+    </div>
+</body>
+</html>

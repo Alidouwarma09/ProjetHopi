@@ -143,81 +143,124 @@
                                               class="space-y-6">
                                             {% csrf_token %}
 
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div class="space-y-4">
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Patient</label>
-                                                        <input list="codes-patients" id="code-patient"
-                                                               name="code_patient"
-                                                               x-model="selectedCode"
-                                                               placeholder="Entrer le code patient"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
+                                           <!-- Remplacer la section du formulaire d'hospitalisation par : -->
 
-                                                        <datalist id="codes-patients">
-                                                            {% for patient in patients %}
-                                                                <option value="{{ patient.code_patient }}">{{ patient.code_patient }}
-                                                                    - {{ patient.nom }}</option>
-                                                            {% endfor %}
-                                                        </datalist>
-                                                    <div x-show="selectedPatientName"
-                                                         x-transition
-                                                         class="mt-2 p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-950/40 dark:border-blue-900/50 dark:text-blue-300 text-sm flex items-center gap-2">
-                                                        <i class="fas fa-user-circle text-base"></i>
-                                                        <span>Patient sélectionné : <strong x-text="selectedPatientName"></strong></span>
-                                                    </div>
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motif</label>
-                                                        <input type="text" name="motif"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnostic</label>
-                                                        <input type="text" name="diagnostic"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Décision</label>
-                                                        <input type="text" name="decision"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Infos
-                                                            supplémentaires</label>
-                                                        <input type="text" name="info_supp"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
-                                                    </div>
-
-                                                </div>
-
-                                                <div class="space-y-4">
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Traitement</label>
-                                                        <input type="text" name="traitement"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Examen</label>
-                                                        <input type="text" name="examen"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Détails</label>
-                                                        <input type="text" name="details"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut</label>
-                                                        <input type="text" name="statut"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-                                                        <input type="text" name="type"
-                                                               class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
-                                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Colonne gauche -->
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Patient <span class="text-red-500">*</span>
+                                                </label>
+                                                <input list="codes-patients" id="code-patient" name="code_patient"
+                                                       x-model="selectedCode"
+                                                       placeholder="Entrer le code patient"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
+                                                <datalist id="codes-patients">
+                                                    {% for patient in patients %}
+                                                        <option value="{{ patient.code_patient }}">{{ patient.code_patient }} - {{ patient.nom }} {{ patient.prenom }}</option>
+                                                    {% endfor %}
+                                                </datalist>
+                                                <div x-show="selectedPatientName"
+                                                     x-transition
+                                                     class="mt-2 p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-950/40 dark:border-blue-900/50 dark:text-blue-300 text-sm flex items-center gap-2">
+                                                    <i class="fas fa-user-circle text-base"></i>
+                                                    <span>Patient sélectionné : <strong x-text="selectedPatientName"></strong></span>
                                                 </div>
                                             </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Date de début d'hospitalisation
+                                                </label>
+                                                <input type="date" name="date_debut"
+                                                       value="{% now 'Y-m-d' %}"
+                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Statut
+                                                </label>
+                                                <select name="statut"
+                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
+                                                    <option value="En cours">En cours</option>
+                                                    <option value="En observation">En observation</option>
+                                                    <option value="Stable">Stable</option>
+                                                    <option value="Critique">Critique</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Type d'hospitalisation
+                                                </label>
+                                                <select name="type"
+                                                        class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 px-4 py-2">
+                                                    <option value="Urgence">Urgence</option>
+                                                    <option value="Programmée">Programmée</option>
+                                                    <option value="Chirurgie">Chirurgie</option>
+                                                    <option value="Médecine">Médecine</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Colonne droite - Informations de la dernière consultation (lecture seule) -->
+                                        <div class="space-y-4 bg-gray-50 dark:bg-gray-800/30 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                                            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                                <i class="fas fa-file-medical-alt text-blue-500"></i>
+                                                Infos de la dernière consultation (auto-remplies)
+                                            </h4>
+
+                                            <div class="space-y-2">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Motif</label>
+                                                    <input type="text" name="motif" id="motif-input"
+                                                           placeholder="Sera auto-rempli"
+                                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Diagnostic</label>
+                                                    <input type="text" name="diagnostic" id="diagnostic-input"
+                                                           placeholder="Sera auto-rempli"
+                                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Décision</label>
+                                                    <input type="text" name="decision" id="decision-input"
+                                                           placeholder="Sera auto-rempli"
+                                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Traitement</label>
+                                                    <input type="text" name="traitement" id="traitement-input"
+                                                           placeholder="Sera auto-rempli"
+                                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Examen</label>
+                                                    <input type="text" name="examen" id="examen-input"
+                                                           placeholder="Sera auto-rempli"
+                                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Infos supplémentaires</label>
+                                                    <input type="text" name="info_supp" id="info-supp-input"
+                                                           placeholder="Optionnel"
+                                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Détails</label>
+                                                    <input type="text" name="details" id="details-input"
+                                                           placeholder="Optionnel"
+                                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300">
+                                                </div>
+                                            </div>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 italic mt-2">
+                                                <i class="fas fa-info-circle"></i> Ces champs seront automatiquement remplis si une consultation existe
+                                            </p>
+                                        </div>
+                                    </div>
 
                                             <div id="error-message" class="mt-4 text-sm"></div>
 
@@ -334,50 +377,82 @@
                                                             Sortie <i class="fa-solid fa-person-hiking"></i>
                                                         </button>
 
-                                                        <div x-show="open"
-                                                             class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
-                                                             x-transition>
-                                                            <div @click.away="open = false"
-                                                                 class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl p-8 relative border border-gray-200 dark:border-gray-700 text-left">
+                                                       <div x-show="open" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm" x-transition>
+    <div @click.away="open = false" class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto relative border border-gray-200 dark:border-gray-700">
 
-                                                                <button @click="open = false"
-                                                                        class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl">
-                                                                    &times;
-                                                                </button>
+        <button @click="open = false" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
 
-                                                                <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">🩺
-                                                                    Sortie
-                                                                    de {{ hosp.patient.nom }}</h2>
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">🩺 Sortie de {{ hosp.patient.nom }}</h2>
 
-                                                                <form method="post"
-                                                                      action="{% url 'Utilisateur:enregistrer_sortie' hosp.id %}">
-                                                                    {% csrf_token %}
-                                                                    <div class="space-y-4">
-                                                                        <div>
-                                                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Montant total de l'hospitalisation</label>
-                                                                            <input type="number" name="montant_total"
-                                                                                   step="0.01" required
-                                                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-                                                                        </div>
-                                                                        <div>
-                                                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Observation</label>
-                                                                            <textarea name="observation" rows="3"
-                                                                                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="flex justify-end gap-2 mt-6">
-                                                                        <button type="button" @click="open = false"
-                                                                                class="bg-gray-150 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition">
-                                                                            Annuler
-                                                                        </button>
-                                                                        <button type="submit"
-                                                                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition shadow-sm">
-                                                                            Enregistrer
-                                                                        </button>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
+        <form method="post" action="{% url 'Utilisateur:enregistrer_sortie' hosp.id %}" id="sortie-form">
+            {% csrf_token %}
+
+            <div class="space-y-4">
+                <!-- Date de fin -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Date de fin d'hospitalisation</label>
+                    <input type="datetime-local" name="date_fin"
+                           value="{% now 'Y-m-d\TH:i' %}"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Prix des soins -->
+              <div>
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Prix des soins (FCFA)</label>
+    <input type="number" name="prix_soins" step="0.01" value="0"
+           id="prix_soins" oninput="calculerTotal()" onchange="calculerTotal()"
+           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+</div>
+
+<!-- Prix de l'hospitalisation -->
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Prix de l'hospitalisation (FCFA)</label>
+    <input type="number" name="prix_hospitalisation" step="0.01" value="0"
+           id="prix_hospitalisation" oninput="calculerTotal()" onchange="calculerTotal()"
+           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+</div>
+
+<!-- Prix total (calculé automatiquement) -->
+<div class="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200">
+    <label class="block text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">Prix total (FCFA) <span class="font-normal text-xs text-blue-500">(calculé automatiquement)</span></label>
+    <input type="number" name="montant_total" id="montant_total" value="0"
+           step="0.01" readonly
+           class="w-full border-2 border-blue-300 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 font-bold text-blue-700 dark:text-blue-300 text-lg">
+</div>
+                <!-- Observation -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Observation</label>
+                    <textarea name="observation" rows="3"
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Observations sur la sortie..."></textarea>
+                </div>
+
+                <!-- Résumé de la consultation -->
+                <div class="bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-200">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <i class="fas fa-file-medical-alt text-blue-500"></i> Récapitulatif
+                    </h4>
+                    <div class="space-y-1 text-sm">
+                        <p><span class="text-gray-500">Patient :</span> <strong>{{ hosp.patient.nom }} {{ hosp.patient.prenom }}</strong></p>
+                        <p><span class="text-gray-500">Motif :</span> {{ hosp.motif|default:"Non renseigné" }}</p>
+                        <p><span class="text-gray-500">Date de début :</span> {{ hosp.date_debut|date:"d/m/Y H:i" }}</p>
+                        <p><span class="text-gray-500">Statut :</span> {{ hosp.statut|default:"En cours" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-6">
+                <button type="button" @click="open = false" class="bg-gray-150 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition">
+                    Annuler
+                </button>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition shadow-sm">
+                    <i class="fas fa-check mr-2"></i> Enregistrer la sortie
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
                                                     </div>
                                                 {% endif %}
 
@@ -427,7 +502,56 @@
         </div>
     </div>
     </body>
+    <script>
+    function calculerTotal() {
+        const soins = parseFloat(document.getElementById('prix_soins').value) || 0;
+        const hosp = parseFloat(document.getElementById('prix_hospitalisation').value) || 0;
+        const total = soins + hosp;
+        document.getElementById('montant_total').value = total.toFixed(2);
+    }
+</script>
+<script>
+    // ==========================================
+    // CHARGEMENT AUTO DES INFOS DE LA DERNIÈRE CONSULTATION
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const codePatientInput = document.getElementById('code-patient');
+        const motifInput = document.getElementById('motif-input');
+        const diagnosticInput = document.getElementById('diagnostic-input');
+        const decisionInput = document.getElementById('decision-input');
+        const traitementInput = document.getElementById('traitement-input');
+        const examenInput = document.getElementById('examen-input');
 
+        // Fonction pour charger les infos du patient
+        function loadPatientConsultation(codePatient) {
+            if (!codePatient || codePatient.length < 3) return;
+
+            fetch(`/get_derniere_consultation/${codePatient}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        motifInput.value = data.motif || '';
+                        diagnosticInput.value = data.diagnostic || '';
+                        decisionInput.value = data.decision || '';
+                        traitementInput.value = data.traitement || '';
+                        examenInput.value = data.examen || '';
+                    }
+                })
+                .catch(err => console.error('Erreur:', err));
+        }
+
+        // Écouter les changements du code patient
+        codePatientInput.addEventListener('change', function() {
+            loadPatientConsultation(this.value);
+        });
+
+        codePatientInput.addEventListener('blur', function() {
+            if (this.value) {
+                loadPatientConsultation(this.value);
+            }
+        });
+    });
+</script>
     <script>
         function filterHospitalisations(type, button) {
             const rows = document.querySelectorAll('#hospitalisationsTable tbody tr.h_row');

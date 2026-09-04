@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Reçu - Sortie</title>
+    <title>Reçu - Consultation</title>
 
     <style>
         /* Structure générale */
@@ -61,7 +61,7 @@
         /* Titre reçu */
         .recu-title {
             text-align: center;
-            background: linear-gradient(90deg, #e7f0ff, #ffffff);
+            background-color: #f1f8ff;
             color: #073b9a;
             padding: 10px;
             border-radius: 6px;
@@ -158,14 +158,25 @@
         .text-right {
             text-align: right;
         }
-        
+
         .text-bold {
             font-weight: 700;
         }
-        
+
         .text-green {
             color: #16a34a;
         }
+
+        .badge-consultation {
+            background: #3b82f6;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
     </style>
 </head>
 <body>
@@ -177,27 +188,28 @@
             <div class="address">Adresse : Cocody Riviera 2 — Tél : +225 0102030405</div>
         </div>
         <div style="text-align:right;">
-            <div style="font-size:12px; color:#0b5ed7; font-weight:700;">REÇU DE SORTIE</div>
-            <div style="font-size:11px; color:#334155;">N° : RQS-{{ sortie.id }}</div>
-            <div style="font-size:11px; color:#334155;">Date : {{ sortie.date_sortie|date:"d/m/Y H:i" }}</div>
+            <div style="font-size:12px; color:#0b5ed7; font-weight:700;">REÇU DE CONSULTATION</div>
+            <div style="font-size:11px; color:#334155;">N° : REC-{{ consultation.id }}</div>
+            <div style="font-size:11px; color:#334155;">Date : {{ consultation.date|date:"d/m/Y H:i" }}</div>
         </div>
     </div>
 
-    <div class="recu-title"> REÇU DE SORTIE</div>
+    <div class="recu-title">
+         REÇU DE CONSULTATION
+    </div>
 
     <div class="infos">
         <div class="left">
             <p><strong>Patient :</strong> {{ patient.nom|upper }} {{ patient.prenom|capfirst }}</p>
             <p><strong>Code patient :</strong> {{ patient.code_patient }}</p>
-            <p><strong>Motif hospitalisation :</strong> {{ hospitalisation.motif|default:"—" }}</p>
-            <p><strong>Date de début :</strong> {{ hospitalisation.date_debut|date:"d/m/Y H:i" }}</p>
-            <p><strong>Date de fin :</strong> {{ hospitalisation.date_fin|date:"d/m/Y H:i" }}</p>
+            <p><strong>Service :</strong> {{ consultation.service.designation }}</p>
+            <p><strong>Motif :</strong> {{ consultation.motif|default:"—" }}</p>
         </div>
         <div class="right">
             <p><strong>Age / Sexe :</strong> {{ patient.age }} ans / {{ patient.sexe }}</p>
             <p><strong>Groupe sanguin :</strong> {{ patient.groupe_sanguin|default:"—" }}</p>
             <p><strong>Téléphone :</strong> {{ patient.numero|default:"—" }}</p>
-            <p><strong>Statut :</strong> {{ hospitalisation.statut|default:"Terminé" }}</p>
+            <p><strong>Statut :</strong> {{ consultation.statue|default:"Consulté" }}</p>
         </div>
     </div>
 
@@ -210,40 +222,18 @@
         </tr>
         </thead>
         <tbody>
-            {% if prix_consultation > 0 %}
+            <!-- Frais de consultation -->
             <tr>
                 <td>Frais de consultation</td>
-                <td>Consultation du {{ consultation.date|date:"d/m/Y" }}</td>
+                <td>{{ consultation.service.designation }}</td>
                 <td style="text-align:right">{{ prix_consultation|floatformat:2 }}</td>
             </tr>
-            {% endif %}
-            
-            {% if hospitalisation.prix_soins > 0 %}
-            <tr>
-                <td>Frais de soins</td>
-                <td>Soins pendant l'hospitalisation</td>
-                <td style="text-align:right">{{ hospitalisation.prix_soins|floatformat:2 }}</td>
-            </tr>
-            {% endif %}
-            
-            <tr>
-                <td>Frais d'hospitalisation</td>
-                <td>Du {{ hospitalisation.date_debut|date:"d/m/Y" }} au {{ hospitalisation.date_fin|date:"d/m/Y" }}</td>
-                <td style="text-align:right">{{ hospitalisation.prix_hospitalisation|floatformat:2 }}</td>
-            </tr>
 
-            <!-- Sous-total -->
             <tr class="total-row">
                 <td colspan="2"><strong>Sous-total</strong></td>
-                <td style="text-align:right"><strong>{{ sortie.montant_total|add:prix_consultation|floatformat:2 }}</strong></td>
+                <td style="text-align:right"><strong>{{ prix_consultation|floatformat:2 }}</strong></td>
             </tr>
-            
-            <!-- Remise éventuelle (0 par défaut) -->
-            <tr>
-                <td colspan="2">Remise</td>
-                <td style="text-align:right; color:#16a34a;">0,00</td>
-            </tr>
-            
+
             <!-- GRAND TOTAL -->
             <tr class="grand-total-row">
                 <td colspan="2"><strong>TOTAL À PAYER</strong></td>
@@ -253,7 +243,8 @@
     </table>
 
     <div class="footer">
-        <div><strong>Observation :</strong> {{ sortie.observation|default:"Aucune observation" }}</div>
+        <div><strong>Diagnostic :</strong> {{ consultation.diagnostic|default:"Non renseigné" }}</div>
+        <div><strong>Traitement :</strong> {{ consultation.traitement|default:"Non renseigné" }}</div>
 
         <div class="signature">
             <div class="left">

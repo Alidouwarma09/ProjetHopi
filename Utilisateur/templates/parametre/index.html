@@ -1,152 +1,392 @@
+
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <body class="bg-gray-50 font-sans">
-    <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-gray-200">
-            <a href="{% url 'Utilisateur:acceuil' %}" class="p-4 flex items-center space-x-3 border-b">
-                <div class="bg-blue-600 text-white p-2 rounded-lg">
-                    <i class="fas fa-hospital text-xl"></i>
-                </div>
-                <span class="logo-text text-xl font-bold text-gray-800">MediCare</span>
-            </a>
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-4">
-                    <div class="flex items-center">
-                        <h1 class="text-2xl font-bold text-gray-900">Gestion du compte</h1>
-                    </div>
-                    <div class="flex items-center space-x-4">
 
-                        <div class="flex items-center space-x-2 ml-4">
-                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                <span class="text-blue-600 font-semibold">{{ request.user.prenom|first|upper }}{{ request.user.nom|first|upper }}</span>
-                            </div>
-                            <div class="hidden md:block">
-                                <p class="text-sm font-medium text-gray-900">{{ request.user.prenom }} {{ request.user.nom }}</p>
-                                <p class="text-xs text-gray-500">{{ request.user.role.designation }}</p>
-                            </div>
+<style>
+    .profile-card {
+        transition: all 0.3s ease;
+    }
+    .profile-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+    }
+    .input-group:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .avatar-upload {
+        position: relative;
+        cursor: pointer;
+    }
+    .avatar-upload:hover .avatar-overlay {
+        opacity: 1;
+    }
+    .avatar-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .badge-role {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+    .badge-status .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .badge-status.active {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .badge-status.active .dot {
+        background: #22c55e;
+    }
+    .badge-status.inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    .badge-status.inactive .dot {
+        background: #ef4444;
+    }
+    .section-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    .info-row .label {
+        color: #64748b;
+        font-size: 13px;
+    }
+    .info-row .value {
+        color: #0f172a;
+        font-weight: 600;
+        font-size: 13px;
+    }
+</style>
+
+<body class="bg-gray-50 font-sans">
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-2 rounded-xl shadow-lg shadow-blue-200">
+                            <i class="fas fa-cog text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Paramètres</h1>
+                            <p class="text-sm text-gray-500">Gérez votre compte et vos préférences</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 ml-4">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-200">
+                            {{ request.user.prenom|first|upper }}{{ request.user.nom|first|upper }}
+                        </div>
+                        <div class="hidden md:block">
+                            <p class="text-sm font-medium text-gray-900">{{ request.user.prenom }} {{ request.user.nom }}</p>
+                            <p class="text-xs text-gray-500">{{ request.user.role.designation }}</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <!-- Main Content -->
-        <main class="flex-grow">
-            <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                <div class="px-4 py-6 sm:px-0">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <!-- Sidebar Navigation -->
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div class="px-4 py-6 sm:px-0">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Sidebar Navigation -->
+                    <div class="lg:col-span-3">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 sticky top-24 overflow-hidden">
+                            <!-- Profile Card -->
+                            <div class="p-5 border-b border-gray-100 bg-gradient-to-br from-blue-50 to-white">
+                                <div class="flex flex-col items-center text-center">
+                                    <div class="avatar-upload">
+                                        <div class="h-20 w-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-200">
+                                            {{ request.user.prenom|first|upper }}{{ request.user.nom|first|upper }}
+                                        </div>
+                                    </div>
+                                    <h3 class="mt-3 font-semibold text-gray-900">{{ request.user.prenom }} {{ request.user.nom }}</h3>
+                                    <span class="badge-role mt-1">{{ request.user.role.designation }}</span>
+                                    <span class="badge-status active mt-2">
+                                        <span class="dot"></span> En ligne
+                                    </span>
+                                </div>
+                            </div>
 
-                        <!-- Profile Content -->
-                        <div class="lg:col-span-10">
-                            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                                <div class="p-6 border-b border-gray-200">
-                                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
-                                        <i class="fas fa-user-circle mr-3 text-blue-600"></i>
-                                        Informations du profil
-                                    </h2>
-                                    <p class="mt-1 text-sm text-gray-500">
-                                        Gérez vos informations personnelles et comment les autres utilisateurs vous
-                                        voient sur la plateforme.
-                                    </p>
+                            <!-- Navigation Items -->
+                            <div class="p-3 space-y-1">
+                                <a href="#profil" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-600 font-medium text-sm transition-all duration-200">
+                                    <i class="fas fa-user text-sm"></i>
+                                    <span>Mon profil</span>
+                                    <span class="ml-auto w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                                </a>
+                                <a href="#securite" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all duration-200">
+                                    <i class="fas fa-shield-alt text-sm"></i>
+                                    <span>Sécurité</span>
+                                </a>
+                                <a href="#notifications" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all duration-200">
+                                    <i class="fas fa-bell text-sm"></i>
+                                    <span>Notifications</span>
+                                    <span class="ml-auto text-[10px] font-semibold bg-red-500 text-white px-2 py-0.5 rounded-full">3</span>
+                                </a>
+                                <a href="#preferences" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all duration-200">
+                                    <i class="fas fa-sliders-h text-sm"></i>
+                                    <span>Préférences</span>
+                                </a>
+                                <hr class="my-2 border-gray-100">
+                                <a href="{% url 'Utilisateur:acceuil' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all duration-200">
+                                    <i class="fas fa-arrow-left text-sm"></i>
+                                    <span>Retour au tableau de bord</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Content -->
+                    <div class="lg:col-span-9">
+                        <div class="space-y-6">
+                            <!-- Informations du profil -->
+                            <div id="profil" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden profile-card">
+                                <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                                                <i class="fas fa-user-circle mr-3 text-blue-600"></i>
+                                                Informations personnelles
+                                            </h2>
+                                            <p class="mt-1 text-sm text-gray-500">
+                                                Gérez vos informations personnelles et votre profil.
+                                            </p>
+                                        </div>
+                                        <span class="text-xs text-gray-400">Dernière mise à jour : aujourd'hui</span>
+                                    </div>
                                 </div>
 
                                 <div class="p-6">
-                                    <form method="POST" action="{% url 'Utilisateur:modifier_profil' %}"
-                                          class="space-y-6">
+                                    <form method="POST" action="{% url 'Utilisateur:modifier_profil' %}" class="space-y-6">
                                         {% csrf_token %}
-                                        <!-- Avatar Section -->
-                                        <div class="flex items-center space-x-6">
-                                            <div class="h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
+
+                                        <!-- Avatar et informations rapides -->
+                                        <div class="flex items-center space-x-6 pb-6 border-b border-gray-100">
+                                            <div class="h-20 w-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-200">
                                                 {{ request.user.prenom|first|upper }}{{ request.user.nom|first|upper }}
                                             </div>
                                             <div>
-                                                <h3 class="text-lg font-medium text-gray-900">
-                                                    {{ request.user.prenom }} - {{ request.user.nom }}</h3>
-
-
+                                                <h3 class="text-lg font-semibold text-gray-900">
+                                                    {{ request.user.prenom }} {{ request.user.nom }}
+                                                </h3>
+                                                <p class="text-sm text-gray-500">{{ request.user.role.designation }}</p>
+                                                <p class="text-sm text-gray-500">{{ request.user.role.service.designation }}</p>
                                             </div>
                                         </div>
 
-                                        <!-- Personal Information -->
+                                        <!-- Formulaire -->
                                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                             <div>
-                                                <label for="nom" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                                                <label for="nom" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                                    <i class="fas fa-user text-gray-400 mr-1"></i> Nom
+                                                </label>
                                                 <input type="text" id="nom" name="nom"
-                                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                       class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50/50"
                                                        value="{{ request.user.nom }}">
                                             </div>
                                             <div>
-                                                <label for="prenom"
-                                                       class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                                                <label for="prenom" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                                    <i class="fas fa-user text-gray-400 mr-1"></i> Prénom
+                                                </label>
                                                 <input type="text" id="prenom" name="prenom"
-                                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                       class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50/50"
                                                        value="{{ request.user.prenom }}">
                                             </div>
                                             <div>
-                                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Identifiant</label>
-                                                <input type="email" id="email" name="username"
-                                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                                    <i class="fas fa-envelope text-gray-400 mr-1"></i> Email / Identifiant
+                                                </label>
+                                                <input type="text" id="email" name="username"
+                                                       class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50/50"
                                                        value="{{ request.user.username }}">
                                             </div>
                                             <div>
-                                                <label for="role"
-                                                       class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+                                                <label for="role" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                                    <i class="fas fa-briefcase text-gray-400 mr-1"></i> Rôle
+                                                </label>
                                                 <input type="text" id="role" name="role" disabled
-                                                       class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                                       class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed"
                                                        value="{{ request.user.role.designation }}">
                                             </div>
-                                        </div>
-                                        <div>
-                                            <label for="new-password"
-                                                   class="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de
-                                                passe</label>
-                                            <input type="password" id="new-password" name="password"
-                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                                                   placeholder="••••••••">
-                                        </div>
-
-                                        <!-- Professional Information -->
-                                        <div>
-                                            <h3 class="text-lg font-medium text-gray-900 mb-4">Informations
-                                                professionnelles</h3>
-                                            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-
-                                                <div>
-                                                    <label for="service"
-                                                           class="block text-sm font-medium text-gray-700 mb-1">Service</label>
-                                                    <input type="text" id="service" name="service" disabled
-                                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                                                           value="{{ request.user.role.service.designation }}">
+                                            <div>
+                                                <label for="service" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                                    <i class="fas fa-building text-gray-400 mr-1"></i> Service
+                                                </label>
+                                                <input type="text" id="service" name="service" disabled
+                                                       class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed"
+                                                       value="{{ request.user.role.service.designation }}">
+                                            </div>
+                                            <div>
+                                                <label for="status" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                                    <i class="fas fa-circle text-green-400 mr-1"></i> Statut
+                                                </label>
+                                                <div class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-600">
+                                                    <span class="badge-status active">
+                                                        <span class="dot"></span> En ligne
+                                                    </span>
                                                 </div>
                                             </div>
-
                                         </div>
 
-
-                                        <!-- Password Section -->
+                                        <!-- Sécurité -->
+                                        <div id="securite" class="pt-6 border-t border-gray-100">
+                                            <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                                <i class="fas fa-shield-alt mr-3 text-blue-600"></i>
+                                                Sécurité du compte
+                                            </h3>
+                                            <p class="text-sm text-gray-500 mb-4">
+                                                Changez votre mot de passe pour sécuriser votre compte.
+                                            </p>
+                                            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                                <div>
+                                                    <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                                        <i class="fas fa-key text-gray-400 mr-1"></i> Nouveau mot de passe
+                                                    </label>
+                                                    <input type="password" id="new-password" name="password"
+                                                           class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50/50"
+                                                           placeholder="••••••••">
+                                                </div>
+                                                <div>
+                                                    <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                                        <i class="fas fa-check-circle text-gray-400 mr-1"></i> Confirmer le mot de passe
+                                                    </label>
+                                                    <input type="password" id="confirm-password" name="confirm_password"
+                                                           class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50/50"
+                                                           placeholder="••••••••">
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                                <p class="text-xs text-blue-700">
+                                                    <i class="fas fa-info-circle mr-1"></i>
+                                                    Le mot de passe doit contenir au moins 8 caractères avec des lettres, chiffres et caractères spéciaux.
+                                                </p>
+                                            </div>
+                                        </div>
 
                                         <!-- Actions -->
-                                        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                                            <a href="{% url 'Utilisateur:acceuil' %}" type="button"
-                                                    class="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                        <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                                            <a href="{% url 'Utilisateur:acceuil' %}"
+                                               class="px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
                                                 Annuler
                                             </a>
                                             <button type="submit"
-                                                    class="px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                                                Enregistrer les modifications
+                                                    class="px-6 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                                                <i class="fas fa-save mr-2"></i> Enregistrer
                                             </button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
+
+                            <!-- Statistiques du compte -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Dernière connexion</p>
+                                            <p class="text-sm font-semibold text-gray-800 mt-1">
+                                                {% if request.user.last_activity %}
+                                                    {{ request.user.last_activity|date:"d/m/Y H:i" }}
+                                                {% else %}
+                                                    Aujourd'hui
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                                            <i class="fas fa-clock text-blue-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Membre depuis</p>
+                                            <p class="text-sm font-semibold text-gray-800 mt-1">
+                                                {% if request.user.creat %}
+                                                    {{ request.user.date_joined|date:"d/m/Y" }}
+                                                {% else %}
+                                                    Non disponible
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+                                            <i class="fas fa-calendar-alt text-green-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Statut du compte</p>
+                                            <p class="text-sm font-semibold text-gray-800 mt-1">
+                                                <span class="badge-status active">
+                                                    <span class="dot"></span> Actif
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                                            <i class="fas fa-check-circle text-purple-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
-    </body>
+        </div>
+    </main>
+</div>
+</body>
 {% endblock %}

@@ -133,67 +133,8 @@
     </div>
 
 
-    {% if ordonnances %}
-        <div>
-            <h3>Ordonnances</h3>
-            <ul>
-                {% for ord in ordonnances %}
-                    <li>{{ ord.contenu }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-
-    {% if arrets %}
-        <div>
-            <h3>Arrêts de travail</h3>
-            <table>
-                <thead>
-                <tr>
-                    <th>Nombre de jours</th>
-                    <th>Date de début</th>
-                    <th>Date de fin</th>
-                    <th>Médecin</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for arret in arrets %}
-                    <tr>
-                        <td>{{ arret.nombre_jours }}</td>
-                        <td>{{ arret.date_debut|date:"d/m/Y" }}</td>
-                        <td>{{ arret.date_fin|date:"d/m/Y" }}</td>
-                        <td>{{ arret.nom_med }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% endif %}
-
-    {% if recu %}
-        <div>
-            <h3>Prestations / Reçu</h3>
-            <table>
-                <thead>
-                <tr>
-                    <th>Désignation</th>
-                    <th>Prix (FCFA)</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for p in prestations %}
-                    <tr>
-                        <td>{{ p.designation }}</td>
-                        <td style="text-align:right">{{ p.prix }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <p><strong>Total :</strong> {{ recu.total }} FCFA</p>
-        </div>
-    {% endif %}
-
     <div class="footer">
+
         Document généré automatiquement par le système de gestion médicale de l'Hôpital.
     </div>
 </div>

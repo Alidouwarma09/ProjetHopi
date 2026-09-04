@@ -111,7 +111,7 @@ class Patient(models.Model):
     numero = models.CharField(max_length=20)
     statut_conjugal = models.CharField(max_length=40)
     groupe_sanguin = models.CharField(max_length=5)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     code_patient = models.CharField(max_length=6, unique=True, editable=False, blank=True)
 
     def __str__(self):
@@ -181,7 +181,7 @@ class Consultation(models.Model):
     issue_consultation = models.CharField(blank=True, null=True, max_length=250)
     resultat_examen = models.CharField(blank=True, null=True, max_length=250)
     statue = models.CharField(blank=True, null=True, max_length=250)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Consultation de {self.patient} le {self.date}"
@@ -198,7 +198,7 @@ class Recu(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)
     monnaie = models.DecimalField(max_digits=10, decimal_places=2)
     details = models.CharField(max_length=350)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Reçu {self.id} - {self.patient}"
@@ -211,6 +211,8 @@ class Hospitalisation(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='hospitalisations')
     motif = models.CharField(blank=True, null=True, max_length=250)
     diagnotic = models.CharField(blank=True, null=True, max_length=550)
+    date_debut = models.DateTimeField(default=timezone.now)
+    date_fin = models.DateTimeField(blank=True, null=True)  # Date de fin de l'hospitalisation
     decision = models.CharField(blank=True, null=True, max_length=250)
     traitement = models.CharField(blank=True, null=True, max_length=250)
     examen = models.CharField(blank=True, null=True, max_length=250)
@@ -218,9 +220,21 @@ class Hospitalisation(models.Model):
     statut = models.CharField(blank=True, null=True, max_length=250)
     type = models.CharField(blank=True, null=True, max_length=250)
     info_supp = models.CharField(blank=True, null=True, max_length=250)
+    prix_soins = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Prix des soins
+    prix_hospitalisation = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Prix de l'hospitalisation
+    prix_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Prix total
 
     def __str__(self):
         return f"Hospitalisation de {self.patient}"
+
+    def calculer_prix_total(self):
+        """Calcule automatiquement le prix total"""
+        self.prix_total = self.prix_soins + self.prix_hospitalisation
+        return self.prix_total
+
+    def save(self, *args, **kwargs):
+        self.calculer_prix_total()
+        super().save(*args, **kwargs)
 
 
 class Examen(models.Model):
@@ -255,7 +269,7 @@ class Medicament(models.Model):
 class Ordonnance(models.Model):
     consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, related_name='ordonnances')
     contenu = models.CharField(blank=True, null=True, max_length=250)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Ordonnance pour {self.consultation}"
@@ -270,7 +284,7 @@ class Prestation(models.Model):
 class ArretTravail(models.Model):
     consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, related_name='arrets')
     nombre_jours = models.IntegerField()
-    date_debut = models.DateField()
+    date_debut = models.DateTimeField(default=timezone.now)
     nom_med = models.CharField(blank=True, null=True, max_length=250)
 
     def __str__(self):
@@ -286,16 +300,3 @@ class Sortie(models.Model):
 
     def __str__(self):
         return f"Sortie de {self.hospitalisation.patient.nom} {self.hospitalisation.patient.prenom} - {self.date_sortie}"
-
-    @property
-    def montant_total_formate(self):
-
-        montant_int = int(self.montant_total)
-
-        formatted_int = f"{montant_int:,}".replace(",", " ")
-
-        decimaux = f"{self.montant_total:.2f}".split(".")[1]
-
-        if decimaux == "00":
-            return f"{formatted_int} FCFA"
-        return f"{formatted_int},{decimaux} FCFA"

@@ -7,7 +7,6 @@
     <title>Carte Patient - {{ patient.code_patient }}</title>
 
     <style>
-        /* Structure générale identique au reçu de sortie */
         body {
             font-family: DejaVu Sans, Arial, Helvetica, sans-serif;
             color: #0f172a;
@@ -19,7 +18,6 @@
             padding: 10px;
         }
 
-        /* Entête bleu & logo */
         .header {
             display: flex;
             align-items: center;
@@ -66,7 +64,6 @@
             color: #334155;
         }
 
-        /* Titre carte */
         .card-title {
             text-align: center;
             background: linear-gradient(90deg, #e7f0ff, #ffffff);
@@ -78,9 +75,7 @@
             border: 1px solid #dbeafe;
         }
 
-        /* ============================================
-           CODE PATIENT - EN EVIDENCE
-           ============================================ */
+
         .code-patient-block {
             text-align: center;
             background: #0f172a;
@@ -116,7 +111,6 @@
             letter-spacing: 1px;
         }
 
-        /* Bloc info */
         .infos {
             width: 100%;
             margin-bottom: 14px;
@@ -150,7 +144,6 @@
             font-weight: 600;
         }
 
-        /* Table récap */
         .table {
             width: 100%;
             border-collapse: collapse;
@@ -179,7 +172,6 @@
             font-size: 11px;
         }
 
-        /* Barcode */
         .barcode-section {
             text-align: center;
             padding: 10px 0;
@@ -188,22 +180,6 @@
             margin: 12px 0;
         }
 
-        .barcode {
-            font-family: 'Courier New', monospace;
-            font-size: 20px;
-            letter-spacing: 3px;
-            color: #0f172a;
-            font-weight: 700;
-        }
-
-        .barcode-text {
-            font-size: 10px;
-            color: #94a3b8;
-            margin-top: 4px;
-            letter-spacing: 1px;
-        }
-
-        /* Footer */
         .footer {
             margin-top: 26px;
             font-size: 11px;
@@ -238,7 +214,6 @@
             margin-top: 8px;
         }
 
-        /* Impression */
         @media print {
             body {
                 background: white;
@@ -254,9 +229,7 @@
 </head>
 <body>
 <div class="page">
-    <!-- ==========================================
-    ENTÊTE
-    ========================================== -->
+
     <div class="header">
         <div class="header-text">
             <div class="ministere">République de Côte d'Ivoire — Ministère de la Santé</div>
@@ -270,23 +243,17 @@
         </div>
     </div>
 
-    <!-- ==========================================
-    TITRE
-    ========================================== -->
+
     <div class="card-title">FICHE D'IDENTIFICATION DU PATIENT</div>
 
-    <!-- ==========================================
-    CODE PATIENT EN EVIDENCE
-    ========================================== -->
+
     <div class="code-patient-block">
         <span class="label">CODE PATIENT</span>
         <div class="code">{{ patient.code_patient }}</div>
         <span class="sub">• Identifiant unique •</span>
     </div>
 
-    <!-- ==========================================
-    INFORMATIONS PATIENT
-    ========================================== -->
+
     <div class="infos">
         <div class="left">
             <p><strong>Nom et Prénom :</strong> <span class="value">{{ patient.nom|upper }} {{ patient.prenom|capfirst }}</span></p>
