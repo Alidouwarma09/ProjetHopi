@@ -1,260 +1,503 @@
+
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <body class="bg-gray-100 font-sans">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        {% include 'personnel_navbar.html' %}
 
+<style>
+    .stat-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #f1f5f9;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+        border-color: #e2e8f0;
+    }
+    .stat-card .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover .icon-wrapper {
+        transform: scale(1.05);
+    }
+    .stat-card .stat-number {
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 500;
+    }
+    .stat-card .stat-trend {
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 10px;
+        border-radius: 20px;
+    }
+    .stat-card .stat-trend.up {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .stat-card .stat-trend.down {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    .stat-card .stat-trend.neutral {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .stat-card .card-decoration {
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        opacity: 0.05;
+        pointer-events: none;
+    }
 
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <!-- Top Navigation -->
-            {% include 'header.html' %}
+    .recent-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .recent-table tbody tr {
+        transition: all 0.2s ease;
+    }
+    .recent-table tbody tr:hover {
+        background: #f8fafc;
+    }
+    .recent-table tbody tr:last-child td {
+        border-bottom: none;
+    }
 
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    .section-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .section-header h2 i {
+        color: #3b82f6;
+        font-size: 20px;
+    }
 
-            <!-- Dashboard Content -->
-            <main class="p-6">
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    {% if request.user.role.designation == "Medecin" %}
-                        <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                            <a href="" class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-500">Voir les Consultations</p>
-                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">Consultations</h3>
-                                    <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i>
-                                        Gerer le Consultations
-                                    </p>
-                                </div>
-                                <div class="bg-blue-100 p-3 rounded-lg">
-                                    <i class="fas fa-procedures text-blue-600 text-xl"></i>
-                                </div>
-                            </a>
-                        </div>
+    .med-card {
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    .med-card:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
+        transform: translateY(-2px);
+    }
+    .med-card .stock-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 10px;
+        border-radius: 20px;
+    }
+    .med-card .stock-badge.critical {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    .med-card .stock-badge.low {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .med-card .stock-badge.normal {
+        background: #dcfce7;
+        color: #166534;
+    }
 
-                    {% endif %}
+    .grid-gap {
+        gap: 20px;
+    }
 
-                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                        <a href="{% url 'Utilisateur:gestion_patients' %}" class="flex items-center justify-between">
+    /* Animation d'entrée */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-in {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+    .animate-in:nth-child(1) { animation-delay: 0.05s; }
+    .animate-in:nth-child(2) { animation-delay: 0.1s; }
+    .animate-in:nth-child(3) { animation-delay: 0.15s; }
+    .animate-in:nth-child(4) { animation-delay: 0.2s; }
+</style>
+
+<body class="bg-gray-50 font-sans">
+<div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    {% include 'personnel_navbar.html' %}
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <!-- Top Navigation -->
+        {% include 'header.html' %}
+
+        <!-- Dashboard Content -->
+        <main class="p-6">
+            <!-- Stats Cards - Affichage dynamique selon le rôle -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+                
+                <!-- Carte 1: Patients (visible pour tous) -->
+                <div class="stat-card bg-white rounded-xl shadow-sm p-5 animate-in">
+                    <a href="{% url 'Utilisateur:gestion_patients' %}" class="block">
+                        <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm text-gray-500">Voir les patient</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1">Patients</h3>
-                                <p class="text-xs text-green-500 mt-2"> {% if stats_patient %}
-                                    <i class="fas fa-arrow-up mr-1"></i> {{ stats_patient }} nouveaux patient{% endif %}
+                                <p class="stat-label">Patients</p>
+                                <p class="stat-number mt-0.5">{{ patients|length }}</p>
+                                <p class="stat-trend up mt-2">
+                                    <i class="fas fa-arrow-up text-xs"></i>
+                                    {% if stats_patient %}{{ stats_patient }} nouveau{% if stats_patient > 1 %}x{% endif %}{% endif %}
                                 </p>
                             </div>
-                            <div class="bg-green-100 p-3 rounded-lg">
-                                <i class="fas fa-user-md text-green-600 text-xl"></i>
-                            </div>
-                        </a>
-                    </div>
-                    {% if request.user.role.designation == "CAISSE" or request.user.role.designation == "ADMIN" or request.user.role.designation == "MEDECIN" %}
-                        <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                            <div class="flex items-center justify-between">
-                                <a href="{% url 'Utilisateur:gestionRdvs' %}">
-                                    <p class="text-sm text-gray-500">Rendez-vous</p>
-                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">Agenda</h3>
-                                    <p class="text-xs text-blue-500 mt-2"><i class="fas fa-arrow-up mr-1"></i> Consulter
-                                        la
-                                        liste
-                                    </p>
-                                </a>
-                                <div class="bg-purple-100 p-3 rounded-lg">
-                                    <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
-                                </div>
+                            <div class="icon-wrapper bg-blue-50 text-blue-600">
+                                <i class="fas fa-user-md text-xl"></i>
                             </div>
                         </div>
-                    {% endif %}
-                    {% if request.user.role.designation == "CAISSE" %}
-
-                        <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                            <div class="flex items-center justify-between">
-                                <a href="{% url 'Utilisateur:sorties' %}">
-                                    <p class="text-sm text-gray-500">Genere des recus</p>
-                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">Recus</h3>
-                                    <p class="text-xs text-gray-500 mt-2">Génération des récus</p>
-                                </a>
-                                <div class="bg-yellow-100 p-3 rounded-lg">
-                                    <i class="fas fa-bed text-yellow-600 text-xl"></i>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                    {% if request.user.role.designation == "TECHNICIEN" %}
-
-                        <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                            <div class="flex items-center justify-between">
-                                <a href="{% url 'Utilisateur:examens' %}">
-                                    <p class="text-sm text-gray-500">Gerer les examens</p>
-                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">EXAMENS</h3>
-                                    <p class="text-xs text-gray-500 mt-2">Les examens disponibles</p>
-                                </a>
-                                <div class="bg-yellow-100 p-3 rounded-lg">
-                                    <i class="fas fa-bed text-yellow-600 text-xl"></i>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
+                        <div class="card-decoration bg-blue-600"></div>
+                    </a>
                 </div>
 
-                <!-- Charts Row -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <!-- Patients Chart -->
-                    <!-- Hospitalisations récentes -->
-                    {% if request.user.role.designation == "CAISSE" or request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" %}
-                        <div class="card-hover bg-white rounded-xl shadow-sm p-6 lg:col-span-2 mt-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <h2 class="text-lg font-semibold text-gray-800">Hospitalisations récentes</h2>
+                <!-- Carte 2: Consultations (Medecin, Admin, Caisse) -->
+                {% if request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" or request.user.role.designation == "CAISSE" %}
+                <div class="stat-card bg-white rounded-xl shadow-sm p-5 animate-in">
+                    <a href="{% url 'Utilisateur:consultation' %}" class="block">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="stat-label">Consultations</p>
+                                <p class="stat-number mt-0.5">{{ nombre_consult }}</p>
+                                <p class="stat-trend neutral mt-2">
+                                    <i class="fas fa-clock text-xs"></i> Gérer
+                                </p>
                             </div>
-
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                            Patient
-                                        </th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                            Diagnotic
-                                        </th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                            Motif
-                                        </th>
-                                    </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                    {% for hosp in hospitalisations_recentes %}
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-4 py-3">{{ hosp.patient.nom }} {{ hosp.patient.prenom }}</td>
-                                            <td class="px-4 py-3">{{ hosp.diagnotic }}</td>
-                                            <td class="px-4 py-3">{{ hosp.motif }}</td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr>
-                                            <td colspan="3" class="text-center py-4 text-gray-500">
-                                                Aucune hospitalisation récente
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
+                            <div class="icon-wrapper bg-purple-50 text-purple-600">
+                                <i class="fas fa-stethoscope text-xl"></i>
                             </div>
                         </div>
-
-                    {% endif %}
-                    <!-- Departments Chart -->
-
+                        <div class="card-decoration bg-purple-600"></div>
+                    </a>
                 </div>
-                {% if request.user.role.designation == "PHARMACIEN" or request.user.role.designation == "ADMIN" %}
-                    <div class="card-hover bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800">Médicaments récents</h2>
-                            <a href="{% url 'Utilisateur:pharmacie' %}"
-                               class="text-sm text-blue-600 hover:underline">Voir tout</a>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {% for med in medicaments_recents %}
-                                <div class="border rounded-lg p-3 hover:shadow-md transition">
-                                    <h3 class="font-semibold text-gray-900">{{ med.designation }}</h3>
-                                    <p class="text-sm text-gray-600">Code : {{ med.code }}</p>
-                                    <p class="text-sm text-gray-600">Prix : {{ med.prix }} FCFA</p>
-                                    <p class="text-sm {% if med.stock|floatformat:0|add:0 < 5 %}text-red-500{% else %}text-green-600{% endif %}">
-                                        Stock : {{ med.stock }}
-                                    </p>
-                                    <p class="text-xs text-gray-500">Expire
-                                        le {{ med.date_expiration|date:"d/m/Y" }}</p>
-                                </div>
-                            {% empty %}
-                                <p class="text-gray-500 text-sm">Aucun médicament enregistré récemment.</p>
-                            {% endfor %}
-                        </div>
-                    </div>
                 {% endif %}
 
-                <!-- Patients and Rooms Row -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Recent Patients -->
-                    <div class="card-hover bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800">Patients récents</h2>
-                            <a href="{% url 'Utilisateur:gestion_patients' %}"
-                               class="text-sm text-blue-600 hover:underline">Voir tout</a>
+                <!-- Carte 3: Rendez-vous (Medecin, Admin, Caisse) -->
+                {% if request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" or request.user.role.designation == "CAISSE" %}
+                <div class="stat-card bg-white rounded-xl shadow-sm p-5 animate-in">
+                    <a href="{% url 'Utilisateur:gestionRdvs' %}" class="block">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="stat-label">Rendez-vous</p>
+                                <p class="stat-number mt-0.5">{{ nombre_rdv }}</p>
+                                <p class="stat-trend neutral mt-2">
+                                    <i class="fas fa-calendar text-xs"></i> Agenda
+                                </p>
+                            </div>
+                            <div class="icon-wrapper bg-indigo-50 text-indigo-600">
+                                <i class="fas fa-calendar-check text-xl"></i>
+                            </div>
                         </div>
-
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Patient
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Code patient
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Sexe
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Groupe sanguin
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                {% if patients %}
-                                    {% for patient in patients %}
-                                        <tr class="patient-status-discharged hover:bg-gray-50">
-                                            <td class="px-4 py-4 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 h-10 w-10">
-                                                        <img class="h-10 w-10 rounded-full"
-                             src="{% if patient.sexe == 'Masculin' or patient.sexe == 'M' %}https://randomuser.me/api/portraits/men/75.jpg{% else %}https://randomuser.me/api/portraits/women/75.jpg{% endif %}"
-                             alt="">
-                                                    </div>
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium text-gray-900">{{ patient.nom }}</div>
-                                                        <div class="text-sm text-gray-500">{{ patient.age }} ans</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4 py-4 whitespace-nowrap">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{{ patient.code_patient }}</span>
-                                            </td>
-                                            <td class="px-4 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900">{{ patient.sexe }}</div>
-                                            </td>
-
-                                            <td class="px-4 py-4 whitespace-nowrap">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-green-800">{{ patient.groupe_sanguin }}</span>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <td class="px-4 py-4 whitespace-nowrap text-center">
-                                        <span class="px-2 text-center mx-auto inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-green-800">Aucun patient disponible</span>
-                                    </td>
-                                {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Room Status -->
-                    {% if request.user.role.designation == "PHARMACIEN" or request.user.role.designation == "ADMIN" %}
-                        <div class="card-hover bg-white rounded-xl shadow-sm p-6 mt-6">
-                            <h2 class="text-lg font-semibold text-gray-800 mb-4">Top 5 - Stocks de médicaments les plus
-                                faibles</h2>
-                            <canvas id="stockChart" height="250"></canvas>
-                        </div>
-                    {% endif %}
+                        <div class="card-decoration bg-indigo-600"></div>
+                    </a>
                 </div>
-            </main>
-        </div>
+                {% endif %}
+
+                <!-- Carte 4: Hospitalisations (Medecin, Admin, Caisse) -->
+                {% if request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" or request.user.role.designation == "CAISSE" %}
+                <div class="stat-card bg-white rounded-xl shadow-sm p-5 animate-in">
+                    <a href="{% url 'Utilisateur:hospitalisation' %}" class="block">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="stat-label">Hospitalisations</p>
+                                <p class="stat-number mt-0.5">{{ hospitalisations_recentes|length }}</p>
+                                <p class="stat-trend neutral mt-2">
+                                    <i class="fas fa-arrow-right text-xs"></i> En cours
+                                </p>
+                            </div>
+                            <div class="icon-wrapper bg-red-50 text-red-600">
+                                <i class="fas fa-procedures text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="card-decoration bg-red-600"></div>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Carte 5: Pharmacie (Pharmacien, Admin) -->
+                {% if request.user.role.designation == "PHARMACIEN" or request.user.role.designation == "ADMIN" %}
+                <div class="stat-card bg-white rounded-xl shadow-sm p-5 animate-in">
+                    <a href="{% url 'Utilisateur:pharmacie' %}" class="block">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="stat-label">Pharmacie</p>
+                                <p class="stat-number mt-0.5">{{ medicaments_recents|length }}</p>
+                                <p class="stat-trend neutral mt-2">
+                                    <i class="fas fa-capsules text-xs"></i> Médicaments
+                                </p>
+                            </div>
+                            <div class="icon-wrapper bg-green-50 text-green-600">
+                                <i class="fas fa-capsules text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="card-decoration bg-green-600"></div>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Carte 6: Reçus (Caisse, Admin) -->
+                {% if request.user.role.designation == "CAISSE" or request.user.role.designation == "ADMIN" %}
+                <div class="stat-card bg-white rounded-xl shadow-sm p-5 animate-in">
+                    <a href="{% url 'Utilisateur:sorties' %}" class="block">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="stat-label">Reçus & Factures</p>
+                                <p class="stat-number mt-0.5">{{ nombre_sortie }}</p>
+                                <p class="stat-trend neutral mt-2">
+                                    <i class="fas fa-file-invoice text-xs"></i> Générer
+                                </p>
+                            </div>
+                            <div class="icon-wrapper bg-yellow-50 text-yellow-600">
+                                <i class="fas fa-file-invoice-dollar text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="card-decoration bg-yellow-600"></div>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Carte 7: Examens (Technicien, Admin) -->
+                {% if request.user.role.designation == "TECHNICIEN" or request.user.role.designation == "ADMIN" %}
+                <div class="stat-card bg-white rounded-xl shadow-sm p-5 animate-in">
+                    <a href="{% url 'Utilisateur:examens' %}" class="block">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="stat-label">Examens</p>
+                                <p class="stat-number mt-0.5">{{ examens|length }}</p>
+                                <p class="stat-trend neutral mt-2">
+                                    <i class="fas fa-vials text-xs"></i> Laboratoire
+                                </p>
+                            </div>
+                            <div class="icon-wrapper bg-cyan-50 text-cyan-600">
+                                <i class="fas fa-vials text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="card-decoration bg-cyan-600"></div>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Section: Hospitalisations récentes + Médicaments stock bas -->
+            {% if request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" or request.user.role.designation == "CAISSE" or request.user.role.designation == "PHARMACIEN" %}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+                <!-- Hospitalisations récentes -->
+                {% if request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" or request.user.role.designation == "CAISSE" %}
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-in">
+                    <div class="section-header">
+                        <h2><i class="fas fa-procedures"></i> Hospitalisations récentes</h2>
+                        <a href="{% url 'Utilisateur:hospitalisation' %}" class="text-sm text-blue-600 hover:text-blue-800 font-medium transition">
+                            Voir tout <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                        </a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="recent-table min-w-full divide-y divide-gray-100">
+                            <thead>
+                                <tr class="bg-gray-50/50">
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Patient</th>
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Diagnostic</th>
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Motif</th>
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                            {% for hosp in hospitalisations_recentes|slice:":5" %}
+                                <tr class="hover:bg-gray-50/50 transition">
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ hosp.patient.nom }} {{ hosp.patient.prenom }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">{{ hosp.diagnotic|default:"—" }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">{{ hosp.motif|default:"—" }}</td>
+                                    <td class="px-4 py-3">
+                                        {% if hosp.sortie %}
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Sorti
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></span>En cours
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="px-4 py-6 text-center text-sm text-gray-400">
+                                        <i class="fas fa-inbox text-2xl block mb-2 text-gray-300"></i>
+                                        Aucune hospitalisation récente
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Médicaments stock bas -->
+                {% if request.user.role.designation == "PHARMACIEN" or request.user.role.designation == "ADMIN" %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-in">
+                    <div class="section-header">
+                        <h2><i class="fas fa-exclamation-triangle text-yellow-500"></i> Stock faible</h2>
+                        <a href="{% url 'Utilisateur:pharmacie' %}" class="text-sm text-blue-600 hover:text-blue-800 font-medium transition">
+                            Voir <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                        </a>
+                    </div>
+                    <div class="space-y-3 max-h-[250px] overflow-y-auto pr-1">
+                        {% for med in medicaments_stock_bas %}
+                        <div class="med-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 text-sm">{{ med.designation }}</h4>
+                                    <p class="text-xs text-gray-500">Code: {{ med.code }}</p>
+                                </div>
+                                {% with stock=med.stock|floatformat:0|add:0 %}
+                                <span class="stock-badge {% if stock <= 5 %}critical{% elif stock <= 15 %}low{% else %}normal{% endif %}">
+                                    {{ stock }} unités
+                                </span>
+                                {% endwith %}
+                            </div>
+                            <div class="mt-2 w-full bg-gray-200 rounded-full h-1.5">
+                                <div class="h-1.5 rounded-full bg-gradient-to-r from-red-500 to-yellow-400" 
+                                     style="width: {% with stock=med.stock|floatformat:0|add:0 %}{% if stock > 50 %}100{% else %}{{ stock|add:0|floatformat:0 }}{% endif %}{% endwith %}%;"></div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-6 text-gray-400 text-sm">
+                            <i class="fas fa-check-circle text-green-400 text-2xl block mb-2"></i>
+                            Tous les médicaments sont bien stockés
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Section: Patients récents + Graphique -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <!-- Patients récents -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-in">
+                    <div class="section-header">
+                        <h2><i class="fas fa-users"></i> Patients récents</h2>
+                        <a href="{% url 'Utilisateur:gestion_patients' %}" class="text-sm text-blue-600 hover:text-blue-800 font-medium transition">
+                            Voir tout <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                        </a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="recent-table min-w-full divide-y divide-gray-100">
+                            <thead>
+                                <tr class="bg-gray-50/50">
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Patient</th>
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Code</th>
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sexe</th>
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Groupe</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                            {% for patient in patients|slice:":5" %}
+                                <tr class="hover:bg-gray-50/50 transition cursor-pointer" onclick="window.location.href='{% url 'Utilisateur:gestion_patients' %}'">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold text-sm">
+                                                {{ patient.prenom|first|upper }}{{ patient.nom|first|upper }}
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ patient.nom }} {{ patient.prenom }}</div>
+                                                <div class="text-xs text-gray-500">{{ patient.age }} ans</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="px-2 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-100">
+                                            {{ patient.code_patient }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">{{ patient.sexe }}</td>
+                                    <td class="px-4 py-3">
+                                        <span class="px-2 py-1 text-xs font-semibold bg-red-50 text-red-700 rounded-full border border-red-100">
+                                            {{ patient.groupe_sanguin }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="px-4 py-6 text-center text-sm text-gray-400">
+                                        <i class="fas fa-inbox text-2xl block mb-2 text-gray-300"></i>
+                                        Aucun patient enregistré
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Graphique Stock (Pharmacien/Admin uniquement) -->
+                {% if request.user.role.designation == "PHARMACIEN" or request.user.role.designation == "ADMIN" %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-in">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-bar text-blue-500"></i> Top 5 stocks faibles</h2>
+                    </div>
+                    <div class="h-[220px]">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                    <p class="text-xs text-gray-400 text-center mt-3">
+                        <i class="fas fa-info-circle"></i> Médicaments avec le stock le plus bas
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </main>
     </div>
-    </body>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const ctx = document.getElementById('stockChart').getContext('2d');
+</div>
+</body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        {% if request.user.role.designation == "PHARMACIEN" or request.user.role.designation == "ADMIN" %}
+        const ctx = document.getElementById('stockChart');
+        if (ctx) {
             const labels = [
                 {% for med in medicaments_stock_bas %}
                     "{{ med.designation|escapejs }}",
@@ -273,39 +516,54 @@
                     datasets: [{
                         label: 'Stock disponible',
                         data: data,
-                        borderWidth: 1,
                         backgroundColor: [
-                            '#f87171', '#fb923c', '#facc15', '#4ade80', '#60a5fa'
+                            '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'
                         ],
+                        borderRadius: 6,
+                        borderSkipped: false,
                     }]
                 },
                 options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: '#4b5563'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: '#4b5563'
-                            }
-                        }
-                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                },
+                                color: '#64748b'
+                            }
                         },
-                        title: {
-                            display: true,
-                            text: "Médicaments à stock faible",
-                            color: "#111827",
-                            font: {size: 16, weight: 'bold'}
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 9
+                                },
+                                color: '#64748b',
+                                maxRotation: 45,
+                                minRotation: 30
+                            }
                         }
                     }
                 }
             });
-        });
-    </script>
+        }
+        {% endif %}
+    });
+</script>
+
 {% endblock %}

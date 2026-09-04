@@ -60,27 +60,25 @@ def parametre(request):
 @login_required(login_url='Utilisateur:Connexion')
 def acceuil(request):
     il_y_a_une_semaine = datetime.now() - timedelta(days=7)
+    nombre_consult = Consultation.objects.all().count()
+    nombre_rdv = RendezVous.objects.all().count()
+    nombre_sortie = Sortie.objects.all().count()
 
     # Patients récents
     patients = Patient.objects.order_by('-id')[:10]
 
-    # Nouveaux patients créés cette semaine
     stats_patient = Patient.objects.filter(created_at__gte=il_y_a_une_semaine).count()
 
-    # Hospitalisations récentes
     hospitalisations_recentes = Hospitalisation.objects.select_related('patient').order_by('-id')[:10]
 
-    # Médicaments récents
     medicaments_recents = Medicament.objects.order_by('-id')[:8]
 
-    # Médicaments avec le stock le plus faible (conversion du champ stock en float)
     medicaments_stock_bas = (
         Medicament.objects
         .annotate(stock_num=Cast('stock', FloatField()))
         .order_by('stock_num')[:5]
     )
 
-    # Statistiques utilisateurs par service
     stats_services = (
         Utilisateur.objects.values('role__designation')
         .annotate(nombre=models.Count('id'))
@@ -89,6 +87,9 @@ def acceuil(request):
     return render(request, 'accueil/index.html', {
         'patients': patients,
         'stats_patient': stats_patient,
+        'nombre_consult': nombre_consult,
+        'nombre_rdv': nombre_rdv,
+        'nombre_sortie': nombre_sortie,
         'hospitalisations_recentes': hospitalisations_recentes,
         'medicaments_recents': medicaments_recents,
         'medicaments_stock_bas': medicaments_stock_bas,
@@ -555,8 +556,8 @@ def consultation(request):
 
     consultations_details = []
     for consult in consultations:
-        ordonnances = consult.ordonnances.all()  # multiple ordonnances
-        arrets = consult.arrets.all()  # multiple arrêts
+        ordonnances = consult.ordonnances.all()
+        arrets = consult.arrets.all()
         recu = consult.recus.first()  # related_name="recus"
         prestations = recu.bulletins.all() if recu else []
 

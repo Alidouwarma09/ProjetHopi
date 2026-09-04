@@ -3,1034 +3,812 @@
 {% load static %}
 {% block content %}
 
-    <style>
-        .sidebar {
-            transition: all 0.3s ease;
-        }
+<style>
+    /* ===== ANIMATIONS ET TRANSITIONS ===== */
+    .page-transition {
+        animation: fadeIn 0.4s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .stat-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #f1f5f9;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+        border-color: #e2e8f0;
+    }
+    .stat-card .icon-wrapper {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover .icon-wrapper {
+        transform: scale(1.05);
+    }
+    .table-row-hover {
+        transition: all 0.2s ease;
+    }
+    .table-row-hover:hover {
+        background: #f8fafc;
+    }
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .badge-status .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .badge-status.actif {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .badge-status.actif .dot { background: #22c55e; }
+    .badge-status.termine {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+    .badge-status.termine .dot { background: #6366f1; }
+    .badge-status.annule {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    .badge-status.annule .dot { background: #ef4444; }
+    
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+    .action-btn.primary { background: #eff6ff; color: #2563eb; }
+    .action-btn.primary:hover { background: #dbeafe; }
+    .action-btn.warning { background: #fffbeb; color: #d97706; }
+    .action-btn.warning:hover { background: #fef3c7; }
+    .action-btn.success { background: #ecfdf5; color: #059669; }
+    .action-btn.success:hover { background: #d1fae5; }
+    .action-btn.danger { background: #fef2f2; color: #dc2626; }
+    .action-btn.danger:hover { background: #fee2e2; }
+    .action-btn.purple { background: #f5f3ff; color: #7c3aed; }
+    .action-btn.purple:hover { background: #ede9fe; }
 
-        .sidebar-collapsed {
-            width: 80px;
-        }
+    .modal-overlay {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(4px);
+    }
+</style>
 
-        .sidebar-collapsed .sidebar-text {
-            display: none;
-        }
+<body class="bg-gray-50 font-sans">
+<div class="flex h-screen overflow-hidden">
+    {% include 'personnel_navbar.html' %}
 
-        .sidebar-collapsed .logo-text {
-            display: none;
-        }
+    <div class="flex-1 overflow-auto">
+        {% include 'header.html' %}
 
-        .sidebar-collapsed .menu-item {
-            justify-content: center;
-        }
+        <main class="p-6">
+            <div id="consultations-page" class="page-transition">
+                <!-- ===== EN-TÊTE ===== -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                            <i class="fas fa-stethoscope text-blue-600 text-2xl"></i>
+                            Gestion des Consultations
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-0.5">
+                            Suivez et gérez toutes les consultations médicales
+                        </p>
+                    </div>
+                    
+                    {% if request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" %}
+                    <div x-data="{ 
+                        open: false, 
+                        selectedCode: '',
+                        get selectedPatientName() {
+                            if (!this.selectedCode) return '';
+                            const option = document.querySelector(`#codes-patients option[value='${this.selectedCode}']`);
+                            if (option) {
+                                const parts = option.textContent.split(' - ');
+                                return parts.length > 1 ? parts[1].trim() : '';
+                            }
+                            return '';
+                        }
+                    }">
+                        <button @click="open = true"
+                                class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition shadow-lg shadow-blue-200 font-semibold">
+                            <i class="fas fa-plus-circle"></i> Nouvelle consultation
+                        </button>
 
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
+                        <!-- Remplacer la div du modal par celle-ci -->
 
-        .card-hover {
-            transition: all 0.3s ease;
-        }
+<div x-show="open" x-transition
+     class="fixed inset-0 z-50 flex items-center justify-center modal-overlay overflow-y-auto p-4">
+    <div @click.away="open = false"
+         class="bg-white dark:bg-gray-900 w-full max-w-6xl rounded-2xl shadow-2xl p-6 max-h-[95vh] overflow-y-auto relative border border-gray-200 dark:border-gray-700">
 
-        .notification-badge {
-            animation: pulse 2s infinite;
-        }
+        <button @click="open = false"
+                class="sticky top-0 float-right z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200 -mt-2 -mr-2"
+                title="Fermer">
+            <i class="fas fa-times text-sm"></i>
+        </button>
 
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-            100% {
-                opacity: 1;
-            }
-        }
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+            🩺 Enregistrement d'une consultation
+        </h2>
 
-        .patient-status-admitted {
-            border-left: 4px solid #3B82F6;
-        }
+        <form id="enregistrer-form" method="post"
+              action="{% url 'Utilisateur:ajouter_consultation' %}"
+              class="space-y-6">
+            {% csrf_token %}
 
-        .patient-status-discharged {
-            border-left: 4px solid #10B981;
-        }
+            <!-- Réduire la taille des champs pour gagner de la place -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Patient</label>
+                    <input list="codes-patients" id="code-patient" name="code_patient"
+                           placeholder="Code patient"
+                           x-model="selectedCode"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                    <datalist id="codes-patients">
+                        {% for patient in patients %}
+                            <option value="{{ patient.code_patient }}">{{ patient.code_patient }}
+                                - {{ patient.nom }}</option>
+                        {% endfor %}
+                    </datalist>
+                    <div x-show="selectedPatientName"
+                         x-transition
+                         class="mt-1 p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-950/40 dark:border-blue-900/50 dark:text-blue-300 text-xs flex items-center gap-1.5">
+                        <i class="fas fa-user-circle text-sm"></i>
+                        <span>Patient : <strong x-text="selectedPatientName"></strong></span>
+                    </div>
+                </div>
 
-        .patient-status-critical {
-            border-left: 4px solid #EF4444;
-        }
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Motif</label>
+                    <input type="text" name="motif"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
 
-        .room-occupied {
-            background-color: #FEE2E2;
-        }
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnostic</label>
+                    <input type="text" name="diagnostic"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
 
-        .room-available {
-            background-color: #DCFCE7;
-        }
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Antécédents médicaux</label>
+                    <textarea name="ant_med" rows="2"
+                              class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm"
+                              placeholder="Ex : Diabète..."></textarea>
+                </div>
 
-        /* Animation for page transitions */
-        .page-transition {
-            animation: fadeIn 0.3s ease-in-out;
-        }
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Antécédents chirurgicaux</label>
+                    <textarea name="ant_chirur" rows="2"
+                              class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm"
+                              placeholder="Ex : Appendicectomie..."></textarea>
+                </div>
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Autres antécédents</label>
+                    <textarea name="ant_mal" rows="2"
+                              class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm"
+                              placeholder="Ex : Allergies..."></textarea>
+                </div>
 
-        /* Active menu item style */
-        .menu-item.active {
-            background-color: #EFF6FF;
-            color: #3B82F6;
-            font-weight: 500;
-        }
-    </style>
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Constat</label>
+                    <input type="text" name="constat_consultation"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
 
-    <body class="bg-gray-100 font-sans">
-    <div class="flex h-screen overflow-hidden">
-        {% include 'personnel_navbar.html' %}
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Statut</label>
+                    <input type="text" name="statue"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
 
-        <div class="flex-1 overflow-auto">
-            {% include 'header.html' %}
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Poids (kg)</label>
+                    <input type="number" step="0.01" name="poids"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
 
-            <main class="p-6">
-                <div id="consultations-page" class="page-transition">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Gestion des Consultations</h2>
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Taille (cm)</label>
+                    <input type="number" name="taille"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
 
-                       <div x-data="{
-                                open: false,
-                                selectedCode: '',
-                                get selectedPatientName() {
-                                    if (!this.selectedCode) return '';
-                                    const option = document.querySelector(`#codes-patients option[value='${this.selectedCode}']`);
-                                    if (option) {
-                                        const parts = option.textContent.split(' - ');
-                                        return parts.length > 1 ? parts[1].trim() : '';
-                                    }
-                                    return '';
-                                }
-                            }">
-                       {% if request.user.role.designation == 'ADMIN' %}
-                            <button @click="open = true"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition shadow-sm">
-                                <i class="fas fa-plus mr-2"></i> Nouvelle consultation
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Pouls</label>
+                    <input type="number" step="0.01" name="pouls"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
+
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">TA</label>
+                    <input type="number" step="0.01" name="TA"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
+
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Examen demandé</label>
+                    <input type="text" name="examen_demande"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
+
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Traitement</label>
+                    <input type="text" name="traitement"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
+
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Issue</label>
+                    <input type="text" name="issue_consultation"
+                           class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-1.5 text-sm">
+                </div>
+
+                <!-- Ordonnance, Arrêt, Frais -->
+                <div class="col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 border-t pt-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                            <i class="fas fa-prescription-bottle-alt text-blue-500 text-sm"></i>
+                            Ordonnance
+                        </h3>
+                        <div id="medicament-list" class="mb-2 space-y-1 max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-1.5 bg-gray-50 dark:bg-gray-800/30 min-h-[30px]">
+                            <p class="text-xs text-gray-400 dark:text-gray-500 text-center" id="empty-medicament-msg">Aucun médicament</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <div class="flex-1">
+                                <input type="text" id="medicament-input"
+                                       placeholder="Médicament..."
+                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-2 py-1 text-xs">
+                            </div>
+                            <div class="w-16">
+                                <input type="number" id="quantite-input"
+                                       placeholder="Qté" min="1"
+                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-2 py-1 text-xs">
+                            </div>
+                            <button type="button" id="add-medicament-btn"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1 rounded-lg transition text-xs font-semibold">
+                                <i class="fas fa-plus"></i>
                             </button>
-                       {% endif %}
-
-                            <div x-show="open"
-                                 x-transition
-                                 class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm overflow-y-auto">
-
-                                <div @click.away="open = false"
-                                     class="relative bg-white dark:bg-gray-900 w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-8 max-h-[90vh] overflow-y-auto">
-
-                                    <button @click="open = false"
-                                            class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200"
-                                            title="Fermer">
-                                        <i class="fas fa-times text-sm"></i>
-                                    </button>
-
-                                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
-                                        🩺 Enregistrement d'une consultation
-                                    </h2>
-
-                                    <form id="enregistrer-form" method="post"
-                                          action="{% url 'Utilisateur:ajouter_consultation' %}"
-                                          class="space-y-6">
-                                        {% csrf_token %}
-
-                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Patient</label>
-                                                <input list="codes-patients" id="code-patient" name="code_patient"
-                                                       placeholder="Entrer le code patient"
-                                                       x-model="selectedCode"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                                <datalist id="codes-patients">
-                                                    {% for patient in patients %}
-                                                        <option value="{{ patient.code_patient }}">{{ patient.code_patient }}
-                                                            - {{ patient.nom }}</option>
-                                                    {% endfor %}
-                                                </datalist>
-                                            <div x-show="selectedPatientName"
-                                                         x-transition
-                                                         class="mt-2 p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-950/40 dark:border-blue-900/50 dark:text-blue-300 text-sm flex items-center gap-2">
-                                                        <i class="fas fa-user-circle text-base"></i>
-                                                        <span>Patient sélectionné : <strong x-text="selectedPatientName"></strong></span>
-                                                    </div>
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motif</label>
-                                                <input type="text" name="motif"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnostic</label>
-                                                <input type="text" name="diagnostic"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Antécédents
-                                                    médicaux</label>
-                                                <textarea name="ant_med" rows="2"
-                                                          class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm"
-                                                          placeholder="Ex : Diabète, Hypertension..."></textarea>
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Antécédents
-                                                    chirurgicaux</label>
-                                                <textarea name="ant_chirur" rows="2"
-                                                          class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm"
-                                                          placeholder="Ex : Appendicectomie, Chirurgie cardiaque..."></textarea>
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Autres
-                                                    antécédents</label>
-                                                <textarea name="ant_mal" rows="2"
-                                                          class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm"
-                                                          placeholder="Ex : Allergies, Asthme..."></textarea>
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Constat</label>
-                                                <input type="text" name="constat_consultation"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut</label>
-                                                <input type="text" name="statue"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Poids
-                                                    (kg)</label>
-                                                <input type="number" step="0.01" name="poids"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Taille
-                                                    (cm)</label>
-                                                <input type="number" name="taille"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pouls</label>
-                                                <input type="number" step="0.01" name="pouls"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">TA</label>
-                                                <input type="number" step="0.01" name="TA"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Examen
-                                                    demandé</label>
-                                                <input type="text" name="examen_demande"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Traitement</label>
-                                                <input type="text" name="traitement"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-1">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Issue</label>
-                                                <input type="text" name="issue_consultation"
-                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2">
-                                            </div>
-
-                                            <div class="col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 border-t pt-4">
-                                                <!-- Remplacer la section Ordonnance (si nécessaire) par : -->
-                                                    <div>
-                                                        <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
-                                                            <i class="fas fa-prescription-bottle-alt text-blue-500"></i>
-                                                            Ordonnance (si nécessaire)
-                                                        </h3>
-
-                                                        <!-- Liste des médicaments ajoutés -->
-                                                        <div id="medicament-list" class="mb-3 space-y-1.5 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-800/30 min-h-[40px]">
-                                                            <!-- Les médicaments ajoutés s'afficheront ici -->
-                                                            <p class="text-xs text-gray-400 dark:text-gray-500 text-center" id="empty-medicament-msg">Aucun médicament ajouté</p>
-                                                        </div>
-
-                                                        <!-- Ligne de saisie -->
-                                                        <div class="flex gap-2">
-                                                            <div class="flex-1">
-                                                                <input type="text" id="medicament-input"
-                                                                       placeholder="Nom du médicament..."
-                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-2 text-sm">
-                                                            </div>
-                                                            <div class="w-24">
-                                                                <input type="number" id="quantite-input"
-                                                                       placeholder="Qté"
-                                                                       min="1"
-                                                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-3 py-2 text-sm">
-                                                            </div>
-                                                            <button type="button" id="add-medicament-btn"
-                                                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition text-sm font-semibold whitespace-nowrap">
-                                                                <i class="fas fa-plus mr-1"></i> Ajouter
-                                                            </button>
-                                                        </div>
-
-                                                        <!-- Champ caché pour stocker les médicaments -->
-                                                        <textarea name="contenu_ordonnance" id="ordonnance-contenu" rows="1"
-                                                                  class="hidden"></textarea>
-                                                    </div>
-
-                                                <div>
-                                                    <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
-                                                        <i class="fas fa-briefcase-medical text-green-500"></i>
-                                                        Arrêt de travail (si nécessaire)
-                                                    </h3>
-                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div>
-                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date
-                                                                de début</label>
-                                                            <input type="date" name="date_debut"
-                                                                   class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm">
-                                                        </div>
-                                                        <div>
-                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre
-                                                                de jours</label>
-                                                            <input type="number" name="nombre_jours" min="1"
-                                                                   class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <!-- Dans le formulaire, après la section Ordonnance et Arrêt de travail -->
-<div class="col-span-4 grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 border-t pt-4">
-
-    <!-- Ordonnance -->
-    <div>
-        <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
-            <i class="fas fa-prescription-bottle-alt text-blue-500"></i>
-            Ordonnance (si nécessaire)
-        </h3>
-        <!-- ... code existant ... -->
-    </div>
-
-    <!-- Arrêt de travail -->
-    <div>
-        <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
-            <i class="fas fa-briefcase-medical text-green-500"></i>
-            Arrêt de travail (si nécessaire)
-        </h3>
-        <!-- ... code existant ... -->
-    </div>
-
-    <!-- ==========================================
-    FRAIS DE CONSULTATION - AJOUTER CE BLOC
-    ========================================== -->
-    <div>
-        <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
-            <i class="fas fa-money-bill-wave text-yellow-500"></i>
-            Frais de consultation
-        </h3>
-        <div class="space-y-3">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Prix (FCFA)
-                </label>
-                <input type="number" name="prix_prestation" step="0.01" value="0"
-                       placeholder="0"
-                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-4 py-2 text-sm">
-            </div>
-        </div>
-    </div>
-</div>
-
-                                        </div>
-
-                                        <div id="error-message"
-                                             class="mt-4 text-sm text-red-600 dark:text-red-400"></div>
-                                        <div id="loader" class="text-center hidden mt-4">
-                                            <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                                            <p class="text-gray-700 dark:text-gray-300 mt-2">Enregistrement en
-                                                cours...</p>
-                                        </div>
-
-                                        <button id="enregistrer-btn" type="submit"
-                                                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
-                                            Enregistrer
-                                        </button>
-                                    </form>
-
-                                </div>
-                            </div>
                         </div>
-
-
+                        <textarea name="contenu_ordonnance" id="ordonnance-contenu" rows="1" class="hidden"></textarea>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm p-4 mb-6 border border-gray-100">
-                        <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                            <i class="fas fa-briefcase-medical text-green-500 text-sm"></i>
+                            Arrêt de travail
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Recherche rapide</label>
-                                <input id="searchInput" type="text" placeholder="Rechercher par nom, code patient, motif, numéro..."
-                                       class="w-full border-gray-250 rounded-lg focus:ring-blue-500 focus:border-blue-500 px-4 py-2 placeholder-gray-400">
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Début</label>
+                                <input type="date" name="date_debut"
+                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-2 py-1 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Jours</label>
+                                <input type="number" name="nombre_jours" min="1"
+                                       class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-2 py-1 text-xs">
                             </div>
                         </div>
                     </div>
 
-
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-150">
-                        <div class="overflow-x-auto">
-                            <table id="consultationsTable" class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        N°
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Patient
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Service
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Motif
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Diagnostic
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Statut
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Date
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                {% for consult in consultations_details %}
-                                    <tr class="hover:bg-gray-50/70 transition c_row">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-400">{{ forloop.counter }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">{{ consult.patient }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ consult.service }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.motif }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ consult.diagnostic }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                                                {{ consult.statue|default:"Consulté" }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <span class="inline-flex items-center gap-1">
-                                                <i class="far fa-calendar-alt text-gray-400"></i>
-                                                {{ consult.date|date:"d/m/Y H:i" }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <div class="flex items-center gap-2 flex-wrap">
-                                                <div x-data="{ openDetails: false }">
-                                                    <button @click="openDetails = true"
-                                                            class="bg-blue-600 text-white px-3 py-1.5 rounded-lg shadow hover:bg-blue-700 transition font-semibold text-xs flex items-center gap-1.5">
-                                                        <i class="fas fa-file-medical-alt"></i> Fiche
-                                                    </button>
-
-                                                    <div x-show="openDetails" x-transition
-                                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-                                                        <div @click.away="openDetails = false"
-                                                             class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
-
-                                                            <button @click="openDetails = false"
-                                                                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200"
-                                                                    title="Fermer">
-                                                                <i class="fas fa-times text-sm"></i>
-                                                            </button>
-
-                                                            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
-                                                                📋 Fiche de Consultation
-                                                            </h2>
-
-                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 dark:bg-gray-800/40 p-5 rounded-xl border border-gray-100 dark:border-gray-850">
-                                                                <div class="space-y-3">
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Patient :</span> {{ consult.patient }}</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Service :</span> {{ consult.service }}</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Motif :</span> {{ consult.motif }}</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Poids :</span> {{ consult.poids }} kg</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Taille :</span> {{ consult.taille }} cm</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">IMC :</span> {{ consult.IMC }}</p>
-                                                                </div>
-                                                                <div class="space-y-3">
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Pouls :</span> {{ consult.pouls }}</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">TA :</span> {{ consult.TA }}</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Diagnostic :</span> {{ consult.diagnostic }}</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Constat :</span> {{ consult.constat_consultation }}</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Examen demandé :</span> {{ consult.examen_demande }}</p>
-                                                                    <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Traitement :</span> {{ consult.traitement }}</p>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="mt-4 p-5 bg-gray-50 dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-850 space-y-3">
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Issue :</span> {{ consult.issue_consultation }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Statut :</span> {{ consult.statue }}</p>
-                                                                <p class="text-sm"><span class="font-semibold text-gray-700 dark:text-gray-300">Date :</span> {{ consult.date|date:"d/m/Y H:i" }}</p>
-                                                            </div>
-
-                                                            <div class="mt-6 text-center">
-                                                                <a href="{% url 'Utilisateur:pdf_consultation' consult.id %}"
-                                                                   class="inline-block bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 transition font-semibold shadow-sm">
-                                                                    <i class="fas fa-file-pdf mr-2"></i> Télécharger PDF
-                                                                </a>
-                                                            </div>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- ==========================================
-                                                BOUTON 2 : ARRÊT DE TRAVAIL (ORANGE)
-                                                ========================================== -->
-                                                {% if consult.arrets %}
-                                                <div x-data="{ openArret: false }">
-                                                    <button @click="openArret = true"
-                                                            class="bg-orange-500 text-black px-3 py-1.5 rounded-lg shadow hover:bg-orange-600 transition font-semibold text-xs flex items-center gap-1.5">
-                                                        <i class="fas fa-file-signature"></i> Arrêt
-                                                    </button>
-
-                                                    <div x-show="openArret" x-transition
-                                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-                                                        <div @click.away="openArret = false"
-                                                             class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
-
-                                                            <button @click="openArret = false"
-                                                                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200">
-                                                                <i class="fas fa-times text-sm"></i>
-                                                            </button>
-
-                                                            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
-                                                                📄 Fiche d'Arrêt de Travail
-                                                            </h2>
-
-                                                            <div class="space-y-4">
-                                                                <div class="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-xl border border-gray-100">
-                                                                    <p class="text-sm"><span class="font-semibold">Patient :</span> {{ consult.patient }}</p>
-                                                                    <p class="text-sm"><span class="font-semibold">Médecin :</span> 
-                                                                        {% for arret in consult.arrets %}
-                                                                            {{ arret.nom_med }}{% if not forloop.last %}, {% endif %}
-                                                                        {% endfor %}
-                                                                    </p>
-                                                                    <p class="text-sm"><span class="font-semibold">Date de début :</span> 
-                                                                        {% for arret in consult.arrets %}
-                                                                            {{ arret.date_debut|date:"d/m/Y" }}{% if not forloop.last %}, {% endif %}
-                                                                        {% endfor %}
-                                                                    </p>
-                                                                    <p class="text-sm"><span class="font-semibold">Nombre de jours :</span> 
-                                                                        {% for arret in consult.arrets %}
-                                                                            {{ arret.nombre_jours }}{% if not forloop.last %}, {% endif %}
-                                                                        {% endfor %}
-                                                                    </p>
-                                                                </div>
-                                                                <div class="bg-yellow-50 dark:bg-yellow-950/30 p-4 rounded-lg border border-yellow-200">
-                                                                    <p class="text-sm text-yellow-800 dark:text-yellow-300">
-                                                                        <i class="fas fa-info-circle mr-2"></i>
-                                                                        Arrêt de travail prescrit par le médecin traitant.
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="mt-6 text-center">
-                                                                <a href="{% url 'Utilisateur:pdf_arret' consult.id %}"
-                                                                   class="inline-block bg-orange-500 text-blqck px-6 py-2.5 rounded-lg hover:bg-orange-600 transition font-semibold shadow-sm">
-                                                                    <i class="fas fa-file-pdf mr-2"></i> Télécharger PDF
-                                                                </a>
-                                                            </div>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                {% endif %}
-
-                                                <!-- ==========================================
-                                                BOUTON 3 : ORDONNANCE (VIOLET)
-                                                ========================================== -->
-                                                {% if consult.ordonnances %}
-                                                <div x-data="{ openOrdonnance: false }">
-                                                    <button @click="openOrdonnance = true"
-                                                            class="bg-purple-600 text-white px-3 py-1.5 rounded-lg shadow hover:bg-purple-700 transition font-semibold text-xs flex items-center gap-1.5">
-                                                        <i class="fas fa-prescription"></i> Ordonnance
-                                                    </button>
-
-                                                    <div x-show="openOrdonnance" x-transition
-                                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-                                                        <div @click.away="openOrdonnance = false"
-                                                             class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
-
-                                                            <button @click="openOrdonnance = false"
-                                                                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200">
-                                                                <i class="fas fa-times text-sm"></i>
-                                                            </button>
-
-                                                            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
-                                                                💊 Ordonnance Médicale
-                                                            </h2>
-
-                                                            <div class="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-xl border border-gray-100">
-                                                                <p class="text-sm mb-3"><span class="font-semibold">Patient :</span> {{ consult.patient }}</p>
-                                                                <div class="space-y-3">
-                                                                    {% for ord in consult.ordonnances %}
-                                                                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200">
-                                                                            <p class="text-sm text-gray-700 dark:text-gray-300">{{ ord.contenu|linebreaks }}</p>
-                                                                            <p class="text-xs text-gray-400 mt-2">Date : {{ ord.date|date:"d/m/Y H:i" }}</p>
-                                                                        </div>
-                                                                    {% endfor %}
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="mt-6 text-center">
-                                                                <a href="{% url 'Utilisateur:pdf_ordonnance' consult.id %}"
-                                                                   class="inline-block bg-purple-600 text-white px-6 py-2.5 rounded-lg hover:bg-purple-700 transition font-semibold shadow-sm">
-                                                                    <i class="fas fa-file-pdf mr-2"></i> Télécharger PDF
-                                                                </a>
-                                                            </div>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                {% endif %}
-
-                                                <!-- ==========================================
-                                                BOUTON MODIFIER
-                                                ========================================== -->
-                                                <div x-data="{ openModifier: false }">
-                                                    <button @click="openModifier = true"
-                                                            class="text-blue-600 hover:text-blue-800 p-1.5 rounded-md hover:bg-blue-50 transition"
-                                                            title="Modifier">
-                                                        <i class="fas fa-pencil-alt"></i>
-                                                    </button>
-
-                                                    <div x-show="openModifier" x-transition
-                                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-                                                        <div @click.away="openModifier = false"
-                                                             class="bg-white dark:bg-gray-900 w-full max-w-5xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200 dark:border-gray-700">
-
-                                                            <button @click="openModifier = false"
-                                                                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white transition duration-200"
-                                                                    title="Fermer">
-                                                                <i class="fas fa-times text-sm"></i>
-                                                            </button>
-
-                                                            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
-                                                                ✏️ Modifier la consultation de {{ consult.patient }}
-                                                            </h2>
-
-                                                            <form method="post" class="space-y-4"
-                                                                  action="{% url 'Utilisateur:modifier_consultation' consult.id %}">
-                                                                {% csrf_token %}
-                                                                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                                                                    <div class="col-span-1">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Patient</label>
-                                                                        <input type="text" name="patient"
-                                                                               value="{{ consult.patient }}"
-                                                                               class="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-800 dark:text-white border-gray-200"
-                                                                               readonly>
-                                                                    </div>
-
-                                                                    <div class="col-span-1">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motif</label>
-                                                                        <input type="text" name="motif"
-                                                                               value="{{ consult.motif }}"
-                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                    </div>
-
-                                                                    <div class="col-span-1">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnostic</label>
-                                                                        <input type="text" name="diagnostic"
-                                                                               value="{{ consult.diagnostic }}"
-                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                    </div>
-
-                                                                    <div class="col-span-1">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Poids (kg)</label>
-                                                                        <input type="number" step="0.1" name="poids"
-                                                                               value="{{ consult.poids|floatformat:'2' }}"
-                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                    </div>
-
-                                                                    <div class="col-span-1">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Taille (cm)</label>
-                                                                        <input type="number" step="0.1" name="taille"
-                                                                               value="{{ consult.taille|floatformat:'2' }}"
-                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                    </div>
-
-                                                                    <div class="col-span-1">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pouls</label>
-                                                                        <input type="number" name="pouls"
-                                                                               value="{{ consult.pouls|floatformat:'0' }}"
-                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                    </div>
-
-                                                                    <div class="col-span-1">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">TA</label>
-                                                                        <input type="number" name="TA"
-                                                                               value="{{ consult.TA|floatformat:'0' }}"
-                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                    </div>
-
-                                                                    <div class="col-span-1">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut</label>
-                                                                        <input type="text" name="statue"
-                                                                               value="{{ consult.statue }}"
-                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                    </div>
-
-                                                                    <div class="col-span-1">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Issue</label>
-                                                                        <input type="text" name="issue_consultation"
-                                                                               value="{{ consult.issue_consultation }}"
-                                                                               class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">
-                                                                    </div>
-
-                                                                    <div class="col-span-5">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Constat</label>
-                                                                        <textarea name="constat_consultation" rows="2"
-                                                                                  class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.constat_consultation }}</textarea>
-                                                                    </div>
-
-                                                                    <div class="col-span-5">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Examen demandé</label>
-                                                                        <textarea name="examen_demande" rows="2"
-                                                                                  class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.examen_demande }}</textarea>
-                                                                    </div>
-
-                                                                    <div class="col-span-5">
-                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Traitement</label>
-                                                                        <textarea name="traitement" rows="3"
-                                                                                  class="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white border-gray-300">{{ consult.traitement }}</textarea>
-                                                                    </div>
-
-
-                                                                </div>
-
-                                                                <button type="submit"
-                                                                        class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                                                                    💾 Mettre à jour
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- ==========================================
-                                                BOUTON SUPPRIMER
-                                                ========================================== -->
-                                                <div x-data="{ open: false, message: '' }">
-                                                    <button @click="open = true"
-                                                            class="text-red-600 hover:text-red-800 p-1.5 rounded-md hover:bg-red-50 transition"
-                                                            title="Supprimer">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-
-                                                    <div x-show="open"
-                                                         class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
-                                                         x-transition>
-                                                        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-8 relative border border-gray-200 dark:border-gray-700 text-center">
-
-                                                            <button @click="open = false"
-                                                                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl">
-                                                                &times;
-                                                            </button>
-
-                                                            <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
-                                                            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                                                                Supprimer cette consultation ?</h2>
-                                                            <p class="text-gray-600 dark:text-gray-300 mb-6 text-sm">Cette
-                                                                action est irréversible.</p>
-
-                                                            <div x-text="message" class="mb-4 text-sm"></div>
-
-                                                            <form @submit.prevent="submitDelete"
-                                                                  action="{% url 'Utilisateur:supprimer_consultation' consult.id %}"
-                                                                  method="post">
-                                                                {% csrf_token %}
-                                                                <div class="flex justify-center space-x-4">
-                                                                    <button type="button" @click="open = false"
-                                                                            class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-sm">
-                                                                        Annuler
-                                                                    </button>
-                                                                    <button type="submit"
-                                                                            class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm">
-                                                                        Supprimer
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            <div x-data="{ openRecu: false }">
-    <button @click="openRecu = true"
-            class="bg-green-600 text-white px-3 py-1.5 rounded-lg shadow hover:bg-green-700 transition font-semibold text-xs flex items-center gap-1.5">
-        <i class="fas fa-file-invoice"></i> Reçu
-    </button>
-
-    <div x-show="openRecu" x-transition
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-        <div @click.away="openRecu = false"
-             class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl p-8 relative border border-gray-200 dark:border-gray-700">
-
-            <button @click="openRecu = false"
-                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl">
-                &times;
-            </button>
-
-            <div class="text-center">
-                <i class="fas fa-file-invoice-dollar text-5xl text-green-500 mb-4"></i>
-                <h2 class="text-xl font-bold text-gray-800 mb-2">Générer le reçu</h2>
-                <p class="text-gray-600 text-sm mb-4">
-                    Voulez-vous générer le reçu pour la consultation de <strong>{{ consult.patient }}</strong> ?
-                </p>
-
-                <div class="bg-gray-50 p-4 rounded-lg text-left text-sm space-y-1 mb-4">
-                    <p><span class="text-gray-500">Date :</span> {{ consult.date|date:"d/m/Y H:i" }}</p>
-                    <p><span class="text-gray-500">Service :</span> {{ consult.service }}</p>
-                    <p><span class="text-gray-500">Motif :</span> {{ consult.motif|default:"Non renseigné" }}</p>
-                </div>
-
-                <div class="flex justify-center gap-3">
-                    <button @click="openRecu = false"
-                            class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition">
-                        Annuler
-                    </button>
-                    <a href="{% url 'Utilisateur:recu_consultation' consult.id %}" target="_blank"
-                       class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition shadow-sm">
-                        <i class="fas fa-file-pdf mr-2"></i> Générer PDF
-                    </a>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                            <i class="fas fa-money-bill-wave text-yellow-500 text-sm"></i>
+                            Frais
+                        </h3>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Prix (FCFA)</label>
+                            <input type="number" name="prix_prestation" step="0.01" value="0"
+                                   class="w-full rounded-lg border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 px-2 py-1 text-sm">
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <div id="error-message" class="mt-3 text-sm text-red-600 dark:text-red-400"></div>
+            <div id="loader" class="text-center hidden mt-3">
+                <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p class="text-gray-700 dark:text-gray-300 mt-1 text-sm">Enregistrement en cours...</p>
+            </div>
+
+            <button id="enregistrer-btn" type="submit"
+                    class="w-full bg-green-600 text-white py-2.5 rounded-lg font-semibold hover:bg-green-700 transition text-sm">
+                Enregistrer
+            </button>
+        </form>
     </div>
 </div>
+                    </div>
+                    {% endif %}
+                </div>
 
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr id="emptyDbRow">
-                                        <td colspan="8" class="px-6 py-10 text-sm text-gray-400 text-center">
-                                            <div class="flex flex-col items-center justify-center gap-2">
-                                                <i class="fas fa-folder-open text-3xl text-gray-300"></i>
-                                                <span>Aucune consultation disponible pour le moment.</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                <!-- ===== STATISTIQUES RAPIDES ===== -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card bg-white rounded-xl p-4 flex items-center gap-4">
+                        <div class="icon-wrapper bg-blue-50 text-blue-600">
+                            <i class="fas fa-file-medical-alt text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-gray-800">{{ consultations_details|length }}</p>
+                            <p class="text-sm text-gray-500">Total consultations</p>
+                        </div>
+                    </div>
+                </div>
 
-                                <tr id="noResultsRow" class="hidden">
-                                    <td colspan="8" class="px-6 py-10 text-sm text-gray-400 text-center">
-                                        <div class="flex flex-col items-center justify-center gap-2">
-                                            <i class="fas fa-search text-3xl text-gray-300"></i>
-                                            <span>Aucune consultation ne correspond à votre recherche.</span>
+                <!-- ===== RECHERCHE ===== -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex-1 min-w-[200px]">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input id="searchInput" type="text" 
+                                       placeholder="Rechercher par nom, code patient, motif, diagnostic..."
+                                       class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-gray-50/50">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                            <i class="fas fa-filter"></i>
+                            <span>Filtres actifs</span>
+                            <span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-xs font-semibold">Tous</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== TABLEAU ===== -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table id="consultationsTable" class="min-w-full divide-y divide-gray-100">
+                            <thead>
+                                <tr class="bg-gray-50/80">
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Patient</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Service</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Motif</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Diagnostic</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                            {% for consult in consultations_details %}
+                                <tr class="table-row-hover c_row">
+                                    <td class="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-400">{{ forloop.counter }}</td>
+                                    <td class="px-5 py-4 whitespace-nowrap">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold text-sm">
+                                                {{ consult.patient|slice:":2"|upper }}
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-semibold text-gray-800">{{ consult.patient }}</div>
+                                                <div class="text-xs text-gray-400">{{ consult.service }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">{{ consult.service }}</td>
+                                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[120px] truncate">{{ consult.motif|default:"—" }}</td>
+                                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[120px] truncate">{{ consult.diagnostic|default:"—" }}</td>
+                                    <td class="px-5 py-4 whitespace-nowrap">
+                                        <span class="badge-status actif">
+                                            <span class="dot"></span> {{ consult.statue|default:"Consulté" }}
+                                        </span>
+                                    </td>
+                                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <i class="far fa-calendar-alt text-gray-300 mr-1.5"></i>
+                                        {{ consult.date|date:"d/m/Y H:i" }}
+                                    </td>
+                                    <td class="px-5 py-4 whitespace-nowrap">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <!-- Fiche Consultation -->
+                                            <div x-data="{ open: false }">
+                                                <button @click="open = true" class="action-btn primary" title="Voir la fiche">
+                                                    <i class="fas fa-file-medical-alt"></i>
+                                                </button>
+                                                <div x-show="open" x-transition class="fixed inset-0 z-50 flex items-center justify-center modal-overlay">
+                                                    <div @click.away="open = false" class="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-gray-200">
+                                                        <button @click="open = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Fiche de Consultation</h2>
+                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-5 rounded-xl">
+                                                            <div class="space-y-3">
+                                                                <p><span class="font-semibold">Patient :</span> {{ consult.patient }}</p>
+                                                                <p><span class="font-semibold">Service :</span> {{ consult.service }}</p>
+                                                                <p><span class="font-semibold">Motif :</span> {{ consult.motif }}</p>
+                                                                <p><span class="font-semibold">Poids :</span> {{ consult.poids }} kg</p>
+                                                                <p><span class="font-semibold">Taille :</span> {{ consult.taille }} cm</p>
+                                                                <p><span class="font-semibold">IMC :</span> {{ consult.IMC }}</p>
+                                                            </div>
+                                                            <div class="space-y-3">
+                                                                <p><span class="font-semibold">Pouls :</span> {{ consult.pouls }}</p>
+                                                                <p><span class="font-semibold">TA :</span> {{ consult.TA }}</p>
+                                                                <p><span class="font-semibold">Diagnostic :</span> {{ consult.diagnostic }}</p>
+                                                                <p><span class="font-semibold">Constat :</span> {{ consult.constat_consultation }}</p>
+                                                                <p><span class="font-semibold">Traitement :</span> {{ consult.traitement }}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-4 p-4 bg-gray-50 rounded-xl">
+                                                            <p><span class="font-semibold">Issue :</span> {{ consult.issue_consultation }}</p>
+                                                            <p><span class="font-semibold">Statut :</span> {{ consult.statue }}</p>
+                                                            <p><span class="font-semibold">Date :</span> {{ consult.date|date:"d/m/Y H:i" }}</p>
+                                                        </div>
+                                                        <div class="mt-6 text-center">
+                                                            <a href="{% url 'Utilisateur:pdf_consultation' consult.id %}" target="_blank" class="action-btn success">
+                                                                <i class="fas fa-file-pdf mr-2"></i> Télécharger PDF
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Arrêt de travail -->
+                                            {% if consult.arrets %}
+                                            <div x-data="{ open: false }">
+                                                <button @click="open = true" class="action-btn warning" title="Arrêt de travail">
+                                                    <i class="fas fa-file-signature"></i>
+                                                </button>
+                                                <div x-show="open" x-transition class="fixed inset-0 z-50 flex items-center justify-center modal-overlay">
+                                                    <div @click.away="open = false" class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto relative">
+                                                        <button @click="open = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Arrêt de Travail</h2>
+                                                        <div class="bg-gray-50 p-5 rounded-xl space-y-3">
+                                                            <p><span class="font-semibold">Patient :</span> {{ consult.patient }}</p>
+                                                            {% for arret in consult.arrets %}
+                                                                <p><span class="font-semibold">Médecin :</span> {{ arret.nom_med }}</p>
+                                                                <p><span class="font-semibold">Début :</span> {{ arret.date_debut|date:"d/m/Y" }}</p>
+                                                                <p><span class="font-semibold">Durée :</span> {{ arret.nombre_jours }} jours</p>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="mt-6 text-center">
+                                                            <a href="{% url 'Utilisateur:pdf_arret' consult.id %}" target="_blank" class="action-btn warning">
+                                                                <i class="fas fa-file-pdf mr-2"></i> Télécharger PDF
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <!-- Ordonnance -->
+                                            {% if consult.ordonnances %}
+                                            <div x-data="{ open: false }">
+                                                <button @click="open = true" class="action-btn purple" title="Ordonnance">
+                                                    <i class="fas fa-prescription"></i>
+                                                </button>
+                                                <div x-show="open" x-transition class="fixed inset-0 z-50 flex items-center justify-center modal-overlay">
+                                                    <div @click.away="open = false" class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto relative">
+                                                        <button @click="open = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Ordonnance Médicale</h2>
+                                                        <div class="bg-gray-50 p-5 rounded-xl">
+                                                            <p class="mb-3"><span class="font-semibold">Patient :</span> {{ consult.patient }}</p>
+                                                            {% for ord in consult.ordonnances %}
+                                                                <div class="bg-white p-4 rounded-lg border border-gray-200 mb-3">
+                                                                    <p class="text-gray-700">{{ ord.contenu|linebreaks }}</p>
+                                                                    <p class="text-xs text-gray-400 mt-2">Date : {{ ord.date|date:"d/m/Y H:i" }}</p>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="mt-6 text-center">
+                                                            <a href="{% url 'Utilisateur:pdf_ordonnance' consult.id %}" target="_blank" class="action-btn purple">
+                                                                <i class="fas fa-file-pdf mr-2"></i> Télécharger PDF
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <!-- Reçu -->
+                                            <div x-data="{ open: false }">
+                                                <button @click="open = true" class="action-btn success" title="Générer reçu">
+                                                    <i class="fas fa-file-invoice"></i>
+                                                </button>
+                                                <div x-show="open" x-transition class="fixed inset-0 z-50 flex items-center justify-center modal-overlay">
+                                                    <div @click.away="open = false" class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 relative">
+                                                        <button @click="open = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                                                        <div class="text-center">
+                                                            <i class="fas fa-file-invoice-dollar text-5xl text-green-500 mb-4"></i>
+                                                            <h2 class="text-xl font-bold text-gray-800 mb-2">Générer le reçu</h2>
+                                                            <p class="text-gray-600 text-sm mb-4">Pour la consultation de <strong>{{ consult.patient }}</strong></p>
+                                                            <div class="bg-gray-50 p-4 rounded-lg text-left text-sm space-y-1 mb-4">
+                                                                <p><span class="text-gray-500">Date :</span> {{ consult.date|date:"d/m/Y H:i" }}</p>
+                                                                <p><span class="text-gray-500">Service :</span> {{ consult.service }}</p>
+                                                            </div>
+                                                            <a href="{% url 'Utilisateur:recu_consultation' consult.id %}" target="_blank" class="action-btn success w-full justify-center">
+                                                                <i class="fas fa-file-pdf mr-2"></i> Générer PDF
+                                                            </a>
+                                                            <button @click="open = false" class="mt-3 text-sm text-gray-400 hover:text-gray-600">Annuler</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Modifier -->
+                                            {% if request.user.role.designation == "MEDECIN" or request.user.role.designation == "ADMIN" %}
+                                            <div x-data="{ open: false }">
+                                                <button @click="open = true" class="action-btn primary" title="Modifier">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </button>
+                                                <div x-show="open" x-transition class="fixed inset-0 z-50 flex items-center justify-center modal-overlay">
+                                                    <div @click.away="open = false" class="bg-white dark:bg-gray-900 w-full max-w-5xl rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
+                                                        <button @click="open = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                                                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Modifier la consultation</h2>
+                                                        <form method="post" action="{% url 'Utilisateur:modifier_consultation' consult.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Patient</label>
+                                                                    <input type="text" name="patient" value="{{ consult.patient }}" readonly
+                                                                           class="w-full border rounded-lg px-3 py-2 bg-gray-50 border-gray-200">
+                                                                </div>
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Motif</label>
+                                                                    <input type="text" name="motif" value="{{ consult.motif }}"
+                                                                           class="w-full border rounded-lg px-3 py-2 border-gray-300">
+                                                                </div>
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Diagnostic</label>
+                                                                    <input type="text" name="diagnostic" value="{{ consult.diagnostic }}"
+                                                                           class="w-full border rounded-lg px-3 py-2 border-gray-300">
+                                                                </div>
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Poids (kg)</label>
+                                                                    <input type="number" step="0.1" name="poids" value="{{ consult.poids|floatformat:'2' }}"
+                                                                           class="w-full border rounded-lg px-3 py-2 border-gray-300">
+                                                                </div>
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Taille (cm)</label>
+                                                                    <input type="number" step="0.1" name="taille" value="{{ consult.taille|floatformat:'2' }}"
+                                                                           class="w-full border rounded-lg px-3 py-2 border-gray-300">
+                                                                </div>
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Pouls</label>
+                                                                    <input type="number" name="pouls" value="{{ consult.pouls|floatformat:'0' }}"
+                                                                           class="w-full border rounded-lg px-3 py-2 border-gray-300">
+                                                                </div>
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">TA</label>
+                                                                    <input type="number" name="TA" value="{{ consult.TA|floatformat:'0' }}"
+                                                                           class="w-full border rounded-lg px-3 py-2 border-gray-300">
+                                                                </div>
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                                                                    <input type="text" name="statue" value="{{ consult.statue }}"
+                                                                           class="w-full border rounded-lg px-3 py-2 border-gray-300">
+                                                                </div>
+                                                                <div class="col-span-1">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Issue</label>
+                                                                    <input type="text" name="issue_consultation" value="{{ consult.issue_consultation }}"
+                                                                           class="w-full border rounded-lg px-3 py-2 border-gray-300">
+                                                                </div>
+                                                                <div class="col-span-5">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Constat</label>
+                                                                    <textarea name="constat_consultation" rows="2" class="w-full border rounded-lg px-3 py-2 border-gray-300">{{ consult.constat_consultation }}</textarea>
+                                                                </div>
+                                                                <div class="col-span-5">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Examen demandé</label>
+                                                                    <textarea name="examen_demande" rows="2" class="w-full border rounded-lg px-3 py-2 border-gray-300">{{ consult.examen_demande }}</textarea>
+                                                                </div>
+                                                                <div class="col-span-5">
+                                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Traitement</label>
+                                                                    <textarea name="traitement" rows="3" class="w-full border rounded-lg px-3 py-2 border-gray-300">{{ consult.traitement }}</textarea>
+                                                                </div>
+                                                            </div>
+                                                            <button type="submit" class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                                                💾 Mettre à jour
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <!-- Supprimer -->
+                                            {% if request.user.role.designation == "ADMIN" %}
+                                            <div x-data="{ open: false }">
+                                                <button @click="open = true" class="action-btn danger" title="Supprimer">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                                <div x-show="open" x-transition class="fixed inset-0 z-50 flex items-center justify-center modal-overlay">
+                                                    <div @click.away="open = false" class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-8 relative text-center">
+                                                        <button @click="open = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                                                        <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
+                                                        <h2 class="text-xl font-bold text-gray-800 mb-4">Supprimer cette consultation ?</h2>
+                                                        <p class="text-gray-600 mb-6 text-sm">Cette action est irréversible.</p>
+                                                        <form @submit.prevent="submitDelete" action="{% url 'Utilisateur:supprimer_consultation' consult.id %}" method="post">
+                                                            {% csrf_token %}
+                                                            <div class="flex justify-center space-x-4">
+                                                                <button type="button" @click="open = false" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition">Annuler</button>
+                                                                <button type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">Supprimer</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
-                                </tbody>
-
-                            </table>
-                        </div>
+                            {% empty %}
+                                <tr id="emptyDbRow">
+                                    <td colspan="8" class="px-5 py-12 text-center text-gray-400">
+                                        <i class="fas fa-folder-open text-4xl block mb-3 text-gray-300"></i>
+                                        <p class="text-sm">Aucune consultation disponible</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            <tr id="noResultsRow" class="hidden" style="display: none;">
+                                <td colspan="8" class="px-5 py-12 text-center text-gray-400">
+                                    <i class="fas fa-search text-4xl block mb-3 text-gray-300"></i>
+                                    <p class="text-sm">Aucune consultation ne correspond à votre recherche</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </main>
-
-
-        </div>
+            </div>
+        </main>
     </div>
-    </body>
+</div>
+</body>
 
-    <script>
-    // ==========================================
-    // GESTION DES MÉDICAMENTS DANS L'ORDONNANCE
-    // ==========================================
-    document.addEventListener('DOMContentLoaded', function() {
-        const medicaments = [];
-        let counter = 1;
-        const listContainer = document.getElementById('medicament-list');
-        const emptyMsg = document.getElementById('empty-medicament-msg');
-        const medicamentInput = document.getElementById('medicament-input');
-        const quantiteInput = document.getElementById('quantite-input');
-        const addBtn = document.getElementById('add-medicament-btn');
-        const ordonnanceContenu = document.getElementById('ordonnance-contenu');
+<!-- ===== SCRIPTS ===== -->
+<script>
+// Gestion des médicaments
+document.addEventListener('DOMContentLoaded', function() {
+    const medicaments = [];
+    const listContainer = document.getElementById('medicament-list');
+    const medicamentInput = document.getElementById('medicament-input');
+    const quantiteInput = document.getElementById('quantite-input');
+    const addBtn = document.getElementById('add-medicament-btn');
+    const ordonnanceContenu = document.getElementById('ordonnance-contenu');
 
-        // Fonction pour mettre à jour le texte caché
-        function updateOrdonnanceContenu() {
-            if (medicaments.length === 0) {
-                ordonnanceContenu.value = '';
-                return;
-            }
-            let texte = '';
-            medicaments.forEach((med, index) => {
-                texte += `${index + 1}. ${med.nom}`;
-                if (med.quantite) {
-                    texte += ` : ${med.quantite}`;
-                }
-                texte += '\n';
-            });
-            ordonnanceContenu.value = texte.trim();
+    function updateOrdonnanceContenu() {
+        if (medicaments.length === 0) {
+            ordonnanceContenu.value = '';
+            return;
         }
-
-        // Fonction pour rafraîchir l'affichage
-        function renderList() {
-            listContainer.innerHTML = '';
-
-            if (medicaments.length === 0) {
-                listContainer.innerHTML = `
-                    <p class="text-xs text-gray-400 dark:text-gray-500 text-center" id="empty-medicament-msg">
-                        Aucun médicament ajouté
-                    </p>
-                `;
-                updateOrdonnanceContenu();
-                return;
+        let texte = '';
+        medicaments.forEach((med, index) => {
+            texte += `${index + 1}. ${med.nom}`;
+            if (med.quantite) {
+                texte += ` : ${med.quantite}`;
             }
+            texte += '\n';
+        });
+        ordonnanceContenu.value = texte.trim();
+    }
 
-            medicaments.forEach((med, index) => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition';
-
-                const span = document.createElement('span');
-                span.className = 'text-gray-700 dark:text-gray-300 flex-1';
-                let text = `${index + 1}. ${med.nom}`;
-                if (med.quantite) {
-                    text += ` <span class="text-blue-600 dark:text-blue-400 font-semibold">× ${med.quantite}</span>`;
-                }
-                span.innerHTML = text;
-
-                const delBtn = document.createElement('button');
-                delBtn.type = 'button';
-                delBtn.className = 'text-red-400 hover:text-red-600 transition opacity-0 group-hover:opacity-100 ml-2';
-                delBtn.innerHTML = '<i class="fas fa-times"></i>';
-                delBtn.onclick = function() {
-                    medicaments.splice(index, 1);
-                    renderList();
-                };
-
-                div.appendChild(span);
-                div.appendChild(delBtn);
-                listContainer.appendChild(div);
-            });
-
+    function renderList() {
+        listContainer.innerHTML = '';
+        if (medicaments.length === 0) {
+            listContainer.innerHTML = `<p class="text-xs text-gray-400 dark:text-gray-500 text-center">Aucun médicament ajouté</p>`;
             updateOrdonnanceContenu();
+            return;
         }
-
-        // Ajouter un médicament
-        function addMedicament() {
-            const nom = medicamentInput.value.trim();
-            const quantite = quantiteInput.value.trim();
-
-            if (!nom) {
-                medicamentInput.focus();
-                medicamentInput.classList.add('border-red-500');
-                setTimeout(() => medicamentInput.classList.remove('border-red-500'), 1500);
-                return;
+        medicaments.forEach((med, index) => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition';
+            const span = document.createElement('span');
+            span.className = 'text-gray-700 dark:text-gray-300 flex-1';
+            let text = `${index + 1}. ${med.nom}`;
+            if (med.quantite) {
+                text += ` <span class="text-blue-600 dark:text-blue-400 font-semibold">× ${med.quantite}</span>`;
             }
+            span.innerHTML = text;
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'text-red-400 hover:text-red-600 transition opacity-0 group-hover:opacity-100 ml-2';
+            delBtn.innerHTML = '<i class="fas fa-times"></i>';
+            delBtn.onclick = function() {
+                medicaments.splice(index, 1);
+                renderList();
+            };
+            div.appendChild(span);
+            div.appendChild(delBtn);
+            listContainer.appendChild(div);
+        });
+        updateOrdonnanceContenu();
+    }
 
-            medicaments.push({
-                nom: nom,
-                quantite: quantite || ''
-            });
-
-            medicamentInput.value = '';
-            quantiteInput.value = '';
+    function addMedicament() {
+        const nom = medicamentInput.value.trim();
+        const quantite = quantiteInput.value.trim();
+        if (!nom) {
             medicamentInput.focus();
-            renderList();
+            medicamentInput.classList.add('border-red-500');
+            setTimeout(() => medicamentInput.classList.remove('border-red-500'), 1500);
+            return;
         }
+        medicaments.push({ nom: nom, quantite: quantite || '' });
+        medicamentInput.value = '';
+        quantiteInput.value = '';
+        medicamentInput.focus();
+        renderList();
+    }
 
-        // Événements
+    if (addBtn) {
         addBtn.addEventListener('click', addMedicament);
-
         medicamentInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (this.value.trim()) {
-                    addMedicament();
-                }
+                if (this.value.trim()) addMedicament();
             }
         });
-
         quantiteInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (medicamentInput.value.trim()) {
-                    addMedicament();
-                } else {
-                    medicamentInput.focus();
-                }
+                if (medicamentInput.value.trim()) addMedicament();
+                else medicamentInput.focus();
             }
         });
+    }
 
-        // Initialiser le champ caché lors de la soumission du formulaire
-        const form = document.querySelector('#enregistrer-form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                updateOrdonnanceContenu();
-            });
+    const form = document.querySelector('#enregistrer-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            updateOrdonnanceContenu();
+        });
+    }
+
+    window.resetMedicaments = function() {
+        medicaments.length = 0;
+        renderList();
+    };
+});
+
+// Suppression
+function submitDelete(event) {
+    const form = event.target;
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
         }
+    })
+    .then(res => res.json())
+    .then(data => { location.reload(); })
+    .catch(err => console.error(err));
+}
 
-        // Rendre la fonction disponible globalement pour le reset
-        window.resetMedicaments = function() {
-            medicaments.length = 0;
-            renderList();
-        };
-    });
-</script>
-    <script>
-        function submitDelete(event) {
-            const form = event.target;
-
-            fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    location.reload();
-                })
-                .catch(err => {
-                    console.error(err);
-                });
-        }
-    </script>
-
-    <script>
-        document.getElementById('searchInput').addEventListener('keyup', function () {
-            let searchValue = this.value.toLowerCase();
-            let rows = document.querySelectorAll('#consultationsTable tbody tr.c_row');
-            const noResultsRow = document.getElementById('noResultsRow');
-            const emptyDbRow = document.getElementById('emptyDbRow');
+// ===== RECHERCHE CORRIGÉE =====
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            let searchValue = this.value.toLowerCase().trim();
+            let rows = document.querySelectorAll('#consultationsTable tbody tr:not(#emptyDbRow):not(#noResultsRow)');
             let visibleRowsCount = 0;
 
-            rows.forEach(function (row) {
+            rows.forEach(function(row) {
                 let text = row.innerText.toLowerCase();
                 if (text.includes(searchValue)) {
                     row.style.display = '';
@@ -1040,79 +818,84 @@
                 }
             });
 
+            const emptyDbRow = document.getElementById('emptyDbRow');
             if (emptyDbRow) {
-                emptyDbRow.style.display = searchValue === '' ? '' : 'none';
+                emptyDbRow.style.display = (searchValue === '' && visibleRowsCount === 0) ? '' : 'none';
             }
 
-            if (visibleRowsCount === 0 && searchValue !== '') {
-                noResultsRow.classList.remove('hidden');
-            } else {
-                noResultsRow.classList.add('hidden');
-            }
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('#enregistrer-form');
-            const errorDiv = document.getElementById('error-message');
-            const loader = document.getElementById('loader');
-            const enregistrerBtn = document.getElementById('enregistrer-btn');
-
-            const showLoader = () => {
-                if (loader) loader.classList.remove('hidden');
-                if (enregistrerBtn) enregistrerBtn.classList.add('hidden');
-            };
-
-            const hideLoader = () => {
-                if (loader) loader.classList.add('hidden');
-                if (enregistrerBtn) enregistrerBtn.classList.remove('hidden');
-            };
-
-            if (form) {
-                form.addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    showLoader();
-
-                    const formData = new FormData(form);
-                    const delay = new Promise(resolve => setTimeout(resolve, 1500));
-
-                    Promise.all([
-                        fetch(form.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                            }
-                        }).then(response => response.json()),
-                        delay
-                    ])
-                    .then(([data]) => {
-                        hideLoader();
-                        if (data.error) {
-                            errorDiv.innerHTML = `<div class="alert alert-danger p-3 bg-red-100 text-red-700 rounded-lg">${data.error}</div>`;
-                        } else if (data.success) {
-                            errorDiv.innerHTML = `
-                            <div class="flex items-center gap-2 p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-100 border border-green-300 animate-fade-in" role="alert">
-                                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11V7a1 1 0 10-2 0v4a1 1 0 001 1h1a1 1 0 100-2h-.586l1.293-1.293a1 1 0 10-1.414-1.414L9 8.586V7a1 1 0 10-2 0v1a1 1 0 001 1h.586l-1.293 1.293a1 1 0 101.414 1.414L11 10.414V11a1 1 0 002 0v-1a1 1 0 00-1-1h-.586l1.293-1.293a1 1 0 10-1.414-1.414L11 8.586z" clip-rule="evenodd"/>
-                                </svg>
-                                <span>${data.success}</span>
-                            </div>`;
-
-                            form.reset();
-                            setTimeout(() => {
-                                location.reload();
-                            }, 1500);
-                        }
-                    })
-                    .catch(err => {
-                        hideLoader();
-                        errorDiv.innerHTML = `<div class="alert alert-danger p-3 bg-red-100 text-red-700 rounded-lg">Une erreur est survenue lors de l'enregistrement.</div>`;
-                    });
-                });
+            const noResultsRow = document.getElementById('noResultsRow');
+            if (noResultsRow) {
+                if (visibleRowsCount === 0 && searchValue !== '') {
+                    noResultsRow.style.display = '';
+                    noResultsRow.classList.remove('hidden');
+                } else {
+                    noResultsRow.style.display = 'none';
+                    noResultsRow.classList.add('hidden');
+                }
             }
         });
-    </script>
+    }
+});
+
+// ===== ENREGISTREMENT =====
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('#enregistrer-form');
+    const errorDiv = document.getElementById('error-message');
+    const loader = document.getElementById('loader');
+    const enregistrerBtn = document.getElementById('enregistrer-btn');
+
+    const showLoader = () => {
+        if (loader) loader.classList.remove('hidden');
+        if (enregistrerBtn) enregistrerBtn.classList.add('hidden');
+    };
+
+    const hideLoader = () => {
+        if (loader) loader.classList.add('hidden');
+        if (enregistrerBtn) enregistrerBtn.classList.remove('hidden');
+    };
+
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            showLoader();
+
+            const formData = new FormData(form);
+            const delay = new Promise(resolve => setTimeout(resolve, 1500));
+
+            Promise.all([
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    }
+                }).then(response => response.json()),
+                delay
+            ])
+            .then(([data]) => {
+                hideLoader();
+                if (data.error) {
+                    errorDiv.innerHTML = `<div class="alert alert-danger p-3 bg-red-100 text-red-700 rounded-lg">${data.error}</div>`;
+                } else if (data.success) {
+                    errorDiv.innerHTML = `
+                        <div class="flex items-center gap-2 p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-100 border border-green-300 animate-fade-in" role="alert">
+                            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11V7a1 1 0 10-2 0v4a1 1 0 001 1h1a1 1 0 100-2h-.586l1.293-1.293a1 1 0 10-1.414-1.414L9 8.586V7a1 1 0 10-2 0v1a1 1 0 001 1h.586l-1.293 1.293a1 1 0 101.414 1.414L11 10.414V11a1 1 0 002 0v-1a1 1 0 00-1-1h-.586l1.293-1.293a1 1 0 10-1.414-1.414L11 8.586z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>${data.success}</span>
+                        </div>`;
+                    form.reset();
+                    window.resetMedicaments();
+                    setTimeout(() => location.reload(), 1500);
+                }
+            })
+            .catch(err => {
+                hideLoader();
+                errorDiv.innerHTML = `<div class="alert alert-danger p-3 bg-red-100 text-red-700 rounded-lg">Une erreur est survenue lors de l'enregistrement.</div>`;
+            });
+        });
+    }
+});
+</script>
 
 {% endblock %}
